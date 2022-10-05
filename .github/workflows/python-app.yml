@@ -1,0 +1,46 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: 生成固件解密json文件
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '* */2 * * *'
+
+jobs:
+  decrypt:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: 安装python依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests lxml python-telegram-bot
+    - name: 运行解密脚本
+      env:
+        FCM_KEY: ${{ secrets.FCM_KEY }}
+        TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+        TG_USER_ID: ${{ secrets.TG_USER_ID }}
+      run: |
+        python 三星测试版固件版本号解密.py
+    - name: 暂存提交
+      run: |
+          git config --global user.name ${{ secrets.USERNAME }}
+          git config --global user.email ${{ secrets.USEREMAIL }}
+          export TZ='Asia/Shanghai'
+          git add .
+          git commit -m "更新json文件" -a
+    - name: 推送json文件
+      uses: ad-m/github-push-action@master
+      with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,3 +1,4 @@
+from genericpath import exists
 import time
 import requests
 import hashlib
@@ -10,11 +11,11 @@ from datetime import timedelta
 import json
 from functools import cmp_to_key
 import telegram
+from copy import deepcopy
 
 
-isDebug = False
 # 本地是使用代理
-if(isDebug):
+if(exists('debug')):
     os.environ["http_proxy"] = "http://127.0.0.1:7890"
     os.environ["https_proxy"] = "http://127.0.0.1:7890"
 
@@ -229,15 +230,15 @@ if __name__ == '__main__':
         hasNewVersion = False
         for model in modelDic:
             md5list = readXML(model)
-            oldModelDic = {}
-            oldModelDic[model] = oldJson[model]
-            decDicts.update(oldModelDic)
-            verDic = DecryptionFirmware(md5list, model)
+            newMDic = {}
+            newMDic[model] = deepcopy(oldJson[model])
+            decDicts.update(newMDic)   #先保存已有的数据
+            verDic = DecryptionFirmware(md5list, model) #解密获取新数据
             for item in verDic[model]:
-                if not item in oldModelDic[model].keys():
+                if not item in newMDic[model].keys():
                     hasNewVersion = True
-                oldModelDic[model][item] = verDic[model][item]
-        decDicts.update(oldModelDic)
+                    newMDic[model][item] = verDic[model][item] #存入新的版本号
+        decDicts.update(newMDic)
         if hasNewVersion:
             with open(AddTxtPath, 'a+', encoding='utf-8') as file:
                 file.write("*****记录时间:" + now + "*****\n")

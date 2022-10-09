@@ -26,9 +26,9 @@
             var model = host[host.length - 2]
             if (jsObj[model] != null) {
                 for (var i in md5List) {
-                    if (jsObj[model][md5List[i]] != null) {
-                        doc[i].childNodes[1].innerHTML = jsObj[model][md5List[i]];
-                        doc[i].childNodes[1].setAttribute("style", "color:#00FFFF")
+                    if (jsObj[model]['versions'][md5List[i]] != null) {
+                        doc[i].childNodes[1].innerHTML = jsObj[model]['versions'][md5List[i]];
+                        doc[i].childNodes[1].setAttribute("style", "color:#FF0000")
                     }
                 }
             }

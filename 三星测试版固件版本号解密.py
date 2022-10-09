@@ -154,7 +154,7 @@ def DecryptionFirmware(md5list, model):
             DecDicts.values(), key=lambda x: x.split('/')[0][-4:])[-1]  # 记录最新版本号
         Dicts[model]['versions'] = DecDicts
     endtime = time.perf_counter()
-    print("机型：" + model + " 测试版固件版本号解密完毕," +
+    print("机型：" + modelDic[model]['name'] + " 测试版固件版本号解密完毕," +
           '耗时:', round(endtime - starttime, 2), '秒')
     if len(DecDicts) > 0:
         print(model+' 此次解密'+str(len(DecDicts))+'个测试版本号')
@@ -291,10 +291,10 @@ if __name__ == '__main__':
                 modelDic = getModelDicts()
                 textStr = ''
                 for model in modelDic.keys():
-                    textStr += "\n*"+modelDic[model]['name']+"：*\n" + \
-                        decDicts[model]['latestVersion']+'\n'
+                    textStr += "*"+modelDic[model]['name']+"：*\n" + \
+                        decDicts[model]['latestVersion']+'\n\n'
                 f.write(textStr)
                 fcm("各机型最新测试版", textStr.replace('*', ''), '')
-                telegram_bot("#各机型最新测试版\n", textStr)
+                telegram_bot("#各机型最新测试版", textStr)
     with open(VerFilePath, 'w', encoding='utf-8') as f:
         f.write(json.dumps(decDicts, indent=4, ensure_ascii=False))

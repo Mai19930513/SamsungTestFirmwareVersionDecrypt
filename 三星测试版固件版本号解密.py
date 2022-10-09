@@ -286,15 +286,15 @@ if __name__ == '__main__':
                                 textStr.replace('*', ''), '')
                             telegram_bot('#'+modelDic[model]['name']
                                          + "新增内测固件", textStr)
-        # 更新全机型最新版
-        with open('各机型最新版本.md', 'w', encoding='utf-8') as f:
-            modelDic = getModelDicts()
-            textStr = ''
-            for model in modelDic.keys():
-                textStr += "*"+modelDic[model]['name']+"：*\n" + \
-                    decDicts[model]['latestVersion']+'\n'
-            f.write(textStr)
-            fcm("各机型最新测试版", textStr.replace('*', ''), '')
-            telegram_bot("#各机型最新测试版\n", textStr)
+            # 更新全机型最新版
+            with open('各机型最新版本.md', 'w', encoding='utf-8') as f:
+                modelDic = getModelDicts()
+                textStr = ''
+                for model in modelDic.keys():
+                    textStr += "\n*"+modelDic[model]['name']+"：*\n" + \
+                        decDicts[model]['latestVersion']+'\n'
+                f.write(textStr)
+                fcm("各机型最新测试版", textStr.replace('*', ''), '')
+                telegram_bot("#各机型最新测试版\n", textStr)
     with open(VerFilePath, 'w', encoding='utf-8') as f:
         f.write(json.dumps(decDicts, indent=4, ensure_ascii=False))

@@ -3,9 +3,9 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://fota-cloud-dn.ospserver.net/firmware/*/version.test.xml
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Mai
-// @description 2022/2/10 下午1:27:28
+// @description 2022/10/10
 // ==/UserScript==
 (function decryptVersion() {
     var httpRequest = new XMLHttpRequest();

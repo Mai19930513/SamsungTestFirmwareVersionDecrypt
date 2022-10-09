@@ -4,6 +4,7 @@
 name: 生成固件解密json文件
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '* */3 * * *'
 

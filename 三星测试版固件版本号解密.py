@@ -156,7 +156,7 @@ def DecryptionFirmware(md5list, model):
     endtime = time.perf_counter()
     print("机型：" + model + " 测试版固件版本号解密完毕," +
           '耗时:', round(endtime - starttime, 2), '秒')
-    if len(DecDicts)>0: 
+    if len(DecDicts) > 0:
         print(model+' 此次解密'+str(len(DecDicts))+'个测试版本号')
     else:
         print(model+' 无新增!')
@@ -278,7 +278,7 @@ if __name__ == '__main__':
                             for md5Key in md5Keys:
                                 VerStr = str(
                                     decDicts[model]['versions'][md5Key])
-                                textStr += "\n"+VerStr
+                                textStr += "\n**"+VerStr+"**"
                                 Str += modelDic[model]['name'] + "新增测试固件版本：" + \
                                     VerStr + "，对应MD5值：" + md5Key + "\n"
                             file.write(Str)
@@ -287,13 +287,13 @@ if __name__ == '__main__':
                             telegram_bot('#'+modelDic[model]['name']
                                          + "新增内测固件", textStr)
             # 更新全机型最新版
-            with open('各机型最新版本.txt', 'w', encoding='utf-8') as f:
+            with open('各机型最新版本.md', 'w', encoding='utf-8') as f:
                 modelDic = getModelDicts()
                 textStr = ''
                 for model in modelDic.keys():
-                    textStr += "**"+modelDic[model]['name']+"：↓**\n" + \
+                    textStr += "## "+modelDic[model]['name']+"：\n" + \
                         decDicts[model]['latestVersion']+'\n'
-                f.write(textStr.replace('*', ''))
+                f.write(textStr)
                 fcm("各机型最新测试版", textStr.replace('*', ''), '')
                 telegram_bot("#各机型最新测试版\n", textStr)
     with open(VerFilePath, 'w', encoding='utf-8') as f:

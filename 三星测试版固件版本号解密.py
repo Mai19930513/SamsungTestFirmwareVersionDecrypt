@@ -118,9 +118,9 @@ def DecryptionFirmware(md5list, model):
         startMonth = ord(lastVersion[-2])
     starttime = time.perf_counter()
     for i1 in "US":
-        jjNumber = int(latestVer[0][-5])+1
+        jjNumber = int(latestVer[0][-5])+2
         for j1 in range(startJJ, jjNumber):  # 防止降级的版本
-            updateCount = ord(latestVer[0][-4])+3  # 获取更新次数,倒数第4位
+            updateCount = ord(latestVer[0][-4])+2  # 获取更新次数,倒数第4位
             for k1 in range(startUpdateCount, updateCount):
                 curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
                 for l1 in range(startYear, curYear):  # A表示2000年，后面递增

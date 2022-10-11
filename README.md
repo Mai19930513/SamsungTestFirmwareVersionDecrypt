@@ -4,4 +4,4 @@
 三星测试版固件官网:`https://fota-cloud-dn.ospserver.net/firmware/区域码/设备型号/version.test.xml`,示例网站：如[国行版Note20 Ultra](https://fota-cloud-dn.ospserver.net/firmware/CHC/SM-N9860/version.test.xml)
 # 如何添加自己需要的设备
 编辑py脚本中`getModelDicts`函数中`ModelDic`字典中的设备列表。
-添加格式为`<设备代号":["固件前缀","系统版本前缀","地区代码"]>`
+添加格式为`<设备代号":{'model':地区代码,'name':设备名称}>`

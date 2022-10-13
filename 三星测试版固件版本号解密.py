@@ -38,7 +38,8 @@ def getModelDicts():
         "SM-G9980": {'model': "CHC", 'name': 'S21 Ultra'},
         "SM-S9010": {'model': "CHC", 'name': 'S22'},
         "SM-S9060": {'model': "CHC", 'name': 'S22+'},
-        "SM-S9080": {'model': "CHC", 'name': 'S22 Ultra'}
+        "SM-S9080": {'model': "CHC", 'name': 'S22 Ultra'},
+        "SM-X800":{'model':"CHN",'name':'Tab S8+'
     }
     return ModelDic
 

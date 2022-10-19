@@ -27,7 +27,7 @@ def getModelDicts():
     # F:表示更新了6个版本，从A开始算
     # VG3:当前版本发布时间，V表示2022年(A表示2000),G表示7月(A表示1月),3表示第3个版本
     ModelDic = {
-        # 机型代号字典，格式为"设备代号:{型号，名称}"
+        # 机型代号字典，格式为"设备型号:{地区代码，名称}"
         "SM-N9760": {'model': "CHC", 'name': 'Note 10+'},
         "SM-N9810": {'model': "CHC", 'name': 'Note 20'},
         "SM-N9860": {'model': "CHC", 'name': 'Note 20 Ultra'},

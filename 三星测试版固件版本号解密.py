@@ -39,7 +39,7 @@ def getModelDicts():
         "SM-S9010": {'model': "CHC", 'name': 'S22'},
         "SM-S9060": {'model': "CHC", 'name': 'S22+'},
         "SM-S9080": {'model': "CHC", 'name': 'S22 Ultra'},
-        "SM-X800":{'model':"CHN",'name':'Tab S8+'}
+        "SM-X800": {'model': "CHN", 'name': 'Tab S8+'}
     }
     return ModelDic
 
@@ -121,14 +121,17 @@ def DecryptionFirmware(md5list, model):
     for i1 in "US":
         jjNumber = int(latestVer[0][-5])+2
         for j1 in range(startJJ, jjNumber):  # 防止降级的版本
-            updateCount = ord(latestVer[0][-4])+2  # 获取更新次数,倒数第4位
-            for k1 in range(startUpdateCount, 91):
+            updateCount = ord(latestVer[0][-4])+2
+            updateLst = list(range(startUpdateCount, updateCount))
+            updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
+            for k1 in updateLst:
                 curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
                 for l1 in range(startYear, curYear):  # A表示2000年，后面递增
                     for m1 in range(startMonth, 77):  # A-L表示1-12月
                         for n1 in "123456789ABCDEFGHIJK":
                             vc = str(j1) + chr(k1) + \
                                 chr(l1) + chr(m1) + n1  # 版本号
+                            # Wifi版没有基带版本号
                             CpCode = ''if latestVer[2] == '' else ApCode + i1 + vc
                             version1 = ApCode + i1 + vc + "/" + CscCode + vc + "/"+CpCode
                             if(model in oldJson.keys() and 'versions' in oldJson[model].keys()) and version1 in oldJson[model]['versions'].values():
@@ -141,15 +144,29 @@ def DecryptionFirmware(md5list, model):
                                 if(version1.split('/')[2] != ''):
                                     tempCpVersions.append(
                                         version1.split('/')[2])
-                            # 基带和固件版本不一致时
+                            # 固件更新，而基带未更新时
                             if(latestVer[2] != '' and tempCpVersions != ''):
                                 for tempCpVersion in tempCpVersions[-6:]:
                                     version2 = ApCode + i1 + vc + "/" + CscCode + vc + "/"+tempCpVersion
+                                    if(model in oldJson.keys() and 'versions' in oldJson[model].keys()) and version2 in oldJson[model]['versions'].values():
+                                        continue
                                     md5 = hashlib.md5()
                                     md5.update(version2.encode(
                                         encoding="utf-8"))
                                     if md5.hexdigest() in md5list:
                                         DecDicts[md5.hexdigest()] = version2
+                            # 测试版以'Z'作为倒数第4位
+                            vc2 = str(j1) + 'Z' + \
+                                chr(l1) + chr(m1) + n1  # 版本号
+                            CpCode = ''if latestVer[2] == '' else ApCode + i1 + vc
+                            version3 = ApCode + i1 + vc2 + "/" + CscCode + vc2 + "/"+CpCode
+                            if(model in oldJson.keys() and 'versions' in oldJson[model].keys()) and version3 in oldJson[model]['versions'].values():
+                                continue
+                            md5 = hashlib.md5()
+                            md5.update(version3.encode(encoding="utf-8"))
+                            if md5.hexdigest() in md5list:
+                                DecDicts[md5.hexdigest()] = version3
+
     if len(DecDicts.values()) > 0:
         Dicts[model]['latestVersion'] = sorted(
             DecDicts.values(), key=lambda x: x.split('/')[0][-4:])[-1]  # 记录最新版本号

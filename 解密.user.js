@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://fota-cloud-dn.ospserver.net/firmware/*/version.test.xml
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Mai
 // @description 2022/10/10
 // ==/UserScript==
@@ -12,7 +12,7 @@
     var url = 'https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/master/firmware.json'
     httpRequest.open('GET', url, true);
     httpRequest.send();
-    httpRequest.onreadystatechange = function () {
+    httpRequest.onreadystatechange = function() {
         if (httpRequest.readyState == 4 && httpRequest.status == 200) {
             var jsonStr = httpRequest.responseText;
             var jsObj = JSON.parse(jsonStr);
@@ -23,11 +23,12 @@
                 md5List.push(doc[i].childNodes[1].innerHTML);
             }
             var host = window.location.href.split("/")
+            var cc = host[host.length - 3]
             var model = host[host.length - 2]
             if (jsObj[model] != null) {
                 for (var i in md5List) {
-                    if (jsObj[model]['versions'][md5List[i]] != null) {
-                        doc[i].childNodes[1].innerHTML = jsObj[model]['versions'][md5List[i]];
+                    if (jsObj[model][cc]['版本号'][md5List[i]] != null) {
+                        doc[i].childNodes[1].innerHTML = jsObj[model][cc]['版本号'][md5List[i]];
                         doc[i].childNodes[1].setAttribute("style", "color:#FF0000")
                     }
                 }
@@ -43,7 +44,7 @@
         for (var i = 0; i < domArray.length; i++) {
             arr[i] = domArray[i];
         }
-        arr.sort(function (a, b) {
+        arr.sort(function(a, b) {
             aText = a.childNodes[1].innerHTML;
             bText = b.childNodes[1].innerHTML
             if (aText > bText) return 1;
@@ -54,5 +55,4 @@
             parNode.appendChild(arr[i])
         }
     }
-}
-)();
+})();

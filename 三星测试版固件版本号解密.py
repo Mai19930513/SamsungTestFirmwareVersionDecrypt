@@ -302,7 +302,7 @@ def run():
         if(jsonStr != ''):
             oldJson = json.loads(jsonStr)
         hasNewVersion = False
-        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
             tasks = []
             for model in modelDic:
                 # 开启多进程解密

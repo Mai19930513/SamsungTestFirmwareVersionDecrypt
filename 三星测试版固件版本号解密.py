@@ -302,10 +302,11 @@ def run():
         if(jsonStr != ''):
             oldJson = json.loads(jsonStr)
         hasNewVersion = False
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
             tasks = []
             for model in modelDic:
-                task = executor.submit(
+                # 开启多进程解密
+                task = pool.submit(
                     getNewVersions, decDicts, oldJson, model)
                 tasks.append(task)
             for task in concurrent.futures.as_completed(tasks):

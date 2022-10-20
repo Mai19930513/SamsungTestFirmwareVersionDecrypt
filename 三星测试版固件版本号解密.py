@@ -98,7 +98,7 @@ def readXML(model):
 
 
 def DecryptionFirmware(model, md5Dic, cc):
-    print(f'开始解密{model}——{getCountryName(cc)}版固件')
+    print(f'开始解密<{model} {getCountryName(cc)}版>测试固件')
     md5list = md5Dic[cc]
     url = (
         "https://fota-cloud-dn.ospserver.net/firmware/"
@@ -110,115 +110,118 @@ def DecryptionFirmware(model, md5Dic, cc):
     content = requestXML(url)
     if content == None:
         return None
-    xml = etree.fromstring(content)
-    latestVer = xml.xpath("//latest//text()")[0].split('/')  # 获取当前最新版本号
-    FirstCode = latestVer[0][:-6]  # 如：N9860ZC
-    SecondCode = latestVer[1][:-5]  # 如：N9860OZL
-    if len(latestVer) > 2:
-        ThirdCode = latestVer[2][:-6]  # 如：N9860OZC
-    Dicts = {}
-    Dicts[model] = {}
-    Dicts[model][cc] = {}
-    Dicts[model][cc]['版本号'] = {}
-    Dicts[model][cc]['最新版本'] = ''
-    DecDicts = {}
-    CpVersions = []
-    VerFilePath = 'firmware.json'
-    lastVersion = ''
-    startUpdateCount = 65  # 设置版本号中更新次数为A，即1次
-    startYear = 65  # 设置版本号中更新年份为A，即2000年
-    startMonth = 65   # 设置版本号中更新月份为A，即2000年
-    startJJ = 1
-    with open(VerFilePath, 'r', encoding='utf-8') as f:
-        jsonStr = f.read()
-        oldJson = {}
-        if(jsonStr != ''):
-            oldJson = json.loads(jsonStr)
-        if(model in oldJson.keys() and cc in oldJson[model].keys() and '最新版本' in oldJson[model][cc].keys()):
-            lastVersion = oldJson[model][cc]['最新版本'].split('/')[0]
-    if(lastVersion != ''):
-        startJJ = int(lastVersion[-5])
-        startUpdateCount = ord(lastVersion[-4])
-        startYear = ord(lastVersion[-3])
-        startMonth = ord(lastVersion[-2])
-    starttime = time.perf_counter()
-    for i1 in "US":
-        jjNumber = int(latestVer[0][-5])+2
-        for j1 in range(startJJ, jjNumber):  # 防止降级的版本
-            updateCount = ord(latestVer[0][-4])+2
-            updateLst = list(range(startUpdateCount, updateCount))
-            updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-            for k1 in updateLst:
-                curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
-                for l1 in range(startYear, curYear):  # A表示2000年，后面递增
-                    for m1 in range(startMonth, 77):  # A-L表示1-12月
-                        for n1 in "123456789ABCDEFGHIJK":
-                            vc = str(j1) + chr(k1) + \
-                                chr(l1) + chr(m1) + n1  # 版本号
-                            # Wifi版没有基带版本号
-                            tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
-                            version1 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCode
-                            if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version1 in oldJson[model][cc]['版本号'].values():
-                                continue
-                            md5 = hashlib.md5()
-                            md5.update(version1.encode(encoding="utf-8"))
-                            # 基带和固件版本一致时
-                            if md5.hexdigest() in md5list:
-                                DecDicts[md5.hexdigest()] = version1
-                                if(version1.split('/')[2] != ''):
-                                    CpVersions.append(
-                                        version1.split('/')[2])
-                            # 固件更新，而基带未更新时
-                            if(latestVer[2] != '' and len(CpVersions) > 0):
-                                for tempCpVersion in CpVersions[-6:]:
-                                    version2 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCpVersion
-                                    if version1 == version2:
-                                        continue
-                                    if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version2 in oldJson[model][cc]['版本号'].values():
-                                        continue
-                                    md5 = hashlib.md5()
-                                    md5.update(version2.encode(
-                                        encoding="utf-8"))
-                                    if md5.hexdigest() in md5list:
-                                        DecDicts[md5.hexdigest()
-                                                 ] = version2
-                            # 测试版以'Z'作为倒数第4位
-                            vc2 = str(j1) + 'Z' + \
-                                chr(l1) + chr(m1) + n1  # 版本号
-                            tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
-                            version3 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCode
-                            if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version3 in oldJson[model][cc]['版本号'].values():
-                                continue
-                            md5 = hashlib.md5()
-                            md5.update(version3.encode(encoding="utf-8"))
-                            if md5.hexdigest() in md5list:
-                                DecDicts[md5.hexdigest()] = version3
+    try:
+        xml = etree.fromstring(content)
+        latestVer = xml.xpath("//latest//text()")[0].split('/')  # 获取当前最新版本号
+        FirstCode = latestVer[0][:-6]  # 如：N9860ZC
+        SecondCode = latestVer[1][:-5]  # 如：N9860OZL
+        if len(latestVer) > 2:
+            ThirdCode = latestVer[2][:-6]  # 如：N9860OZC
+        Dicts = {}
+        Dicts[model] = {}
+        Dicts[model][cc] = {}
+        Dicts[model][cc]['版本号'] = {}
+        Dicts[model][cc]['最新版本'] = ''
+        DecDicts = {}
+        CpVersions = []
+        VerFilePath = 'firmware.json'
+        lastVersion = ''
+        startUpdateCount = 65  # 设置版本号中更新次数为A，即1次
+        startYear = 65  # 设置版本号中更新年份为A，即2000年
+        startMonth = 65   # 设置版本号中更新月份为A，即2000年
+        startJJ = 1
+        with open(VerFilePath, 'r', encoding='utf-8') as f:
+            jsonStr = f.read()
+            oldJson = {}
+            if(jsonStr != ''):
+                oldJson = json.loads(jsonStr)
+            if(model in oldJson.keys() and cc in oldJson[model].keys() and '最新版本' in oldJson[model][cc].keys()):
+                lastVersion = oldJson[model][cc]['最新版本'].split('/')[0]
+        if(lastVersion != ''):
+            startJJ = int(lastVersion[-5])
+            startUpdateCount = ord(lastVersion[-4])
+            startYear = ord(lastVersion[-3])
+            startMonth = ord(lastVersion[-2])
+        starttime = time.perf_counter()
+        for i1 in "US":
+            jjNumber = int(latestVer[0][-5])+2
+            for j1 in range(startJJ, jjNumber):  # 防止降级的版本
+                updateCount = ord(latestVer[0][-4])+2
+                updateLst = list(range(startUpdateCount, updateCount))
+                updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
+                for k1 in updateLst:
+                    curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
+                    for l1 in range(startYear, curYear):  # A表示2000年，后面递增
+                        for m1 in range(startMonth, 77):  # A-L表示1-12月
+                            for n1 in "123456789ABCDEFGHIJK":
+                                vc = str(j1) + chr(k1) + \
+                                    chr(l1) + chr(m1) + n1  # 版本号
+                                # Wifi版没有基带版本号
+                                tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
+                                version1 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCode
+                                if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version1 in oldJson[model][cc]['版本号'].values():
+                                    continue
+                                md5 = hashlib.md5()
+                                md5.update(version1.encode(encoding="utf-8"))
+                                # 基带和固件版本一致时
+                                if md5.hexdigest() in md5list:
+                                    DecDicts[md5.hexdigest()] = version1
+                                    if(version1.split('/')[2] != ''):
+                                        CpVersions.append(
+                                            version1.split('/')[2])
+                                # 固件更新，而基带未更新时
+                                if(latestVer[2] != '' and len(CpVersions) > 0):
+                                    for tempCpVersion in CpVersions[-6:]:
+                                        version2 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCpVersion
+                                        if version1 == version2:
+                                            continue
+                                        if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version2 in oldJson[model][cc]['版本号'].values():
+                                            continue
+                                        md5 = hashlib.md5()
+                                        md5.update(version2.encode(
+                                            encoding="utf-8"))
+                                        if md5.hexdigest() in md5list:
+                                            DecDicts[md5.hexdigest()
+                                                    ] = version2
+                                # 测试版以'Z'作为倒数第4位
+                                vc2 = str(j1) + 'Z' + \
+                                    chr(l1) + chr(m1) + n1  # 版本号
+                                tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
+                                version3 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCode
+                                if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version3 in oldJson[model][cc]['版本号'].values():
+                                    continue
+                                md5 = hashlib.md5()
+                                md5.update(version3.encode(encoding="utf-8"))
+                                if md5.hexdigest() in md5list:
+                                    DecDicts[md5.hexdigest()] = version3
 
-    # 新增解密数据
-    if len(DecDicts.values()) > 0:
-        Dicts[model][cc]['最新版本'] = sorted(
-            DecDicts.values(), key=lambda x: x.split('/')[0][-3:])[-1]  # 记录最新版本号
-        Dicts[model][cc]['版本号'] = DecDicts
-    endtime = time.perf_counter()
-    # 如果有缓存数据
-    if model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys() and len(oldJson[model][cc]["版本号"]) > 0:
-        sumCount = len(Dicts[model][cc]["版本号"]) + \
-            len(oldJson[model][cc]["版本号"])
-        rateOfSuccess = round(sumCount/len(md5list)*100, 2)
-    else:
-        rateOfSuccess = round(
-            len(Dicts[model][cc]["版本号"])/len(md5list)*100, 2)
-    Dicts[model][cc]['解密百分比'] = f'{rateOfSuccess}%'
-    print(
-        f"{modelDic[model]['name']}——{getCountryName(cc)}版测试版固件版本号解密完毕,耗时:{round(endtime - starttime, 2)}秒,解密成功百分比:{rateOfSuccess}%")
-    if len(DecDicts) > 0:
-        print(f"{modelDic[model]['name']}新增{len(DecDicts)}个测试版固件.")
-    else:
-        print(f"{modelDic[model]['name']}暂无新增测试版.")
-    if len(Dicts[model][cc]['版本号']) > 0:
-        return Dicts
-    else:
-        return None
+        # 新增解密数据
+        if len(DecDicts.values()) > 0:
+            Dicts[model][cc]['最新版本'] = sorted(
+                DecDicts.values(), key=lambda x: x.split('/')[0][-3:])[-1]  # 记录最新版本号
+            Dicts[model][cc]['版本号'] = DecDicts
+        endtime = time.perf_counter()
+        # 如果有缓存数据
+        if model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys() and len(oldJson[model][cc]["版本号"]) > 0:
+            sumCount = len(Dicts[model][cc]["版本号"]) + \
+                len(oldJson[model][cc]["版本号"])
+            rateOfSuccess = round(sumCount/len(md5list)*100, 2)
+        else:
+            rateOfSuccess = round(
+                len(Dicts[model][cc]["版本号"])/len(md5list)*100, 2)
+        Dicts[model][cc]['解密百分比'] = f'{rateOfSuccess}%'
+        print(
+            f"<{modelDic[model]['name']} {getCountryName(cc)}版>测试版固件版本号解密完毕,耗时:{round(endtime - starttime, 2)}秒,解密成功百分比:{rateOfSuccess}%")
+        if len(DecDicts) > 0:
+            print(f"<{modelDic[model]['name']} {getCountryName(cc)}版>新增{len(DecDicts)}个测试版固件.")
+        else:
+            print(f"<{modelDic[model]['name']} {getCountryName(cc)}版>暂无新增测试版.")
+        if len(Dicts[model][cc]['版本号']) > 0:
+            return Dicts
+        else:
+            return None
+    except Exception as e:
+        print(f'发生错误:{e}')
 
 # 使用TG机器人推送
 
@@ -306,10 +309,11 @@ def run():
                     getNewVersions, decDicts, oldJson, model)
                 tasks.append(task)
             for task in concurrent.futures.as_completed(tasks):
-                hasNew, newMDic = task.result()
-                if(hasNew):
-                    hasNewVersion = True
-                decDicts.update(newMDic)
+                if task.result()!=None:
+                    hasNew, newMDic = task.result()
+                    if(hasNew):
+                        hasNewVersion = True
+                    decDicts.update(newMDic)
         if hasNewVersion:
             # 固件更新日志
             with open(AddTxtPath, 'a+', encoding='utf-8') as file:
@@ -376,6 +380,7 @@ def getNewVersions(decDicts, oldJson, model):
         decDicts.update(newMDic)  # 先保存已有的数据
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         newMDic[model][cc]['地区'] = getCountryName(cc)
+        newMDic[model][cc]['机型'] = modelDic[model]['name']
         if verDic == None:
             continue
         diffModel = []

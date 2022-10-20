@@ -29,7 +29,7 @@
                 for (var i in md5List) {
                     if (jsObj[model][cc]['版本号'][md5List[i]] != null) {
                         doc[i].childNodes[1].innerHTML = jsObj[model][cc]['版本号'][md5List[i]];
-                        doc[i].childNodes[1].setAttribute("style", "color:#FF0000")
+                        doc[i].childNodes[1].setAttribute("style", "color:#ed1c24")
                     }
                 }
             }

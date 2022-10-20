@@ -66,7 +66,7 @@ def requestXML(url):
         content = requests.get(url, headers=headers).content
         return content
     except:
-        print('网络出现问题.')
+        print(f'{url}网络出现问题.')
         return None
 
 
@@ -201,7 +201,7 @@ def DecryptionFirmware(model, md5Dic, cc):
         Dicts[model][cc]['版本号'] = DecDicts
     endtime = time.perf_counter()
     # 如果有缓存数据
-    if model in oldJson.keys() and '版本号' in oldJson[model][cc].keys() and len(oldJson[model][cc]["版本号"]) > 0:
+    if model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys() and len(oldJson[model][cc]["版本号"]) > 0:
         sumCount = len(Dicts[model][cc]["版本号"]) + \
             len(oldJson[model][cc]["版本号"])
         rateOfSuccess = round(sumCount/len(md5list)*100, 2)
@@ -317,6 +317,8 @@ def run():
                 for model in modelDic:
                     if (model in decDicts) and (model in oldJson):
                         for cc in modelDic[model]['CC']:
+                            if not cc in oldJson[model] or not cc in decDicts[model]:
+                                continue
                             md5Keys = decDicts[model][cc]['版本号'].keys(
                             ) - oldJson[model][cc]['版本号'].keys()  # 获取新增的版本号
                             if len(md5Keys) > 0:
@@ -345,7 +347,7 @@ def run():
                     for cc in modelDic[model]['CC']:
                         if not cc in decDicts[model].keys():
                             continue
-                        textStr += f"*{modelDic[model]['name']}-{getCountryName(cc)}版：*\n{decDicts[model][cc]['最新版本']}\n\n"
+                        textStr += f"*{modelDic[model]['name']} {getCountryName(cc)}版：*\n{decDicts[model][cc]['最新版本']}\n\n"
                 f.write(textStr)
                 fcm("各机型最新测试版", textStr.replace('*', ''), '')
                 telegram_bot("#各机型最新测试版", textStr)

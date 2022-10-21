@@ -6,7 +6,7 @@ name: 生成固件解密json文件
 on:
   workflow_dispatch:
   schedule:
-    - cron: '* 0-10/3 * * *'
+    - cron: '* 0,3,6,9,10 * * *'
 
 jobs:
   decrypt:
@@ -21,8 +21,7 @@ jobs:
         python-version: "3.10"
     - name: 安装python依赖
       run: |
-        python -m pip install --upgrade pip
-        pip install requests lxml python-telegram-bot
+        pip install -r requirements.txt
     - name: 运行解密脚本
       env:
         FCM_API_KEY: ${{ secrets.FCM_API_KEY }}

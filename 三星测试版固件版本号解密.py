@@ -1,8 +1,6 @@
-import asyncio
 from genericpath import exists
 import concurrent.futures
 import time
-from tkinter import E
 import requests
 import hashlib
 from lxml import etree
@@ -14,7 +12,8 @@ from datetime import timedelta
 import json
 import telegram
 from copy import deepcopy
-
+from func_timeout import func_set_timeout
+import func_timeout
 
 # 本地是使用代理
 if(exists('debug')):
@@ -273,7 +272,7 @@ push_config = {
     'TG_PROXY_PORT': '',                # tg 机器人的 TG_PROXY_PORT
 }
 
-
+@func_set_timeout(900)
 def run():
     # 获取相关参数变量数据
     for k in push_config:
@@ -413,5 +412,9 @@ def getNewVersions(decDicts, oldJson, model):
 
 
 if __name__ == '__main__':
-    modelDic = getModelDicts()  # 获取型号信息
-    run()
+    try:
+        modelDic = getModelDicts()  # 获取型号信息
+        run()
+    except func_timeout.exceptions.FunctionTimedOut:
+        print('任务超时，已退出执行!')
+    

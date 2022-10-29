@@ -1,6 +1,5 @@
 from genericpath import exists
 import concurrent.futures
-from socket import NI_NOFQDN
 import time
 import requests
 import hashlib
@@ -15,6 +14,8 @@ import telegram
 from copy import deepcopy
 from func_timeout import func_set_timeout
 import func_timeout
+from dotenv import load_dotenv
+load_dotenv()
 
 # 本地是使用代理
 if(exists('debug')):
@@ -379,8 +380,8 @@ def run():
                             continue
                         textStr += f"*{modelDic[model]['name']} {getCountryName(cc)}版：*\n{decDicts[model][cc]['最新测试版']}\n\n"
                 f.write(textStr)
-                fcm("各机型最新测试版", content=textStr.replace('*', ''))
-                telegram_bot("#各机型最新测试版", textStr)
+                # fcm("各机型最新测试版", content=textStr.replace('*', ''))
+                # telegram_bot("#各机型最新测试版", textStr)
     endTime = time.perf_counter()
     print(f'总耗时:{round(endTime - startTime, 2)}秒')
     with open(VerFilePath, 'w', encoding='utf-8') as f:

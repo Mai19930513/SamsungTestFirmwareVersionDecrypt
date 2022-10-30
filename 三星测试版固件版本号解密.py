@@ -18,9 +18,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 本地是使用代理
-if(exists('debug')):
-    os.environ["http_proxy"] = "http://127.0.0.1:7890"
-    os.environ["https_proxy"] = "http://127.0.0.1:7890"
+# os.environ["http_proxy"] = "http://127.0.0.1:7890"
+# os.environ["https_proxy"] = "http://127.0.0.1:7890"
+
 
 # 三星固件代号解释:如"N9860ZCU3FVG3"
 # N9860:表示机型代号 ZC:大陆公开版 U3:U表示user,还有另一个S，3表示防止降级的版本

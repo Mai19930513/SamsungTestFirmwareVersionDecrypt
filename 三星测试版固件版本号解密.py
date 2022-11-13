@@ -356,7 +356,6 @@ def run():
                                 if isFirst:
                                     file.write("*****记录时间:" + now + "*****\n")
                                     isFirst = False
-                                textStr = ''
                                 Str = ''
                                 newVersions = {}
                                 for md5key in md5Keys:
@@ -364,7 +363,7 @@ def run():
                                 newVersions = dict(
                                     sorted(newVersions.items(), key=lambda x: x[1]))  # 按照版本号排序
                                 for key, value in newVersions.items():
-                                    textStr += "\n"+value
+                                    textStr ="\n"+value
                                     Str += f"{modelDic[model]['name']}-{getCountryName(cc)}版新增测试固件版本:{value}，对应MD5值：{key}\n"
                                 file.write(Str)
                                 fcm(f"{modelDic[model]['name']}——{getCountryName(cc)}新增内测固件",

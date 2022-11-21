@@ -11,6 +11,7 @@ from datetime import timezone
 from datetime import timedelta
 import json
 import telegram
+import pymysql
 from copy import deepcopy
 from func_timeout import func_set_timeout
 import func_timeout
@@ -28,7 +29,45 @@ load_dotenv()
 # VG3:当前版本发布时间，V表示2022年(A表示2000),G表示7月(A表示1月),3表示第3个版本
 
 
+def getConnect():
+    prefix = os.getenv('PREFIX')
+    if prefix != None:
+        cert_path = f'{prefix}/etc/tls/cert.pem'
+    else:
+        cert_path = "/etc/ssl/certs/ca-certificates.crt"
+    connection = pymysql.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USERNAME"),
+        passwd=os.getenv("PASSWORD"),
+        db=os.getenv("DATABASE"),
+        charset='utf8',
+        autocommit=True,
+        ssl={
+            "ca": cert_path
+        },
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    return connection
+
+def getModelDictsFromDB():
+    '''从数据库读取型号'''
+    ModelDic = {}
+    ModelsQuery = "SELECT * FROM models"
+    connect = getConnect()
+    cursor = connect.cursor()
+    cursor.execute(ModelsQuery)
+    models = cursor.fetchall()
+    for model in models:
+        name=model['name']
+        modelCode=model['code']
+        countryCode=[]
+        for cc in  model['cc'].split('|'):
+            countryCode.append(cc)
+        ModelDic[modelCode] = {'CC': countryCode, 'name': name}
+    return ModelDic
+
 def getModelDicts():
+    '''从文件读取型号'''
     ModelDic = {}
     with open('models.txt', 'r', encoding='utf-8') as models:
         for model in models:
@@ -135,13 +174,13 @@ def DecryptionFirmware(model, md5Dic, cc):
         with open(VerFilePath, 'r', encoding='utf-8') as f:
             jsonStr = f.read()
             oldJson = {}
-            if(jsonStr != ''):
+            if (jsonStr != ''):
                 oldJson = json.loads(jsonStr)
             if model in oldJson.keys() and cc in oldJson[model].keys() and '最新测试版' in oldJson[model][cc].keys():
                 lastVersion = oldJson[model][cc]['最新测试版'].split('/')[0]
                 CpVersions = [
                     x.split('/')[-1] for x in list(oldJson[model][cc]['版本号'].values())[-5:]]
-        if(lastVersion != ''):
+        if (lastVersion != ''):
             startJJ = int(lastVersion[-5])
             startUpdateCount = ord(lastVersion[-4])
             startYear = ord(lastVersion[-3])
@@ -170,16 +209,16 @@ def DecryptionFirmware(model, md5Dic, cc):
                                 # 基带和固件版本一致时
                                 if md5.hexdigest() in md5list:
                                     DecDicts[md5.hexdigest()] = version1
-                                    if(version1.split('/')[2] != ''):
+                                    if (version1.split('/')[2] != ''):
                                         CpVersions.append(
                                             version1.split('/')[2])
                                 # 固件更新，而基带未更新时
-                                if(latestVer[2] != '' and len(CpVersions) > 0):
+                                if (latestVer[2] != '' and len(CpVersions) > 0):
                                     for tempCpVersion in CpVersions[-6:]:
                                         version2 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCpVersion
                                         if version1 == version2:
                                             continue
-                                        if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version2 in oldJson[model][cc]['版本号'].values():
+                                        if (model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version2 in oldJson[model][cc]['版本号'].values():
                                             continue
                                         md5 = hashlib.md5()
                                         md5.update(version2.encode(
@@ -187,7 +226,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                         if md5.hexdigest() in md5list:
                                             DecDicts[md5.hexdigest()
                                                      ] = version2
-                                            if(version2.split('/')[2] != ''):
+                                            if (version2.split('/')[2] != ''):
                                                 CpVersions.append(
                                                     version2.split('/')[2])
                                 # 测试版以'Z'作为倒数第4位
@@ -195,21 +234,21 @@ def DecryptionFirmware(model, md5Dic, cc):
                                     chr(l1) + chr(m1) + n1  # 版本号
                                 tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
                                 version3 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCode
-                                if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version3 in oldJson[model][cc]['版本号'].values():
+                                if (model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version3 in oldJson[model][cc]['版本号'].values():
                                     continue
                                 md5 = hashlib.md5()
                                 md5.update(version3.encode(encoding="utf-8"))
                                 if md5.hexdigest() in md5list:
                                     DecDicts[md5.hexdigest()] = version3
-                                    if(version3.split('/')[2] != ''):
+                                    if (version3.split('/')[2] != ''):
                                         CpVersions.append(
                                             version3.split('/')[2])
-                                if(latestVer[2] != '' and len(CpVersions) > 0):
+                                if (latestVer[2] != '' and len(CpVersions) > 0):
                                     for tempCpVersion in CpVersions[-6:]:
                                         version4 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCpVersion
                                         if version1 == version4:
                                             continue
-                                        if(model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version4 in oldJson[model][cc]['版本号'].values():
+                                        if (model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version4 in oldJson[model][cc]['版本号'].values():
                                             continue
                                         md5 = hashlib.md5()
                                         md5.update(version4.encode(
@@ -217,7 +256,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                         if md5.hexdigest() in md5list:
                                             DecDicts[md5.hexdigest()
                                                      ] = version4
-                                            if(version4.split('/')[2] != ''):
+                                            if (version4.split('/')[2] != ''):
                                                 CpVersions.append(
                                                     version4.split('/')[2])
 
@@ -325,7 +364,7 @@ def run():
     with open(VerFilePath, 'r', encoding='utf-8') as f:
         jsonStr = f.read()
         oldJson = {}
-        if(jsonStr != ''):
+        if (jsonStr != ''):
             oldJson = json.loads(jsonStr)
         hasNewVersion = False
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
@@ -338,7 +377,7 @@ def run():
             for task in concurrent.futures.as_completed(tasks):
                 if task.result() != None:
                     hasNew, newMDic = task.result()
-                    if(hasNew):
+                    if (hasNew):
                         hasNewVersion = True
                     decDicts.update(newMDic)
         if hasNewVersion:
@@ -363,7 +402,7 @@ def run():
                                 newVersions = dict(
                                     sorted(newVersions.items(), key=lambda x: x[1]))  # 按照版本号排序
                                 for key, value in newVersions.items():
-                                    textStr ="\n"+value
+                                    textStr = "\n"+value
                                     Str += f"{modelDic[model]['name']}-{getCountryName(cc)}版新增测试固件版本:{value}，对应MD5值：{key}\n"
                                 file.write(Str)
                                 fcm(f"{modelDic[model]['name']}——{getCountryName(cc)}新增内测固件",
@@ -406,7 +445,7 @@ def getNewVersions(decDicts, oldJson, model):
             newMDic[model][cc]['解密百分比'] = ''
         decDicts.update(newMDic)  # 先保存已有的数据
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
-        if newMDic[model][cc]['最新正式版'] != '' and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
+        if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
             telegram_bot(f"#{model} {getCountryName(cc)}版推送更新",
                          f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
             fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
@@ -424,7 +463,8 @@ def getNewVersions(decDicts, oldJson, model):
         ver = newMDic[model][cc]['最新测试版'].split('/')[0]
         yearStr = ord(ver[-3])-65+2001  # 获取更新年份
         monthStr = ord(ver[-2])-64  # 获取更新月份
-        countStr = int(ver[-1], 16) if ord(ver[-1])<71 else ord(ver[-1])-55  # 获取第几次更新
+        countStr = int(ver[-1], 16) if ord(ver[-1]
+                                           ) < 71 else ord(ver[-1])-55  # 获取第几次更新
         definitionStr = f'{yearStr}年{monthStr}月第{countStr}个测试版'
         newMDic[model][cc]['最新版本号说明'] = definitionStr
         if verDic[model][cc]['解密百分比'] != '':
@@ -448,7 +488,7 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        modelDic = getModelDicts()  # 获取型号信息
+        modelDic = getModelDictsFromDB()  # 获取型号信息
         run()
     except func_timeout.exceptions.FunctionTimedOut:
         print('任务超时，已退出执行!')

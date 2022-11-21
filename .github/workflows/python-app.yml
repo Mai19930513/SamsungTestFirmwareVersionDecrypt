@@ -24,6 +24,10 @@ jobs:
         pip install -r requirements.txt
     - name: 运行解密脚本
       env:
+        DATABASE: ${{ secrets.DATABASE }}
+        HOST: ${{ secrets.HOST }}
+        DBUSER: ${{ secrets.USERNAME }}
+        PASSWORD: ${{ secrets.PASSWORD }}
         FCM_API_KEY: ${{ secrets.FCM_API_KEY }}
         FCM_KEY: ${{ secrets.FCM_KEY }}
         TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}

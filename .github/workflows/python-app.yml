@@ -26,7 +26,7 @@ jobs:
       env:
         DATABASE: ${{ secrets.DATABASE }}
         HOST: ${{ secrets.HOST }}
-        DBUSER: ${{ secrets.USERNAME }}
+        DBUSER: ${{ secrets.DBUSER }}
         PASSWORD: ${{ secrets.PASSWORD }}
         FCM_API_KEY: ${{ secrets.FCM_API_KEY }}
         FCM_KEY: ${{ secrets.FCM_KEY }}

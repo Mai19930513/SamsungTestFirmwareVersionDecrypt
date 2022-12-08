@@ -182,7 +182,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                     x.split('/')[-1] for x in list(oldJson[model][cc]['版本号'].values())[-5:]]
         if (lastVersion != ''):
             startJJ = int(lastVersion[-5])
-            if(lastVersion!='Z'):
+            if(lastVersion[-4]!='Z'):
                 startUpdateCount = ord(lastVersion[-4])
             else:
                 startUpdateCount=ord(latestVer[0][-4])

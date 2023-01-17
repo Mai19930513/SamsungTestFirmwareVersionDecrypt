@@ -192,7 +192,7 @@ def DecryptionFirmware(model, md5Dic, cc):
         updateCount = ord(latestVer[0][-4])+2
         updateLst = list(range(startUpdateCount, updateCount))
         updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-        curYear = ord(latestVer[0][-3])+2  # 获取当前年份，,倒数第3位
+        curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
         starttime = time.perf_counter()
         for i1 in "US":
             for j1 in range(startJJ, jjNumber):  # 防止降级的版本

@@ -459,7 +459,8 @@ def getNewVersions(decDicts, oldJson, model):
             newMDic[model][cc]['最新正式版'] = verDic[model][cc]['最新正式版']
         newMDic[model][cc]['地区'] = getCountryName(cc)
         newMDic[model][cc]['机型'] = modelDic[model]['name']
-        if len(verDic[model][cc]['版本号']) == 0:
+        if verDic==None or len(verDic[model][cc]['版本号']) == 0:
+            print(f"获取版本号错误，跳过{model}")
             continue
         diffModel = []
         if verDic[model][cc]['最新测试版'] != '':

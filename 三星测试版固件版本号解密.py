@@ -195,7 +195,10 @@ def DecryptionFirmware(model, md5Dic, cc):
         updateCount = ord(latestVer[0][-4])+2
         updateLst = list(range(startUpdateCount, updateCount))
         updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-        curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
+        if(latestVer[0][-2]=="L"):
+            curYear = ord(latestVer[0][-3])+2
+        else:    
+            curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
         starttime = time.perf_counter()
         for i1 in "US":
             for j1 in range(startJJ, jjNumber):  # 防止降级的版本
@@ -460,7 +463,6 @@ def getNewVersions(decDicts, oldJson, model):
         newMDic[model][cc]['地区'] = getCountryName(cc)
         newMDic[model][cc]['机型'] = modelDic[model]['name']
         if verDic==None or len(verDic[model][cc]['版本号']) == 0:
-            print(f"获取版本号错误，跳过{model}")
             continue
         diffModel = []
         if verDic[model][cc]['最新测试版'] != '':

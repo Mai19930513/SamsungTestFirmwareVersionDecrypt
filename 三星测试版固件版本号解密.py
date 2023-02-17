@@ -195,7 +195,7 @@ def DecryptionFirmware(model, md5Dic, cc):
         updateCount = ord(latestVer[0][-4])+2
         updateLst = list(range(startUpdateCount, updateCount))
         updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-        if(latestVer[0][-2]=="L"):
+        if(latestVer[0][-2] in "KL"):
             curYear = ord(latestVer[0][-3])+2
         else:    
             curYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位

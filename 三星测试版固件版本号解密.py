@@ -152,6 +152,9 @@ def DecryptionFirmware(model, md5Dic, cc):
         return None
     try:
         xml = etree.fromstring(content)
+        if(len(xml.xpath("//latest//text()"))==0):
+            print(f"获取{model} {getCountryName(cc)}最新正式版本号出错")
+            return 
         latestVerStr = xml.xpath("//latest//text()")[0]  # 获取当前最新版本号数组
         latestVer = xml.xpath("//latest//text()")[0].split('/')  # 获取当前最新版本号数组
         FirstCode = latestVer[0][:-6]  # 如：N9860ZC

@@ -198,7 +198,7 @@ def DecryptionFirmware(model, md5Dic, cc):
             for j1 in range(startJJ, jjNumber):  # 防止降级的版本
                 for k1 in updateLst:
                     for l1 in range(startYear, curYear):
-                        for m1 in range(startMonth, 77):
+                        for m1 in range(65, 77):
                             for n1 in "123456789ABCDEFGHIJK":
                                 vc = str(j1) + chr(k1) + \
                                     chr(l1) + chr(m1) + n1  # 版本号

@@ -41,6 +41,7 @@ def getConnect():
         passwd=os.getenv("PASSWORD"),
         db=os.getenv("DATABASE"),
         charset='utf8',
+        port=21777,
         autocommit=True,
         ssl={
             "ca": cert_path

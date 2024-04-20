@@ -37,15 +37,12 @@ def getConnect():
         cert_path = "/etc/ssl/certs/ca-certificates.crt"
     connection = pymysql.connect(
         host=os.getenv("HOST"),
-        user=os.getenv("DBUSER"),
+        user=os.getenv("USERNAME"),
         passwd=os.getenv("PASSWORD"),
         db=os.getenv("DATABASE"),
         charset='utf8mb4',
         port=21777,
         autocommit=True,
-        ssl={
-            "ca": cert_path
-        },
         cursorclass=pymysql.cursors.DictCursor
     )
     return connection

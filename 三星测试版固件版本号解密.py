@@ -132,6 +132,14 @@ def readXML(model):
                 md5Dic[cc] = md5list
     return md5Dic
 
+
+def char_to_number(char):
+    if char.isdigit():
+            return int(char)
+    elif char.isalpha() and char.isupper():
+        return ord(char) - ord('A') + 10
+    else:
+        raise ValueError("输入必须是0-9或A-Z之间的字符")
 # 暴力解密版本号
 
 
@@ -182,14 +190,14 @@ def DecryptionFirmware(model, md5Dic, cc):
                 CpVersions = [
                     x.split('/')[-1] for x in list(oldJson[model][cc]['版本号'].values())[-5:]]
         if (lastVersion != ''):
-            startJJ = int(lastVersion[-5])
+            startJJ = char_to_number(lastVersion[-5])
             if(lastVersion[-4]!='Z'):
                 startUpdateCount = ord(lastVersion[-4])
             else:
                 startUpdateCount=ord(latestVer[0][-4])
             startYear = ord(lastVersion[-3])
             startMonth = ord(lastVersion[-2])
-        jjNumber = int(latestVer[0][-5])+2
+        jjNumber = char_to_number(latestVer[0][-5])+2
         updateCount = ord(latestVer[0][-4])+2
         updateLst = list(range(startUpdateCount, updateCount))
         updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
@@ -453,7 +461,7 @@ def getNewVersions(decDicts, oldJson, model):
         decDicts.update(newMDic)  # 先保存已有的数据
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
-            telegram_bot(f"#{model} {getCountryName(cc)}版推送更新",
+            telegram_bot(f"#{model} - {newMDic[model][cc]['机型']} {getCountryName(cc)}版推送更新",
                          f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
             fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
                 link=f"https://doc.samsungmobile.com/{model}/{cc}/doc.html")
@@ -470,7 +478,7 @@ def getNewVersions(decDicts, oldJson, model):
         ver = newMDic[model][cc]['最新测试版'].split('/')[0]
         yearStr = ord(ver[-3])-65+2001  # 获取更新年份
         monthStr = ord(ver[-2])-64  # 获取更新月份
-        countStr = int(ver[-1], 16) if ord(ver[-1]
+        countStr = char_to_number(ver[-1], 16) if ord(ver[-1]
                                            ) < 71 else ord(ver[-1])-55  # 获取第几次更新
         definitionStr = f'{yearStr}年{monthStr}月第{countStr}个测试版'
         newMDic[model][cc]['最新版本号说明'] = definitionStr

@@ -478,8 +478,7 @@ def getNewVersions(decDicts, oldJson, model):
         ver = newMDic[model][cc]['最新测试版'].split('/')[0]
         yearStr = ord(ver[-3])-65+2001  # 获取更新年份
         monthStr = ord(ver[-2])-64  # 获取更新月份
-        countStr = char_to_number(ver[-1], 16) if ord(ver[-1]
-                                           ) < 71 else ord(ver[-1])-55  # 获取第几次更新
+        countStr = char_to_number(ver[-1])   # 获取第几次更新
         definitionStr = f'{yearStr}年{monthStr}月第{countStr}个测试版'
         newMDic[model][cc]['最新版本号说明'] = definitionStr
         if verDic[model][cc]['解密百分比'] != '':

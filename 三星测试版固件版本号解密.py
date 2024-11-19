@@ -214,7 +214,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                             initCP = ''if latestVer[2] == '' else ThirdCode + i1 + str(j1) + chr(k1) + chr(l1) + chr(m1) +"1" #添加当月第1个基带版本
                             tempCP=CpVersions.copy()
                             tempCP.append(initCP)
-                            for n1 in "123456789ABCDEFGHIJKL":
+                            for n1 in "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ":
                                 vc = str(j1) + chr(k1) + \
                                     chr(l1) + chr(m1) + n1  # 版本号
                                 tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc # Wifi版没有基带版本号

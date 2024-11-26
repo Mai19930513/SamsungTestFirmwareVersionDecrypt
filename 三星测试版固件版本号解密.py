@@ -44,6 +44,11 @@ def getConnect():
     )
     return connection
 
+def printStr(str):
+    global isDebug
+    if isDebug:
+        print(str)
+
 def getModelDictsFromDB():
     '''从数据库读取型号'''
     ModelDic = {}
@@ -100,9 +105,11 @@ def requestXML(url):
     try:
         content = requests.get(url, headers=headers).content
         return content
-    except:
-        print(f'{url}网络出现问题.')
+    except requests.exceptions.ProxyError as e:
+        print(f'ProxyError:{e}')
         return None
+    except Exception as e:
+        print(f"发生错误:{e.args[0]}")
 
 
 # 获取官网版本号代码的md5值
@@ -187,7 +194,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                 # CpVersions保存最近的3个基带版本
                 seen = set()
                 modelVersion=[x.split('/')[-1] for x in list(oldJson[model][cc]['版本号'].values())]
-                newMV=[x for x in modelVersion if not (x in seen or seen.add(x))][-10:] #保存最近的10个基带版本
+                newMV=[x for x in modelVersion if not (x in seen or seen.add(x))][-12:]#保存最近的12个基带版本
                 CpVersions = newMV
         if (lastVersion != ''):
             startBLVersion = char_to_number(lastVersion[-5])
@@ -201,7 +208,7 @@ def DecryptionFirmware(model, md5Dic, cc):
         endUpdateCount = ord(latestVer[0][-4])+2   # 一直解密到当前大版本号+1
         updateLst = list(range(startUpdateCount, endUpdateCount))
         updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-        if(latestVer[0][-2] in "L"):
+        if(latestVer[0][-2] == "L"):
             endYear = ord(latestVer[0][-3])+2   #如果当前测试固件月份为12月，则将测试固件年份+1
         else:    
             endYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
@@ -211,9 +218,10 @@ def DecryptionFirmware(model, md5Dic, cc):
                 for k1 in updateLst:
                     for l1 in range(startYear, endYear):
                         for m1 in range(65, 77):
-                            initCP = ''if latestVer[2] == '' else ThirdCode + i1 + str(j1) + chr(k1) + chr(l1) + chr(m1) +"1" #添加当月第1个基带版本
-                            tempCP=CpVersions.copy()
-                            tempCP.append(initCP)
+                            tempCP=CpVersions[-12:].copy()
+                            for i in range(1,3):
+                                initCP = ''if latestVer[2] == '' else ThirdCode + i1 + str(j1) + chr(k1) + chr(l1) + chr(m1) +str(i) #手动指定当月基带版本
+                                tempCP.append(initCP)
                             for n1 in "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ":
                                 vc = str(j1) + chr(k1) + \
                                     chr(l1) + chr(m1) + n1  # 版本号
@@ -226,6 +234,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                 # 基带和固件版本一致时
                                 if md5.hexdigest() in md5list:
                                     DecDicts[md5.hexdigest()] = version1
+                                    printStr(f'新增<{model} {getCountryName(cc)}版>测试固件:{version1}')
                                     if (version1.split('/')[2] != '') and  (version1.split('/')[2] not in CpVersions):
                                         CpVersions.append(
                                             version1.split('/')[2])
@@ -244,6 +253,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                         if md5.hexdigest() in md5list:
                                             DecDicts[md5.hexdigest()
                                                      ] = version2
+                                            printStr(f'<基带>新增<{model} {getCountryName(cc)}版>测试固件:{version2}')         
                                             if (version2.split('/')[2] != '') and  (version2.split('/')[2] not in CpVersions):
                                                 CpVersions.append(
                                                     version2.split('/')[2])
@@ -276,6 +286,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                         if md5.hexdigest() in md5list:
                                             DecDicts[md5.hexdigest()
                                                      ] = version4
+                                            printStr(f'<Z>新增<{model} {getCountryName(cc)}版>测试固件:{version4}')   
                                             if (version4.split('/')[2] != '') and  (version4.split('/')[2]  not in CpVersions):
                                                 CpVersions.append(
                                                     version4.split('/')[2])
@@ -359,7 +370,7 @@ push_config = {
 }
 
 
-@func_set_timeout(900)
+@func_set_timeout(1200)
 def run():
     # 获取相关参数变量数据
     for k in push_config:
@@ -508,7 +519,11 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        modelDic = getModelDictsFromDB()  # 获取型号信息
+        isDebug=False
+        if isDebug:
+            modelDic={"SM-G9910":{'CC': ['CHC'], 'name': '21'}}    #测试时使用
+        else:
+            modelDic = getModelDictsFromDB()  # 获取型号信息
         run()
     except func_timeout.exceptions.FunctionTimedOut:
         print('任务超时，已退出执行!')

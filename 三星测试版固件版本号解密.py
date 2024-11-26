@@ -519,7 +519,7 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        isDebug=False
+        isDebug=True
         if isDebug:
             modelDic={"SM-G9910":{'CC': ['CHC'], 'name': '21'}}    #测试时使用
         else:

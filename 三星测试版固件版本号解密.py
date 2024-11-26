@@ -521,7 +521,7 @@ if __name__ == '__main__':
     try:
         isDebug=True
         if isDebug:
-            modelDic={"SM-G9910":{'CC': ['CHC'], 'name': '21'}}    #测试时使用
+            modelDic={"SM-G9910":{'CC': ['CHC'], 'name': 'S21'}}    #测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

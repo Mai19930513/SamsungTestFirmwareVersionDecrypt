@@ -370,7 +370,7 @@ push_config = {
 }
 
 
-@func_set_timeout(1200)
+@func_set_timeout(2000)
 def run():
     # 获取相关参数变量数据
     for k in push_config:
@@ -519,7 +519,7 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        isDebug=True
+        isDebug=False
         if isDebug:
             modelDic={"SM-G9910":{'CC': ['CHC'], 'name': 'S21'}}    #测试时使用
         else:

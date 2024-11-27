@@ -16,6 +16,7 @@ from copy import deepcopy
 from func_timeout import func_set_timeout
 import func_timeout
 from dotenv import load_dotenv
+import string
 load_dotenv()
 
 
@@ -27,6 +28,9 @@ load_dotenv()
 
 
 def getConnect():
+    '''
+    获取数据库连接
+    '''
     prefix = os.getenv('PREFIX')
     if prefix != None:
         cert_path = f'{prefix}/etc/tls/cert.pem'
@@ -84,6 +88,9 @@ def getModelDicts():
 
 
 def getCountryName(cc):
+    '''
+    通过设备代号获取地区名称
+    '''
     cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国'}
     if cc in cc2Country.keys():
         return cc2Country[cc]
@@ -92,6 +99,9 @@ def getCountryName(cc):
 
 
 def requestXML(url):
+    '''
+    请求xml内容
+    '''
     UA_list = [
         "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.0.0",
@@ -112,8 +122,10 @@ def requestXML(url):
         print(f"发生错误:{e.args[0]}")
 
 
-# 获取官网版本号代码的md5值
 def readXML(model):
+    '''
+    获取官网版本号代码的md5值
+    '''
     global modelDic
     md5Dic = {}
     for cc in modelDic[model]['CC']:
@@ -138,16 +150,39 @@ def readXML(model):
 
 
 def char_to_number(char):
+    '''
+    字符转对应数字
+    '''
     if char.isdigit():
             return int(char)
     elif char.isalpha() and char.isupper():
         return ord(char) - ord('A') + 10
     else:
         raise ValueError("输入必须是0-9或A-Z之间的字符")
-# 暴力解密版本号
+
+def get_letters_range(start:str, end:str)->str:
+    '''返回给定区间的字符串(包含end结束字符)'''
+    # 获取A-Z的所有大写字母
+    letters = "0123456789"+string.ascii_uppercase+string.ascii_lowercase
+    # 找到起始和结束字母的索引位置
+    start_index = letters.index(start)
+    end_index = letters.index(end) + 1  # 加1是为了包含结束字母
+    # 使用切片获取指定范围的字母
+    if letters[start_index:end_index]=="":
+        raise Exception("字符串开始和结束错误，请检查")
+    else:
+        return letters[start_index:end_index].upper()
 
 
-def DecryptionFirmware(model, md5Dic, cc):
+def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
+    '''通过穷举解码固件号
+    Args:
+        model(str):设备型号
+        md5Dic(dict):待解码固件版本号MD5字典
+        cc(str):设备地区码
+    Returns:
+        dict:设备型号解码后的固件版本号字典
+    '''
     print(f'开始解密<{model} {getCountryName(cc)}版>测试固件')
     md5list = md5Dic[cc]
     url = (
@@ -163,28 +198,50 @@ def DecryptionFirmware(model, md5Dic, cc):
     try:
         xml = etree.fromstring(content)
         if(len(xml.xpath("//latest//text()"))==0):
-            print(f"获取{model} {getCountryName(cc)}最新正式版本号出错")
-            return 
-        latestVerStr = xml.xpath("//latest//text()")[0]  # 获取当前最新版本号数组
-        latestVer = xml.xpath("//latest//text()")[0].split('/')  # 获取当前最新版本号数组
-        FirstCode = latestVer[0][:-6]  # 如：N9860ZC
-        SecondCode = latestVer[1][:-5]  # 如：N9860OZL
-        if len(latestVer) > 2:
+            # 新设备初始化一个版本号
+            ccList={"CHC":["ZC","CHC",3],"CHN":["ZC","CHC",2]} # CHC对应国行，后面的字典分别表示固件AP版本号、运营商CSC版本号前缀及是否带基带版本号，CHN为不带版本号
+            if(cc in ccList.keys()):
+                latestVer=""
+                latestVerStr="暂无正式版"
+                FirstCode=model.replace("SM-","")+ccList[cc][0]
+                SecondCode=model.replace("SM-","")+ccList[cc][1]
+                latestVer=""
+                startYear =chr(datetime.now().year-2001+ord("A")) # 设置版本号默认开始年份，A代表2001年，设置从当前年份开始解密
+                if(ccList[cc][2]>2):
+                    # 初始化带基带固件版本号
+                    ThirdCode=FirstCode
+                else:
+                    # 初始化不带基带固件版本号
+                    ThirdCode=""
+            else:
+                print(f'设备<{model}>无<{cc}>初始化版本号信息，请手动添加后再试!')
+                return
+        else:
+            # 直接获取服务器当前最新版本号信息
+            latestVerStr = xml.xpath("//latest//text()")[0]  # 获取当前最新版本号数组
+            latestVer = xml.xpath("//latest//text()")[0].split('/')  # 获取当前最新版本号数组
+            FirstCode = latestVer[0][:-6]  # 如：N9860ZC
+            SecondCode = latestVer[1][:-5]  # 如：N9860OZL
             ThirdCode = latestVer[2][:-6]  # 如：N9860OZC
-        Dicts = {}
+            startYear=chr(datetime.now().year-2001-4+ord("A")) # 设置版本号默认开始年份，A代表2001年，设置从当前年份前3年开始解密
+        Dicts = {} #新建一个字典
         Dicts[model] = {}
         Dicts[model][cc] = {}
         Dicts[model][cc]['版本号'] = {}
         Dicts[model][cc]['最新版本'] = ''
         DecDicts = {}
-        CpVersions = []
+        CpVersions = [] #以往的基带版本号
         VerFilePath = 'firmware.json'
         lastVersion = ''
-        startUpdateCount = 65  # 设置版本号中更新次数为A，即1次
-        startYear = ord('S')  # 设置版本号默认开始年份，A代表2000年，设置从2019年开始
-        startMonth = ord('A')   # 设置版本号中默认开始月份,A表示1月
-        startBLVersion = 1 # 设置默认BL版本号为1
+        # 初始化开始
+        startUpdateCount = "A"  # 设置版本号中更新次数为A，即第1次
+        endUpdateCount="B"
+        endYear=startYear 
+        startBLVersion = "0" # 设置默认BL版本号为1
+        endBLVersion="2"
+        # 初始化结束
         with open(VerFilePath, 'r', encoding='utf-8') as f:
+            # 导入旧数据，获取最后指定数量的基带版本号
             jsonStr = f.read()
             oldJson = {}
             if (jsonStr != ''):
@@ -197,35 +254,37 @@ def DecryptionFirmware(model, md5Dic, cc):
                 newMV=[x for x in modelVersion if not (x in seen or seen.add(x))][-12:]#保存最近的12个基带版本
                 CpVersions = newMV
         if (lastVersion != ''):
-            startBLVersion = char_to_number(lastVersion[-5])
+            startBLVersion = lastVersion[-5]
             if(lastVersion[-4]!='Z'):
-                startUpdateCount = ord(lastVersion[-4])
+                startUpdateCount = lastVersion[-4]
             else:
-                startUpdateCount=ord(latestVer[0][-4])
-            startYear = ord(lastVersion[-3])    #'A'表示2001年
-            startMonth = ord(lastVersion[-2])   #'A'表示1月
-        endBLVersion = char_to_number(latestVer[0][-5])+2 # 一直解密到当前bootloader版本+1
-        endUpdateCount = ord(latestVer[0][-4])+2   # 一直解密到当前大版本号+1
-        updateLst = list(range(startUpdateCount, endUpdateCount))
-        updateLst.append(90)  # 某些测试版倒数第4位以'Z'作为开头
-        if(latestVer[0][-2] == "L"):
-            endYear = ord(latestVer[0][-3])+2   #如果当前测试固件月份为12月，则将测试固件年份+1
-        else:    
-            endYear = ord(latestVer[0][-3])+1  # 获取当前年份，,倒数第3位
+                startUpdateCount=latestVer[0][-4]
+            startYear = lastVersion[-3]    #'A'表示2001年
+        if(latestVer!=""):
+            endBLVersion = chr(ord(latestVer[0][-5])+1) # 一直解密到当前bootloader版本+1，可能值为1
+            endUpdateCount = chr(ord(latestVer[0][-4])+1)   # 一直解密到当前大版本号+1
+        updateLst = get_letters_range(startUpdateCount,endUpdateCount)
+        updateLst+="Z" # 某些测试版倒数第4位以'Z'作为开头
+        if(latestVer!=""):
+            if(latestVer[0][-2] == "L"):
+                endYear = chr(ord(latestVer[0][-3])+1)   #如果当前测试固件月份为12月，则将测试固件年份+1
+            else:    
+                endYear = latestVer[0][-3]  # 获取当前年份，,倒数第3位
         starttime = time.perf_counter()
         for i1 in "US":
-            for j1 in range(startBLVersion, endBLVersion):  # 防止降级的版本
+            for j1 in get_letters_range(startBLVersion, endBLVersion):  # 防止降级的版本
                 for k1 in updateLst:
-                    for l1 in range(startYear, endYear):
-                        for m1 in range(65, 77):
+                    for l1 in get_letters_range(startYear, endYear):
+                        for m1 in get_letters_range("A","L"):
                             tempCP=CpVersions[-12:].copy()
-                            for i in range(1,3):
-                                initCP = ''if latestVer[2] == '' else ThirdCode + i1 + str(j1) + chr(k1) + chr(l1) + chr(m1) +str(i) #手动指定当月基带版本
-                                tempCP.append(initCP)
-                            for n1 in "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                                vc = str(j1) + chr(k1) + \
-                                    chr(l1) + chr(m1) + n1  # 版本号
-                                tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc # Wifi版没有基带版本号
+                            if ThirdCode!="":
+                                for i in range(1,3):
+                                    initCP = ThirdCode + i1 + j1+ k1 + l1+ m1 +str(i) #手动指定当月基带版本
+                                    tempCP.append(initCP)
+                            for n1 in ''.join(string.digits[1:] + string.ascii_uppercase):
+                                vc = j1+ k1 + \
+                                    l1+ m1+ n1  # 版本号
+                                tempCode = ''if ThirdCode== '' else ThirdCode + i1 + vc # Wifi版没有基带版本号
                                 version1 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCode
                                 if model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys() and version1 in oldJson[model][cc]['版本号'].values():
                                     continue
@@ -240,7 +299,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                             version1.split('/')[2])
                                         tempCP.append(version1.split('/')[2])
                                 # 固件更新，而基带未更新时
-                                if (latestVer[2] != '' and len(CpVersions) > 0):
+                                if (latestVer!="" and latestVer[2] != '' and len(CpVersions) > 0):
                                     for tempCpVersion in tempCP:
                                         version2 = FirstCode + i1 + vc + "/" + SecondCode + vc + "/"+tempCpVersion
                                         if version1 == version2:
@@ -259,9 +318,9 @@ def DecryptionFirmware(model, md5Dic, cc):
                                                     version2.split('/')[2])
                                                 tempCP.append(version2.split('/')[2])
                                 # 测试版以'Z'作为倒数第4位
-                                vc2 = str(j1) + 'Z' + \
-                                    chr(l1) + chr(m1) + n1  # 版本号
-                                tempCode = ''if latestVer[2] == '' else ThirdCode + i1 + vc
+                                vc2 = j1 + 'Z' + \
+                                    l1 + m1+ n1  # 版本号
+                                tempCode = ''if ThirdCode== ''  else ThirdCode + i1 + vc
                                 version3 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCode
                                 if (model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys()) and version3 in oldJson[model][cc]['版本号'].values():
                                     continue
@@ -273,7 +332,7 @@ def DecryptionFirmware(model, md5Dic, cc):
                                         CpVersions.append(
                                             version3.split('/')[2])
                                         tempCP.append(version3.split('/')[2])
-                                if (latestVer[2] != '' and len(CpVersions) > 0):
+                                if (latestVer!="" and  latestVer[2] != '' and len(CpVersions) > 0):
                                     for tempCpVersion in tempCP:
                                         version4 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCpVersion
                                         if version1 == version4:
@@ -319,11 +378,11 @@ def DecryptionFirmware(model, md5Dic, cc):
     except Exception as e:
         print(f'发生错误:{e}')
 
-# 使用TG机器人推送
-
 
 def telegram_bot(title: str, content: str) -> None:
-
+    '''
+    使用TG机器人推送消息
+    '''
     if not push_config.get("TG_BOT_TOKEN") or not push_config.get("TG_USER_ID"):
         print("tg 服务的 bot_token 或者 user_id 未设置!!\n取消推送")
         return
@@ -336,9 +395,10 @@ def telegram_bot(title: str, content: str) -> None:
         print('TG消息发送成功!')
 
 
-# 使用FCM推送
 def fcm(title: str, content='', link='') -> None:
-
+    '''
+    使用FCM推送消息
+    '''
     if link == '':
         data2 = {"title": title, "message": content}
         data1 = {"text": data2}
@@ -467,8 +527,10 @@ def getNewVersions(decDicts, oldJson, model):
     hasNewVersion = False
     for cc in md5Dic.keys():
         if model in oldJson.keys() and cc in oldJson[model].keys():
+            # 拷贝已有设备固件版本内容
             newMDic[model][cc] = deepcopy(oldJson[model][cc])
         else:
+            # 新增设备初始化内容
             newMDic[model][cc] = {}
             newMDic[model][cc]['版本号'] = {}
             newMDic[model][cc]['最新测试版'] = ''
@@ -478,6 +540,7 @@ def getNewVersions(decDicts, oldJson, model):
         decDicts.update(newMDic)  # 先保存已有的数据
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
+            # 正式版更新时发送通知
             telegram_bot(f"#{model} - {newMDic[model][cc]['机型']} {getCountryName(cc)}版推送更新",
                          f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
             fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
@@ -519,9 +582,9 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        isDebug=False
+        isDebug=True
         if isDebug:
-            modelDic={"SM-G9910":{'CC': ['CHC'], 'name': 'S21'}}    #测试时使用
+            modelDic={"SM-N9860":{'CC': ['CHC'], 'name': 'Note20 Ultra'}}    #测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

@@ -195,7 +195,7 @@ def LoadOldMD5Firmware()->dict:
     with open(MD5VerFilePath, 'r', encoding='utf-8') as f:
             # 导入旧数据，获取最后指定数量的基带版本号
             jsonStr = f.read()
-            oldJson = {}
+            oldFirmwareJson = {}
             if (jsonStr != ''):
                 oldFirmwareJson = json.loads(jsonStr)
             return oldFirmwareJson

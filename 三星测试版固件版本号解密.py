@@ -130,13 +130,7 @@ def readXML(model):
     md5Dic = {}
     for cc in modelDic[model]['CC']:
         md5list = []
-        url = (
-            "https://fota-cloud-dn.ospserver.net/firmware/"
-            + cc
-            + "/"
-            + model
-            + "/version.test.xml"
-        )
+        url=f"https://fota-cloud-dn.ospserver.net/firmware/{cc}/{model}/version.test.xml"
         content = requestXML(url)
         if content != None:
             xml = etree.fromstring(content)
@@ -172,7 +166,88 @@ def get_letters_range(start:str, end:str)->str:
         raise Exception("字符串开始和结束错误，请检查")
     else:
         return letters[start_index:end_index].upper()
+def getFirmwareAddAndRemoveInfo(oldJson:list,newJson:list)->dict:
+    '''
+    获取固件版本号增删信息
+    Args:
+        oldJson(dict):保存旧版本号Md5的字典
+        newJson(dict):保存新版本号Md5的字典
+    Returns:
+        dict:通过key:"added"获取新增固件版本;key:"removed"获取移除固件版本
+    '''
+    oldSet=set(oldJson)
+    newSet=set(newJson)
+    info={}
+    info["added"]=newSet-oldSet
+    info["removed"]=oldSet-newSet
+    return info
 
+def LoadOldMD5Firmware()->dict:
+    '''
+    获取上次保存的固件版本号MD5信息
+    Returns:
+        历史MD5编码固件信息
+    '''
+    MD5VerFilePath="MD5编码后的固件版本号.json"
+    if not os.path.exists(MD5VerFilePath):
+        with open(MD5VerFilePath, 'w') as file:
+            file.write('{}') 
+    with open(MD5VerFilePath, 'r', encoding='utf-8') as f:
+            # 导入旧数据，获取最后指定数量的基带版本号
+            jsonStr = f.read()
+            oldJson = {}
+            if (jsonStr != ''):
+                oldFirmwareJson = json.loads(jsonStr)
+            return oldFirmwareJson
+
+
+def UpdateOldFirmware(newDict:dict):
+    '''
+    更新历史固件版本号MD5信息
+    Args:
+        newDict(dict):新的MD5编码固件版本号
+    '''
+    oldFirmwareDict=LoadOldMD5Firmware()
+    MD5VerFilePath="MD5编码后的固件版本号.json"
+    with open(MD5VerFilePath, 'w', encoding='utf-8') as f:
+        oldFirmwareDict.update(newDict)
+        f.write(json.dumps(oldFirmwareDict, indent=4, ensure_ascii=False))
+
+def WriteInfo(model:str,cc:str,AddAndRemoveInfo:dict):
+    '''
+    记录服务器固件变动信息
+    Args:
+        model(str):设备型号信息
+        cc(str):设备地区代码
+        AddAndRemoveInfo(str):包含增删固件版本信息
+    '''
+    global modelDic
+    MD5InfoFilePath="测试版固件变动信息.txt"
+    if not os.path.exists(MD5InfoFilePath):
+        with open(MD5InfoFilePath, 'w') as file:
+            file.write('') 
+    with open(MD5InfoFilePath, 'a+', encoding='utf-8') as f:
+        isFirst=True
+        if isFirst and len(AddAndRemoveInfo["added"])!=0 or len(AddAndRemoveInfo["removed"])!=0:
+            f.write(f"*****记录时间:{getNowTime()}*****\n")
+            isFirst = False
+        for addVer in AddAndRemoveInfo["added"]:
+            f.write(f"{modelDic[model]['name']}-{getCountryName(cc)}版服务器新增固件,对应版本号MD5编码为:<{addVer}>\n")
+        for removeVer in AddAndRemoveInfo["removed"]:
+            f.write(f"{modelDic[model]['name']}-{getCountryName(cc)}版服务器移除固件,对应版本号MD5编码为:<{removeVer}>\n")
+
+def getNowTime()->str:
+    SHA_TZ = timezone(
+        timedelta(hours=8),
+        name='Asia/Shanghai',
+    )
+    now = (
+        datetime.utcnow()
+        .replace(tzinfo=timezone.utc)
+        .astimezone(SHA_TZ)
+        .strftime('%Y-%m-%d %H:%M')
+    )
+    return now
 
 def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
     '''通过穷举解码固件号
@@ -185,13 +260,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
     '''
     print(f'开始解密<{model} {getCountryName(cc)}版>测试固件')
     md5list = md5Dic[cc]
-    url = (
-        "https://fota-cloud-dn.ospserver.net/firmware/"
-        + cc
-        + "/"
-        + model
-        + "/version.xml"
-    )
+    url=f"https://fota-cloud-dn.ospserver.net/firmware/{cc}/{model}/version.xml"
     content = requestXML(url)
     if content == None:
         return None
@@ -229,7 +298,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         Dicts[model][cc] = {}
         Dicts[model][cc]['版本号'] = {}
         Dicts[model][cc]['最新版本'] = ''
-        DecDicts = {}
+        DecDicts = {} #保存解码后的固件版本号
         CpVersions = [] #以往的基带版本号
         VerFilePath = 'firmware.json'
         lastVersion = ''
@@ -439,20 +508,13 @@ def run():
             push_config[k] = v
     global modelDic
     jsonStr = ""
-    SHA_TZ = timezone(
-        timedelta(hours=8),
-        name='Asia/Shanghai',
-    )
-    now = (
-        datetime.utcnow()
-        .replace(tzinfo=timezone.utc)
-        .astimezone(SHA_TZ)
-        .strftime('%Y-%m-%d %H:%M')
-    )
-    decDicts = {"上次更新时间": now}
+    decDicts = {"上次更新时间": getNowTime()}
     VerFilePath = 'firmware.json'
     AddTxtPath = '测试版新增日志.txt'
     startTime = time.perf_counter()
+    if not os.path.exists(VerFilePath):
+        with open(VerFilePath, 'w') as file:
+            file.write('{}') 
     with open(VerFilePath, 'r', encoding='utf-8') as f:
         jsonStr = f.read()
         oldJson = {}
@@ -485,7 +547,7 @@ def run():
                             ) - oldJson[model][cc]['版本号'].keys()  # 获取新增的版本号
                             if len(md5Keys) > 0:
                                 if isFirst:
-                                    file.write("*****记录时间:" + now + "*****\n")
+                                    file.write(f"*****记录时间:{getNowTime()}*****\n")
                                     isFirst = False
                                 Str = ''
                                 newVersions = {}
@@ -522,8 +584,12 @@ def getNewVersions(decDicts, oldJson, model):
     md5Dic = readXML(model)  # 返回包含多个地区版本的md5字典
     if len(md5Dic) == 0:
         return
-    newMDic = {}
+    newMDic = {}    #保存解密后的固件版本号信息
+    oldMD5Dict={}   #MD5编码后的历史固件版本号信息
     newMDic[model] = {}
+    newMD5Dict={"上次更新时间": getNowTime()}   #最新的MD5编码固件版本号信息
+    newMD5Dict[model]={}
+    oldMD5Dict=LoadOldMD5Firmware()
     hasNewVersion = False
     for cc in md5Dic.keys():
         if model in oldJson.keys() and cc in oldJson[model].keys():
@@ -538,6 +604,22 @@ def getNewVersions(decDicts, oldJson, model):
             newMDic[model][cc]['最新版本号说明'] = ''
             newMDic[model][cc]['解密百分比'] = ''
         decDicts.update(newMDic)  # 先保存已有的数据
+        if model in oldMD5Dict.keys() and cc in oldMD5Dict[model].keys():
+            # 获取MD5编码的固件版本号增减信息
+            newMD5Dict[model][cc]=deepcopy(oldMD5Dict[model][cc])
+            oldMD5Vers=oldMD5Dict[model][cc]["版本号"]
+            newMD5Vers=md5Dic[cc]
+            addAndRemoveInfo=getFirmwareAddAndRemoveInfo(oldJson=oldMD5Vers,newJson=newMD5Vers)
+            WriteInfo(model=model,cc=cc,AddAndRemoveInfo=addAndRemoveInfo)
+        else:
+            # 新增设备初始化内容
+            newMD5Dict[model]={}
+            newMD5Dict[model][cc]={}
+            newMD5Dict[model][cc]['版本号']={}
+            newMD5Dict[model][cc]["固件数量"]=0
+        newMD5Dict[model][cc]["版本号"]=md5Dic[cc]
+        newMD5Dict[model][cc]["固件数量"]=len(md5Dic[cc])
+        UpdateOldFirmware(newMD5Dict)   #更新历史固件Json信息
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
             # 正式版更新时发送通知

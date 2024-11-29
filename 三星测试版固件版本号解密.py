@@ -182,23 +182,31 @@ def getFirmwareAddAndRemoveInfo(oldJson:list,newJson:list)->dict:
     info["removed"]=oldSet-newSet
     return info
 
-def LoadOldMD5Firmware()->dict:
+
+
+def LoadOldMD5Firmware() -> dict:
     '''
     获取上次保存的固件版本号MD5信息
     Returns:
         历史MD5编码固件信息
     '''
-    MD5VerFilePath="MD5编码后的固件版本号.json"
-    if not os.path.exists(MD5VerFilePath):
-        with open(MD5VerFilePath, 'w') as file:
-            file.write('{}') 
-    oldFirmwareJson = {}
-    with open(MD5VerFilePath, 'r', encoding='utf-8') as f:
-            # 导入旧数据，获取最后指定数量的基带版本号
-            jsonStr = f.read()
-            if (jsonStr != ''):
-                oldFirmwareJson = json.loads(jsonStr)
+    MD5VerFilePath = "MD5编码后的固件版本号.json"
+    
+    # 确保文件存在，如果不存在则创建并写入空字典
+    if not os.path.isfile(MD5VerFilePath):
+        with open(MD5VerFilePath, 'w', encoding='utf-8') as file:
+            json.dump({}, file)
+    
+    # 从文件中加载JSON数据
+    try:
+        with open(MD5VerFilePath, 'r', encoding='utf-8') as file:
+            oldFirmwareJson = json.load(file)
+    except json.JSONDecodeError:
+        # 如果文件内容不是有效的JSON，则返回空字典
+        oldFirmwareJson = {}
+    
     return oldFirmwareJson
+ 
 
 def UpdateOldFirmware(newDict:dict):
     '''

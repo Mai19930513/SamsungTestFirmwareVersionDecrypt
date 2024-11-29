@@ -206,7 +206,7 @@ def LoadOldMD5Firmware() -> dict:
         oldFirmwareJson = {}
     
     return oldFirmwareJson
- 
+    
 
 def UpdateOldFirmware(newDict:dict):
     '''

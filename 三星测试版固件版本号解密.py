@@ -201,8 +201,9 @@ def LoadOldMD5Firmware() -> dict:
     try:
         with open(MD5VerFilePath, 'r', encoding='utf-8') as file:
             oldFirmwareJson = json.load(file)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         # 如果文件内容不是有效的JSON，则返回空字典
+        print(f"JSON解析错误,错误信息:{e}")
         oldFirmwareJson = {}
     
     return oldFirmwareJson

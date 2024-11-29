@@ -191,7 +191,6 @@ def LoadOldMD5Firmware() -> dict:
         历史MD5编码固件信息
     '''
     MD5VerFilePath = "MD5编码后的固件版本号.json"
-    
     # 确保文件存在，如果不存在则创建并写入空字典
     if not os.path.isfile(MD5VerFilePath):
         with open(MD5VerFilePath, 'w', encoding='utf-8') as file:
@@ -215,11 +214,11 @@ def UpdateOldFirmware(newDict:dict):
     Args:
         newDict(dict):新的MD5编码固件版本号
     '''
-    oldFirmwareDict=LoadOldMD5Firmware()
+    global oldMD5Dict
     MD5VerFilePath="MD5编码后的固件版本号.json"
     with open(MD5VerFilePath, 'w', encoding='utf-8') as f:
-        oldFirmwareDict.update(newDict)
-        f.write(json.dumps(oldFirmwareDict, indent=4, ensure_ascii=False))
+        oldMD5Dict.update(newDict)
+        f.write(json.dumps(oldMD5Dict, indent=4, ensure_ascii=False))
 
 def WriteInfo(model:str,cc:str,AddAndRemoveInfo:dict):
     '''
@@ -256,6 +255,15 @@ def getNowTime()->str:
         .strftime('%Y-%m-%d %H:%M')
     )
     return now
+
+def get_next_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+    if char in alphabet:
+        index = alphabet.index(char)
+        # 如果不是最后一个字符，返回下一个字符，否则返回第一个字符
+        return alphabet[(index + 1) % len(alphabet)]
+    else:
+        raise ValueError(f"字符 '{char}' 不在给定的字符串中")
+
 
 def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
     '''通过穷举解码固件号
@@ -338,13 +346,13 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                 startUpdateCount=latestVer[0][-4]
             startYear = lastVersion[-3]    #'A'表示2001年
         if(latestVer!=""):
-            endBLVersion = chr(ord(latestVer[0][-5])+1) # 一直解密到当前bootloader版本+1，可能值为1
-            endUpdateCount = chr(ord(latestVer[0][-4])+1)   # 一直解密到当前大版本号+1
+            endBLVersion = get_next_char(latestVer[0][-5],"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ") # 一直解密到当前bootloader版本+1，可能值为1
+            endUpdateCount = get_next_char(latestVer[0][-4])   # 一直解密到当前大版本号+1
         updateLst = get_letters_range(startUpdateCount,endUpdateCount)
         updateLst+="Z" # 某些测试版倒数第4位以'Z'作为开头
         if(latestVer!=""):
             if(latestVer[0][-2] == "L"):
-                endYear = chr(ord(latestVer[0][-3])+1)   #如果当前测试固件月份为12月，则将测试固件年份+1
+                endYear = get_next_char(latestVer[0][-3],"ABCDEFGHIJKLMNOPQRSTUVWXYZ")  #如果当前测试固件月份为12月，则将测试固件年份+1
             else:    
                 endYear = latestVer[0][-3]  # 获取当前年份，,倒数第3位
         starttime = time.perf_counter()
@@ -514,7 +522,7 @@ def run():
         if os.getenv(k):
             v = os.getenv(k)
             push_config[k] = v
-    global modelDic
+    global modelDic,oldMD5Dict
     jsonStr = ""
     decDicts = {"上次更新时间": getNowTime()}
     VerFilePath = 'firmware.json'
@@ -589,15 +597,14 @@ def run():
 
 
 def getNewVersions(decDicts, oldJson, model):
+    global oldMD5Dict
     md5Dic = readXML(model)  # 返回包含多个地区版本的md5字典
     if len(md5Dic) == 0:
         return
     newMDic = {}    #保存解密后的固件版本号信息
-    oldMD5Dict={}   #MD5编码后的历史固件版本号信息
     newMDic[model] = {}
     newMD5Dict={"上次更新时间": getNowTime()}   #最新的MD5编码固件版本号信息
     newMD5Dict[model]={}
-    oldMD5Dict=LoadOldMD5Firmware()
     hasNewVersion = False
     for cc in md5Dic.keys():
         if model in oldJson.keys() and cc in oldJson[model].keys():
@@ -672,9 +679,10 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        isDebug=False
+        isDebug=True
+        oldMD5Dict=LoadOldMD5Firmware() #获取上次的MD5编码版本号数据
         if isDebug:
-            modelDic={"SM-N9860":{'CC': ['CHC'], 'name': 'Note20 Ultra'}}    #测试时使用
+            modelDic=dict(list(getModelDictsFromDB().items())[:5])  #测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

@@ -21,12 +21,6 @@ load_dotenv()
 
 
 
-# 三星固件代号解释:如"N9860ZCU3FVG3"
-# N9860:表示机型代号 ZC:大陆公开版 U3:U表示user,还有另一个S，3表示防止降级的版本
-# F:表示更新了6个版本，从A开始算
-# VG3:当前版本发布时间，V表示2022年(A表示2001),G表示7月(A表示1月),3表示第3个版本
-
-
 def getConnect():
     '''
     获取数据库连接
@@ -322,7 +316,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         startUpdateCount = "A"  # 设置版本号中更新次数为A，即第1次
         endUpdateCount="B"
         endYear=startYear 
-        startBLVersion = "0" # 设置默认BL版本号为1
+        startBLVersion = "0" # 设置默认BL版本号为0
         endBLVersion="2"
         # 初始化结束
         with open(VerFilePath, 'r', encoding='utf-8') as f:

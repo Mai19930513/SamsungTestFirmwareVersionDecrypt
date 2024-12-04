@@ -628,7 +628,6 @@ def getNewVersions(decDicts, oldJson, model):
             newMD5Dict[model][cc]["固件数量"]=0
         newMD5Dict[model][cc]["版本号"]=md5Dic[cc]
         newMD5Dict[model][cc]["固件数量"]=len(md5Dic[cc])
-        UpdateOldFirmware(newMD5Dict)   #更新历史固件Json信息
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
             # 正式版更新时发送通知
@@ -668,6 +667,7 @@ def getNewVersions(decDicts, oldJson, model):
         newMDic[model][cc]['版本号'] = dict(
             sorted(newMDic[model][cc]['版本号'].items(), key=lambda x: x[1].split('/')[0][-3:]))
         newMDic[model][cc]['解密数量'] = len(newMDic[model][cc]['版本号'])
+    UpdateOldFirmware(newMD5Dict)   #更新历史固件Json信息
     return hasNewVersion, newMDic
 
 

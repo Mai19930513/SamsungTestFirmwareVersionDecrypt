@@ -222,13 +222,12 @@ def WriteInfo(model:str,cc:str,AddAndRemoveInfo:dict):
         cc(str):设备地区代码
         AddAndRemoveInfo(str):包含增删固件版本信息
     '''
-    global modelDic
+    global modelDic,isFirst
     MD5InfoFilePath="测试版固件变动信息.txt"
     if not os.path.exists(MD5InfoFilePath):
         with open(MD5InfoFilePath, 'w') as file:
             file.write('') 
     with open(MD5InfoFilePath, 'a+', encoding='utf-8') as f:
-        isFirst=True
         if isFirst and len(AddAndRemoveInfo["added"])!=0 or len(AddAndRemoveInfo["removed"])!=0:
             f.write(f"*****记录时间:{getNowTime()}*****\n")
             isFirst = False
@@ -674,6 +673,7 @@ def getNewVersions(decDicts, oldJson, model):
 if __name__ == '__main__':
     try:
         isDebug=False
+        isFirst=True
         oldMD5Dict=LoadOldMD5Firmware() #获取上次的MD5编码版本号数据
         if isDebug:
             modelDic=dict(list(getModelDictsFromDB().items())[:5])  #测试时使用

@@ -250,6 +250,9 @@ def getNowTime()->str:
     return now
 
 def get_next_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+    '''
+    返回下一个字符
+    '''
     if char in alphabet:
         index = alphabet.index(char)
         # 如果不是最后一个字符，返回下一个字符，否则返回第一个字符
@@ -257,6 +260,16 @@ def get_next_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
     else:
         raise ValueError(f"字符 '{char}' 不在给定的字符串中")
 
+def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+'''
+返回上一个字符
+'''
+    if char in alphabet:
+        index = alphabet.index(char)
+        # 如果不是第一个字符，返回上一个字符，否则返回最后字符
+        return alphabet[(index -1) % len(alphabet)]
+    else:
+        raise ValueError(f"字符 '{char}' 不在给定的字符串中")
 
 def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
     '''通过穷举解码固件号
@@ -360,6 +373,8 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                                     initCP = ThirdCode + i1 + j1+ k1 + l1+ m1 +str(i) #手动指定当月基带版本
                                     tempCP.append(initCP)
                             for n1 in ''.join(string.digits[1:] + string.ascii_uppercase):
+                                initCP = ThirdCode + i1 + j1+ k1 + l1+ m1 +get_pre_char(n1)
+                                tempCP.append(initCP)
                                 vc = j1+ k1 + \
                                     l1+ m1+ n1  # 版本号
                                 tempCode = ''if ThirdCode== '' else ThirdCode + i1 + vc # Wifi版没有基带版本号

@@ -261,9 +261,9 @@ def get_next_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
         raise ValueError(f"字符 '{char}' 不在给定的字符串中")
 
 def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
-'''
-返回上一个字符
-'''
+    '''
+    返回上一个字符
+    '''
     if char in alphabet:
         index = alphabet.index(char)
         # 如果不是第一个字符，返回上一个字符，否则返回最后字符

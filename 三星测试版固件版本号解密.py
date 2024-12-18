@@ -339,6 +339,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                 oldJson = json.loads(jsonStr)
             if model in oldJson.keys() and cc in oldJson[model].keys() and '最新测试版' in oldJson[model][cc].keys() and oldJson[model][cc]['最新测试版'] != '':
                 lastVersion = oldJson[model][cc]['最新测试版'].split('/')[0]
+                DecDicts=deepcopy(oldJson[model][cc]['版本号'])
                 # CpVersions保存最近的3个基带版本
                 seen = set()
                 modelVersion=[x.split('/')[-1] for x in list(oldJson[model][cc]['版本号'].values())]

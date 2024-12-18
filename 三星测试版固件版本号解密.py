@@ -369,17 +369,17 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                 for update_version in updateLst:
                     for yearStr in get_letters_range(startYear, endYear):
                         for monthStr in get_letters_range("A","L"):
-                            tempCP=set(CpVersions[-12:].copy())
+                            tempCP=CpVersions[-12:].copy()
                             if ThirdCode!="":
                                 for i in range(1,3):
                                     initCP = ThirdCode + i1 + bl_version+ update_version + yearStr+ monthStr +str(i) #手动指定当月基带版本
-                                    tempCP.add(initCP)
+                                    tempCP.append(initCP)
                             for serialStr in ''.join(string.digits[1:] + string.ascii_uppercase):
                                 # 添加基带使用未使用的AP版本号
                                 initCP1 = ThirdCode + i1 + bl_version+ update_version + yearStr+ monthStr +get_pre_char(serialStr) 
                                 initCP2 = ThirdCode + i1 + bl_version+ update_version + yearStr+ monthStr +get_pre_char(get_pre_char(serialStr))
-                                tempCP.add(initCP1)
-                                tempCP.add(initCP2)
+                                tempCP.append(initCP1)
+                                tempCP.append(initCP2)
                                 randomVersion = bl_version+ update_version + yearStr+ monthStr+ serialStr  # 组合版本号
                                 tempCode = ''if ThirdCode== '' else ThirdCode + i1 + randomVersion # Wifi版没有基带版本号
                                 version1 = FirstCode + i1 + randomVersion + "/" + SecondCode + randomVersion + "/"+tempCode
@@ -394,7 +394,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                                     if (version1.split('/')[2] != '') and  (version1.split('/')[2] not in CpVersions):
                                         CpVersions.append(
                                             version1.split('/')[2])
-                                        tempCP.add(version1.split('/')[2])
+                                        tempCP.append(version1.split('/')[2])
                                 # 固件更新，而基带未更新时
                                 if (len(CpVersions) > 0):
                                     for tempCpVersion in tempCP:
@@ -413,7 +413,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                                             if (version2.split('/')[2] != '') and  (version2.split('/')[2] not in CpVersions):
                                                 CpVersions.append(
                                                     version2.split('/')[2])
-                                                tempCP.add(version2.split('/')[2])
+                                                tempCP.append(version2.split('/')[2])
                                 # beta版以'Z'作为倒数第4位
                                 vc2 = bl_version + 'Z' + \
                                     yearStr + monthStr+ serialStr  # 版本号
@@ -428,7 +428,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                                     if (version3.split('/')[2] != '') and  (version3.split('/')[2] not in CpVersions):
                                         CpVersions.append(
                                             version3.split('/')[2])
-                                        tempCP.add(version3.split('/')[2])
+                                        tempCP.append(version3.split('/')[2])
                                 if (len(CpVersions) > 0):
                                     for tempCpVersion in tempCP:
                                         version4 = FirstCode + i1 + vc2 + "/" + SecondCode + vc2 + "/"+tempCpVersion
@@ -446,7 +446,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                                             if (version4.split('/')[2] != '') and  (version4.split('/')[2]  not in CpVersions):
                                                 CpVersions.append(
                                                     version4.split('/')[2])
-                                                tempCP.add(version4.split('/')[2])
+                                                tempCP.append(version4.split('/')[2])
 
         # 新增解密数据
         if len(DecDicts.values()) > 0:

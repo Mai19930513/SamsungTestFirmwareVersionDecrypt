@@ -271,7 +271,7 @@ def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
     else:
         raise ValueError(f"字符 '{char}' 不在给定的字符串中")
 
-@func_set_timeout(2000)
+#@func_set_timeout(2000)
 def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
     '''通过穷举解码固件号
     Args:

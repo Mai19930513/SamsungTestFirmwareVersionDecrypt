@@ -693,7 +693,7 @@ def getNewVersions(decDicts, oldJson, model):
 
 if __name__ == '__main__':
     try:
-        isDebug=False
+        isDebug=True
         isFirst=True
         oldMD5Dict=LoadOldMD5Firmware() #获取上次的MD5编码版本号数据
         if isDebug:

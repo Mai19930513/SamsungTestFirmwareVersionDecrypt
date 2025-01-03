@@ -291,20 +291,15 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         xml = etree.fromstring(content)
         if(len(xml.xpath("//latest//text()"))==0):
             # 新设备初始化一个版本号
-            ccList={"CHC":["ZC","CHC",3],"CHN":["ZC","CHC",2],"TGY":["ZH","OZ",3]} # CHC对应国行，后面的字典分别表示固件AP版本号、运营商CSC版本号前缀及是否带基带版本号，CHN为不带版本号
+            ccList={"CHC":["ZC","CHC","ZC"],"CHN":["ZC","CHC",""],"TGY":["ZH","OZS","ZC"]} # CHC对应国行，后面的字典分别表示固件AP版本号、运营商CSC版本号前缀及是否带基带版本号，CHN为不带版本号
             if(cc in ccList.keys()):
                 latestVer=""
                 latestVerStr="暂无正式版"
                 FirstCode=model.replace("SM-","")+ccList[cc][0]
                 SecondCode=model.replace("SM-","")+ccList[cc][1]
+                ThirdCode=model.replace("SM-","")+ccList[cc][2]
                 latestVer=""
                 startYear =chr(datetime.now().year-2001+ord("A")) # 设置版本号默认开始年份，A代表2001年，设置从当前年份开始解密
-                if(ccList[cc][2]>2):
-                    # 初始化带基带固件版本号
-                    ThirdCode=FirstCode
-                else:
-                    # 初始化不带基带固件版本号
-                    ThirdCode=""
             else:
                 print(f'设备<{model}>无<{cc}>初始化版本号信息，请手动添加后再试!')
                 return

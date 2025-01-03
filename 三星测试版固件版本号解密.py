@@ -299,7 +299,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                 SecondCode=model.replace("SM-","")+ccList[cc][1]
                 ThirdCode=model.replace("SM-","")+ccList[cc][2]
                 latestVer=""
-                startYear =chr(datetime.now().year-2001+ord("A")) # 设置版本号默认开始年份，A代表2001年，设置从当前年份开始解密
+                startYear =chr(datetime.now().year-2001-1+ord("A")) # 设置版本号默认开始年份，A代表2001年，设置从当前年份前一年开始解密
             else:
                 print(f'设备<{model}>无<{cc}>初始化版本号信息，请手动添加后再试!')
                 return

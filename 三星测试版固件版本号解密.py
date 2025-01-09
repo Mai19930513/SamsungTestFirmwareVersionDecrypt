@@ -324,7 +324,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         # 初始化开始
         startUpdateCount = "A"  # 设置版本号中更新次数为A，即第1次
         endUpdateCount="B"
-        endYear=startYear 
+        endYear=get_next_char(startYear)
         startBLVersion = "0" # 设置默认BL版本号为0
         endBLVersion="2"
         # 初始化结束

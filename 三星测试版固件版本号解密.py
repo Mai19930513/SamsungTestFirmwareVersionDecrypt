@@ -355,7 +355,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         updateLst = get_letters_range(startUpdateCount,endUpdateCount)
         updateLst+="Z" # 某些测试版倒数第4位以'Z'作为开头
         if(latestVer!=""):
-            if(latestVer[0][-2] == "L"):
+            if(latestVer[0][-2] in  "KL"):
                 endYear = get_next_char(latestVer[0][-3],"ABCDEFGHIJKLMNOPQRSTUVWXYZ")  #如果当前测试固件月份为12月，则将测试固件年份+1
             else:    
                 endYear = latestVer[0][-3]  # 获取当前年份，,倒数第3位

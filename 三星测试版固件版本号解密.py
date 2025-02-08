@@ -591,7 +591,7 @@ def run():
             # 更新全机型最新版
             with open('各机型最新版本.md', 'w', encoding='utf-8') as f:
                 textStr = ''
-                for model in modelDic.keys().sorted():
+                for model in modelDic.keys():
                     for cc in modelDic[model]['CC']:
                         if not cc in decDicts[model].keys():
                             continue

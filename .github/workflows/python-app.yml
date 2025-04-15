@@ -33,6 +33,7 @@ jobs:
         FCM_KEY: ${{ secrets.FCM_KEY }}
         TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
         TG_USER_ID: ${{ secrets.TG_USER_ID }}
+        TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
       run: |
         python 三星测试版固件版本号解密.py
     - name: 暂存提交

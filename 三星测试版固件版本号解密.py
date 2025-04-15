@@ -85,7 +85,7 @@ def getCountryName(cc):
     '''
     通过设备代号获取地区名称
     '''
-    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲'}
+    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲','INS':'印度'}
     if cc in cc2Country.keys():
         return cc2Country[cc]
     else:
@@ -473,7 +473,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         print(f'发生错误:{e}')
 
 
-def telegram_bot(title: str, content: str) -> None:
+def sendMessageByTG_Bot(title: str, content: str) -> None:
     '''
     使用TG机器人推送消息
     '''
@@ -481,12 +481,21 @@ def telegram_bot(title: str, content: str) -> None:
         print("tg 服务的 bot_token 或者 user_id 未设置!!\n取消推送")
         return
     bot = telegram.Bot(token=push_config.get("TG_BOT_TOKEN"))
-    message = bot.send_message(chat_id=push_config.get("TG_USER_ID"),
-                               text=f"{title}\n\n{content}",
+    # 发送到个人用户
+    message1 = bot.send_message(chat_id=push_config.get("TG_USER_ID"),
+                               text=f"{title}\n{content}",
                                parse_mode=telegram.ParseMode.MARKDOWN,
                                disable_web_page_preview='true')
-    if message.message_id > 0:
-        print('TG消息发送成功!')
+    if message1.message_id > 0:
+        print('TG个人消息发送成功!')
+    #发送到频道
+    if push_config.get("TG_CHAT_ID"):
+        message2 = bot.send_message(chat_id=push_config.get("TG_CHAT_ID"),
+                                text=f"{title}\n{content}",
+                                parse_mode=telegram.ParseMode.MARKDOWN,
+                                disable_web_page_preview='true')
+        if message2.message_id > 0:
+            print('TG频道消息发送成功!')
 
 
 def fcm(title: str, content='', link='') -> None:
@@ -514,15 +523,14 @@ push_config = {
     'FCM_API_KEY': '',
     'FCM_KEY': '',
     'PUSH_KEY': '',                     # server 酱的 PUSH_KEY，兼容旧版与 Turbo 版
-    # 必填 tg 机器人的 TG_BOT_TOKEN，例：1407203283:AAG9rt-6RDaaX0HBLZQq0laNOh898iFYaRQ
-    'TG_BOT_TOKEN': '',
-    'TG_USER_ID': '',                   # 必填 tg 机器人的 TG_USER_ID，例：1434078534
-    'TG_API_HOST': '',                  # tg 代理 api
-    'TG_PROXY_AUTH': '',                # tg 代理认证参数
-    'TG_PROXY_HOST': '',                # tg 机器人的 TG_PROXY_HOST
-    'TG_PROXY_PORT': '',                # tg 机器人的 TG_PROXY_PORT
+    'TG_BOT_TOKEN': '',                 # 机器人的令牌，例：1407203283:AAG9rt-6RDaaX0HBLZQq0laNOh898iFYaRQ
+    'TG_USER_ID': '',                   # 机器人的 TG_USER_ID，例：-1001234567890
+    'TG_API_HOST': '',                  # 代理 api
+    'TG_PROXY_AUTH': '',                # 代理认证参数
+    'TG_PROXY_HOST': '',                # 机器人的的代理主机地址
+    'TG_PROXY_PORT': '',                # 机器人的代理端口
+    'TG_CHAT_ID': '',                   # 频道ID 
 }
-
 
 
 def run():
@@ -586,7 +594,7 @@ def run():
                                 file.write(Str)
                                 fcm(f"{modelDic[model]['name']}——{getCountryName(cc)}新增内测固件",
                                     content=textStr.replace('*', ''))
-                                telegram_bot(
+                                sendMessageByTG_Bot(
                                     f"#{modelDic[model]['name']}——{getCountryName(cc)}新增内测固件", textStr)
             # 更新全机型最新版
             with open('各机型最新版本.md', 'w', encoding='utf-8') as f:
@@ -646,7 +654,7 @@ def getNewVersions(decDicts, oldJson, model):
         verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
         if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
             # 正式版更新时发送通知
-            telegram_bot(f"#{model} - {newMDic[model][cc]['机型']} {getCountryName(cc)}版推送更新",
+            sendMessageByTG_Bot(f"#{model} - {newMDic[model][cc]['机型']} {getCountryName(cc)}版推送更新",
                          f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
             fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
                 link=f"https://doc.samsungmobile.com/{model}/{cc}/doc.html")

@@ -604,7 +604,7 @@ def run():
                     for cc in modelDic[model]['CC']:
                         if not cc in decDicts[model].keys():
                             continue
-                        textStr += f"*{modelDic[model]['name']} {getCountryName(cc)}版：*\n正式版:{decDicts[model][cc]['最新正式版']}\n测试版:{decDicts[model][cc]['最新测试版']}\n\n"
+                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版:  \n正式版:{decDicts[model][cc]['最新正式版']}  \n测试版:{decDicts[model][cc]['最新测试版']}  \n"
                 f.write(textStr)
                 # fcm("各机型最新测试版", content=textStr.replace('*', ''))
                 # telegram_bot("#各机型最新测试版", textStr)

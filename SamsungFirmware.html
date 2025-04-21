@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三星固件版本查询系统</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6c5ce7;
+            --bg-gradient: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            isolation: isolate;
+            /* 隔离层叠上下文 */
+        }
+
+        th,
+        td {
+            padding: 1.1rem;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: var(--primary-color) !important;
+            /* 强制背景色 */
+            color: white !important;
+            position: sticky;
+            min-width: 100px;
+            /* 设置最小宽度 */
+            white-space: nowrap;
+            /* 禁止文字换行 */
+            top: 0 !important;
+            overflow: visible;
+            /* 确保内容不被隐藏 */
+            text-overflow: clip;
+            /* 禁止省略号显示 */
+            z-index: 1001 !important;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .version-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+
+        .official-badge {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .beta-badge {
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--secondary-color);
+            border: 1px solid rgba(108, 92, 231, 0.2);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            display: none;
+        }
+
+        .table-container {
+            top: 0;
+            /* 固定在页面顶部 */
+            background-color: white;
+            /* 设置背景颜色，避免透明 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* 添加阴影效果 */
+            position: relative;
+            z-index: 0;
+        }
+
+        .last-update {
+            text-align: right;
+            /* 文字右对齐 */
+            position: absolute;
+            /* 使用绝对定位 */
+            top: 10px;
+            /* 距离顶部 20px */
+            right: 25px;
+            /* 距离右侧 20px */
+            font-size: 0.9rem;
+            /* 字体稍小 */
+            color: #4a90e2;
+            /* 使用主色调 */
+            font-weight: bold;
+            /* 加粗字体 */
+            background-color: #f0f8ff;
+            /* 添加浅蓝色背景 */
+            padding: 0.6rem 1rem;
+            /* 内边距 */
+            border-radius: 8px;
+            /* 圆角边框 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* 添加阴影效果 */
+            z-index: 1000;
+            /* 确保在其他内容之上 */
+
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            th,
+            td {
+                padding: 1rem;
+            }
+        }
+
+        /* 清空按钮 */
+        .clear-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .clear-btn i {
+            margin-right: 0.5rem;
+            color: #6c757d;
+        }
+
+        .clear-btn:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        /* 自定义弹窗样式 */
+        .custom-popup {
+            position: fixed;
+            top: 95%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .custom-popup.fade-out {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+        }
+
+        .sortable {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .sortable::after {
+            content: '▲';
+            /* 默认显示升序箭头 */
+            font-size: 0.8rem;
+            margin-left: 5px;
+            /* transition: transform 0.3s ease; */
+        }
+
+        .sortable.desc::after {
+            content: '▼';
+            /* 显示降序箭头 */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-mobile-alt"></i>三星测试固件版本查询</h1>
+        <div id="lastUpdate" class="last-update"></div>
+        <div class="filters">
+            <div class="filter-group">
+                <i class="fas fa-search"></i>
+                <input type="text" id="modelFilter" placeholder="输入设备型号(如:SM-S9280)">
+            </div>
+            <div class="filter-group">
+                <i class="fas fa-globe-asia"></i>
+                <input type="text" id="regionFilter" placeholder="输入地区代码(如:CHC)">
+            </div>
+            <!-- 新增：清空按钮 -->
+            <div class="filter-group">
+                <button id="clearFilters" class="clear-btn" title="清空筛选">
+                    <i class="fas fa-times"></i> 清空
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="firmwareTable">
+                <thead>
+                    <tr>
+                        <th>设备名称</th>
+                        <th id="sortModel" class="sortable">设备型号</th>
+                        <th>地区代码</th>
+                        <th>地区名称</th>
+                        <th>最新正式版</th>
+                        <th>最新测试版</th>
+                        <th>测试版本号说明</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="no-results" id="noResults">
+                <i class="fas fa-info-circle"></i> 没有找到匹配的结果
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const DATA_URL = 'https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware.json';
+            class FirmwareTable {
+                constructor() {
+                    this.tableBody = document.querySelector('#firmwareTable tbody');
+                    this.pageSize = 30; // 每次加载的数据量
+                    this.currentIndex = 0; // 当前加载到的数据索引
+                    this.isLoading = false; // 是否正在加载数据
+                    this.filters = { model: '', region: '' }; // 筛选条件
+                    this.sortOrder = 'asc'; // 默认排序顺序为升序
+                    this.initFilters();
+                    this.loadData();
+                    this.initScrollListener();
+                    this.initSortListeners(); // 初始化排序事件监听器
+                }
+
+                async loadData() {
+                    try {
+                        const response = await fetch(DATA_URL)
+                        const data = await response.json();
+                        this.processData(data);
+                        this.renderTable();
+                    } catch (error) {
+                        console.error('数据加载失败:', error);
+                    }
+                }
+
+                processData(rawData) {
+                    this.processedData = [];
+                    if (!rawData || typeof rawData !== 'object') {
+                        console.error('无效的数据格式:', rawData);
+                        return;
+                    }
+                    Object.entries(rawData).forEach(([model, regions]) => {
+                        // 跳过 "上次更新时间"
+                        if (model === "上次更新时间") {
+                            document.getElementById('lastUpdate').textContent = `更新时间：${regions}`;
+                            return;
+                        }
+                        Object.entries(regions).forEach(([regionCode, details]) => {
+                            if (!details || !details.最新正式版 || !details.最新测试版) {
+                                console.warn('跳过无效数据:', { model, regionCode, details });
+                                return; // 跳过无效数据
+                            }
+                            this.processedData.push({
+                                model,
+                                regionCode,
+                                regionName: details.地区,
+                                official: this.parseVersion(details.最新正式版),
+                                official_full: details.最新正式版,
+                                beta: this.parseVersion(details.最新测试版),
+                                beta_full: details.最新测试版,
+                                description: details.最新版本号说明,
+                                deviceName: details.机型
+                            });
+                        });
+                    });
+                }
+
+                parseVersion(version) {
+                    {
+                        if (!version || typeof version !== 'string') {
+                            console.warn('无效的版本号:', version);
+                            return "未知版本"; // 返回默认值
+                        }
+                        const parts = version.split('/');
+                        return parts[0]; // 返回分割后的第一个部分
+                    }
+
+                }
+
+                renderTable() {
+                    if (this.isLoading) return; // 防止重复加载
+                    this.isLoading = true;
+                    // 应用筛选条件
+                    const filteredData = this.processedData.filter(item => {
+                        const modelMatch = item.model.toLowerCase().includes(this.filters.model.toLowerCase());
+                        const regionMatch = item.regionCode.toLowerCase().includes(this.filters.region.toLowerCase());
+                        return modelMatch && regionMatch;
+                    });
+
+                    // 获取当前需要加载的数据
+                    const nextData = filteredData.slice(this.currentIndex, this.currentIndex + this.pageSize);
+                    this.currentIndex += this.pageSize;
+
+                    // 动态生成表格行
+                    const fragment = document.createDocumentFragment();
+                    nextData.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+            <td>${item.deviceName}</td>
+            <td>${item.model}</td>
+            <td>${item.regionCode}</td>
+            <td>${item.regionName}</td>
+            <td title="${item.official_full || '无版本号'}" class="copyable">
+                ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
+            </td>
+            <td title="${item.beta_full || '无版本号'}" class="copyable">
+                ${item.beta ? `<span class="version-badge beta-badge">${item.beta}</span>` : '-'}
+            </td>
+            <td>${item.description}</td>
+        `;
+                        fragment.appendChild(row);
+                    });
+
+                    this.tableBody.appendChild(fragment);
+                    this.isLoading = false;
+
+                    document.getElementById('noResults').style.display =
+                        filteredData.length ? 'none' : 'block';
+                    this.addCopyEvent();
+                }
+
+                initScrollListener() {
+                    window.addEventListener('scroll', () => {
+                        // 检查是否接近页面底部
+                        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                            this.renderTable();
+                        }
+                    });
+                }
+
+                initFilters() {
+                    this.filters = {
+                        model: '',
+                        region: '',
+                    };
+
+                    // 绑定筛选事件
+                    document.getElementById('modelFilter').addEventListener('input', debounce(e => {
+                        this.filters.model = e.target.value;
+                        this.resetTable(); // 重置表格
+                    }, 300));
+
+                    document.getElementById('regionFilter').addEventListener('input', debounce(e => {
+                        this.filters.region = e.target.value;
+                        this.resetTable(); // 重置表格
+                    }, 300));
+
+                    document.getElementById('clearFilters').addEventListener('click', debounce(e => {
+                        // 清空 state
+                        this.filters.model = '';
+                        this.filters.region = '';
+                        // 清空输入框
+                        document.getElementById('modelFilter').value = '';
+                        document.getElementById('regionFilter').value = '';
+                        // 重置并重新渲染表格
+                        this.resetTable();
+                    }, 300));
+                }
+
+                // 初始化排序事件监听器
+                initSortListeners() {
+                    const sortModelHeader = document.getElementById('sortModel');
+                    sortModelHeader.addEventListener('click', () => {
+                        // 切换排序顺序
+                        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+
+                        // 更新箭头样式
+                        if (this.sortOrder === 'asc') {
+                            sortModelHeader.classList.remove('desc');
+                        } else {
+                            sortModelHeader.classList.add('desc');
+                        }
+
+                        // 按设备型号排序
+                        this.sortData('model', this.sortOrder);
+
+                        // 重新渲染表格
+                        this.resetTable();
+                    });
+                }
+
+                // 排序数据
+                sortData(key, order) {
+                    this.processedData.sort((a, b) => {
+                        const valueA = a[key].toLowerCase();
+                        const valueB = b[key].toLowerCase();
+
+                        if (order === 'asc') {
+                            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                        } else {
+                            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                        }
+                    });
+                }
+
+                resetTable() {
+                    this.currentIndex = 0; // 重置索引
+                    this.tableBody.innerHTML = ''; // 清空表格
+                    this.renderTable(); // 重新渲染表格
+                }
+
+                renderPagination(totalItems, currentPage, pageSize) {
+                    const totalPages = Math.ceil(totalItems / pageSize);
+                    const paginationContainer = document.getElementById('pagination');
+                    if (!paginationContainer) return;
+
+                    paginationContainer.innerHTML = '';
+                    if (totalPages === 0) {
+                        paginationContainer.style.display = 'none'; // 隐藏分页容器
+                        return;
+                    }
+                    paginationContainer.style.display = 'block'; // 显示分页容器
+                    for (let i = 1; i <= totalPages; i++) {
+                        const button = document.createElement('button');
+                        button.textContent = i;
+                        button.disabled = i === currentPage;
+                        button.addEventListener('click', () => this.renderTable(i, pageSize));
+                        paginationContainer.appendChild(button);
+                    }
+                }
+
+                addCopyEvent() {
+                    const copyableCells = document.querySelectorAll('.copyable');
+                    copyableCells.forEach(cell => {
+                        // 移除之前绑定的事件监听器
+                        cell.replaceWith(cell.cloneNode(true));
+                    });
+
+                    // 重新获取更新后的 copyableCells
+                    const updatedCopyableCells = document.querySelectorAll('.copyable');
+                    updatedCopyableCells.forEach(cell => {
+                        cell.addEventListener('click', () => {
+                            const textToCopy = cell.getAttribute('title');
+                            if (textToCopy && textToCopy !== '无版本号') {
+                                navigator.clipboard.writeText(textToCopy).then(() => {
+                                    this.showCustomPopup(`已复制到剪贴板: ${textToCopy}`);
+                                }).catch(err => {
+                                    console.error('复制失败:', err);
+                                });
+                            } else {
+                                this.showCustomPopup('无可复制的版本号');
+                            }
+                        });
+                    });
+                }
+
+                // 自定义弹窗显示方法
+                showCustomPopup(message) {
+                    const popup = document.createElement('div');
+                    popup.className = 'custom-popup';
+                    popup.textContent = message;
+
+                    // 添加到页面
+                    document.body.appendChild(popup);
+
+                    // 显示弹窗并在 2 秒后自动移除
+                    setTimeout(() => {
+                        popup.classList.add('fade-out');
+                        popup.addEventListener('transitionend', () => {
+                            popup.remove();
+                        });
+                    }, 2000);
+                }
+
+            }
+            // 防抖函数
+            function debounce(func, delay) {
+                let timer;
+                return function (...args) {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+            // 初始化表格
+            new FirmwareTable();
+        });
+    </script>
+</body>
+
+</html>

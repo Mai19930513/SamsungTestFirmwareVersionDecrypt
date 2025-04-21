@@ -324,7 +324,7 @@
                     this.currentIndex = 0; // 当前加载到的数据索引
                     this.isLoading = false; // 是否正在加载数据
                     this.filters = { model: '', region: '' }; // 筛选条件
-                    this.sortOrder = 'asc'; // 默认排序顺序为升序
+                    this.sortOrder = 'desc'; // 默认排序顺序为降序
                     this.initFilters();
                     this.loadData();
                     this.initScrollListener();
@@ -336,6 +336,12 @@
                         const response = await fetch(DATA_URL)
                         const data = await response.json();
                         this.processData(data);
+                        // 默认按设备型号降序排序
+                        this.sortData('model', this.sortOrder);
+                        // 更新箭头样式
+                        const sortModelHeader = document.getElementById('sortModel');
+                        sortModelHeader.classList.add('desc');
+                        
                         this.renderTable();
                     } catch (error) {
                         console.error('数据加载失败:', error);

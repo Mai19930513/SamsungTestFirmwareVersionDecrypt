@@ -38,8 +38,8 @@
         h1 {
             color: var(--primary-color);
             text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
@@ -51,11 +51,15 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
+            flex-wrap: wrap;
+            /* 在小屏幕上换行 */
             margin-bottom: 2rem;
         }
 
         .filter-group {
             position: relative;
+            flex: 1 1 100%;
+            /* 在小屏幕上每个筛选器占满一行 */
         }
 
         .filter-group i {
@@ -87,7 +91,7 @@
             border-collapse: collapse;
             background: white;
             border-radius: 12px;
-            overflow: auto;
+            overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             isolation: isolate;
             /* 隔离层叠上下文 */
@@ -95,9 +99,11 @@
 
         th,
         td {
-            padding: 1.1rem;
+            padding: 0.8rem;
+            font-size: 0.9rem;
             text-align: center;
             border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
         }
 
         th {
@@ -158,12 +164,16 @@
             /* 添加阴影效果 */
             position: relative;
             z-index: 0;
+            overflow-x: auto;
+            /* 启用水平滚动条 */
+            max-width: 100%;
+            /* 确保表格容器不超出屏幕宽度 */
         }
 
         .last-update {
-            text-align: right;
+            text-align: center;
             /* 文字右对齐 */
-            position: absolute;
+            position: static;
             /* 使用绝对定位 */
             top: 10px;
             /* 距离顶部 20px */
@@ -185,6 +195,8 @@
             /* 添加阴影效果 */
             z-index: 1000;
             /* 确保在其他内容之上 */
+            margin-bottom: 1rem;
+            /* 增加与下方内容的间距 */
 
         }
 
@@ -199,15 +211,49 @@
 
             th,
             td {
-                padding: 1rem;
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            th:nth-child(3),
+            td:nth-child(3),
+            /* 隐藏地区代码 */
+            th:nth-child(4),
+            td:nth-child(4),
+            /* 隐藏地区名称 */
+            th:nth-child(7),
+            td:nth-child(7) {
+                /* 隐藏测试版本号说明 */
+                display: none;
+            }
+
+        }
+
+        @media (min-width: 768px) {
+            .last-update {
+                position: absolute;
+                /* 在大屏幕上恢复绝对定位 */
+                top: 10px;
+                right: 25px;
             }
         }
 
         /* 清空按钮 */
+
+        .filter-group {
+            flex: 1 1 100%;
+            /* 在小屏幕上每个筛选器占满一行 */
+        }
+
         .clear-btn {
-            display: inline-flex;
+            width: 100%;
+            /* 在小屏幕上按钮占满一行 */
+            text-align: center;
+            display: flex;
             align-items: center;
-            padding: 0.6rem 1rem;
+            padding: 0.8rem;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             background: white;
@@ -226,8 +272,24 @@
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
         }
 
+
+        @media (min-width: 768px) {
+            .clear-btn {
+                width: auto;
+                /* 在大屏幕上恢复为自动宽度 */
+            }
+
+            .filter-group {
+                flex: 1 1 auto;
+                /* 在大屏幕上恢复为水平布局 */
+            }
+
+        }
+
         /* 自定义弹窗样式 */
         .custom-popup {
+            width: 90%; /* 在小屏幕上限制弹窗宽度 */
+            max-width: 300px; /* 设置最大宽度 */
             position: fixed;
             top: 95%;
             left: 50%;
@@ -272,7 +334,7 @@
 
 <body>
     <div class="container">
-        <h1><i class="fas fa-mobile-alt"></i>三星测试固件版本查询</h1>
+        <h1><i class="fas fa-mobile-alt"></i>三星测试版固件版本查询</h1>
         <div id="lastUpdate" class="last-update"></div>
         <div class="filters">
             <div class="filter-group">
@@ -341,7 +403,7 @@
                         // 更新箭头样式
                         const sortModelHeader = document.getElementById('sortModel');
                         sortModelHeader.classList.add('desc');
-                        
+
                         this.renderTable();
                     } catch (error) {
                         console.error('数据加载失败:', error);
@@ -415,7 +477,7 @@
             <td>${item.model}</td>
             <td>${item.regionCode}</td>
             <td>${item.regionName}</td>
-            <td title="${item.official_full || '无版本号'}" class="copyable">
+            <td title="${item.official_full || '无版本号'}">
                 ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
             </td>
             <td title="${item.beta_full || '无版本号'}" class="copyable">

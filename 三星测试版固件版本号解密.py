@@ -348,7 +348,8 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
                 CpVersions = newMV
         if (lastVersion != ''):
             startBLVersion = lastVersion[-5]
-            startUpdateCount=latestVer[0][-4]
+            if latestVer!='':
+                startUpdateCount=latestVer[0][-4]
             startYear = lastVersion[-3]    #'A'表示2001年
         if(latestVer!=""):
             endBLVersion = get_next_char(latestVer[0][-5],"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ") # 一直解密到当前bootloader版本+1，可能值为1
@@ -457,7 +458,10 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
             Dicts[model][cc]['最新测试版上传时间']=getNowTime()
         Dicts[model][cc]['最新正式版'] = latestVerStr
         Dicts[model][cc]['正式版安卓版本']=currentOS
-        Dicts[model][cc]['测试版安卓版本']=str(int(currentOS)+ord(Dicts[model][cc]['最新测试版'].split('/')[0][-4])-ord(Dicts[model][cc]['最新正式版'].split('/')[0][-4]))
+        if currentOS!='未知':
+            Dicts[model][cc]['测试版安卓版本']=str(int(currentOS)+ord(Dicts[model][cc]['最新测试版'].split('/')[0][-4])-ord(Dicts[model][cc]['最新正式版'].split('/')[0][-4]))
+        else:
+            Dicts[model][cc]['测试版安卓版本']='未知'
         endtime = time.perf_counter()
         # 如果有缓存数据
         if model in oldJson.keys() and cc in oldJson[model].keys() and '版本号' in oldJson[model][cc].keys() and len(oldJson[model][cc]["版本号"]) > 0:
@@ -701,6 +705,8 @@ def getNewVersions(decDicts, oldJson, model):
 
         newMDic[model][cc]['地区'] = getCountryName(cc)
         newMDic[model][cc]['机型'] = modelDic[model]['name']
+        if verDic==None:
+            continue
         diffModel = []
         if verDic[model][cc]['最新测试版'] != '':
             newMDic[model][cc]['最新测试版'] = verDic[model][cc]['最新测试版']
@@ -720,7 +726,7 @@ def getNewVersions(decDicts, oldJson, model):
         if verDic[model][cc]['解密百分比'] != '':
             newMDic[model][cc]['解密百分比'] = verDic[model][cc]['解密百分比']
             # 如果有缓存数据，则获取差集
-        if verDic==None or len(verDic[model][cc]['版本号']) == 0:
+        if len(verDic[model][cc]['版本号']) == 0:
             continue
         if len(newMDic[model][cc]['版本号'].keys()) > 0:
             diffModel = verDic[model][cc]['版本号'].keys(
@@ -746,7 +752,7 @@ if __name__ == '__main__':
         oldMD5Dict=LoadOldMD5Firmware() #获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic=dict(list(getModelDictsFromDB().items())[:1])  #测试时使用
-            modelDic={'SM-S9280':{'name':'S24 Ultra','CC':['CHC']}} #测试时使用
+            modelDic={'SM-S9370':{'name':'S24 Ultra','CC':['CHC']}} #测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

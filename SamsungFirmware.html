@@ -215,11 +215,11 @@
                 font-size: 0.8rem;
             }
 
-            th:nth-child(3),
-            td:nth-child(3),
+            /* th:nth-child(3),
+            td:nth-child(3), */
             /* 隐藏地区代码 */
-            th:nth-child(4),
-            td:nth-child(4),
+            /* th:nth-child(4),
+            td:nth-child(4), */
             /* 隐藏地区名称 */
             th:nth-child(7),
             td:nth-child(7) {
@@ -252,8 +252,10 @@
             display: flex;
             align-items: center;
             padding: 0.8rem;
-            justify-content: center; /* 水平居中 */
-            align-items: center; /* 垂直居中 */
+            justify-content: center;
+            /* 水平居中 */
+            align-items: center;
+            /* 垂直居中 */
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             background: white;
@@ -288,18 +290,20 @@
 
         /* 自定义弹窗样式 */
         .custom-popup {
-            width: 90%; /* 在小屏幕上限制弹窗宽度 */
-            max-width: 300px; /* 设置最大宽度 */
+            width: 90%;
+            /* 在小屏幕上限制弹窗宽度 */
+            max-width: 450px;
+            /* 设置最大宽度 */
             position: fixed;
             top: 95%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #4a90e2;
+            background-color: #1775e1e1;
             color: white;
             padding: 1rem 2rem;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
+            font-size: 0.8rem;
             font-weight: bold;
             text-align: center;
             z-index: 1000;
@@ -320,7 +324,7 @@
         .sortable::after {
             content: '▲';
             /* 默认显示升序箭头 */
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             margin-left: 5px;
             /* transition: transform 0.3s ease; */
         }
@@ -328,6 +332,25 @@
         .sortable.desc::after {
             content: '▼';
             /* 显示降序箭头 */
+        }
+
+        .android_os {
+            font-size: 0.8rem;
+            /* 字体稍小 */
+            color: #6c757d;
+            /* 使用灰色 */
+            margin-top: 0.3rem;
+            /* 与上方内容保持间距 */
+            display: block;
+            /* 独占一行 */
+            font-weight: bold;
+            /* 加粗字体 */
+            padding: 0.2rem 0.5rem;
+            /* 内边距 */
+            border-radius: 4px;
+            /* 圆角边框 */
+            text-align: center;
+            /* 居中对齐 */
         }
     </style>
 </head>
@@ -363,6 +386,7 @@
                         <th>地区名称</th>
                         <th>最新正式版</th>
                         <th>最新测试版</th>
+                        <th>测试版上线时间</th>
                         <th>测试版本号说明</th>
                     </tr>
                 </thead>
@@ -378,7 +402,8 @@
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
-            const DATA_URL = 'https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware.json';
+            // const DATA_URL = 'https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware.json';
+            const DATA_URL = 'https://ghfast.top/https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware.json';
             class FirmwareTable {
                 constructor() {
                     this.tableBody = document.querySelector('#firmwareTable tbody');
@@ -436,7 +461,10 @@
                                 beta: this.parseVersion(details.最新测试版),
                                 beta_full: details.最新测试版,
                                 description: details.最新版本号说明,
-                                deviceName: details.机型
+                                deviceName: details.机型,
+                                updateTime: details.最新测试版上传时间,
+                                stableOS: details.正式版安卓版本,
+                                devOS: details.测试版安卓版本,
                             });
                         });
                     });
@@ -479,10 +507,14 @@
             <td>${item.regionName}</td>
             <td title="${item.official_full || '无版本号'}">
                 ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
-            </td>
+            <div class="android_os">OS:${item.stableOS || '未知'}</div>
+                </td>
             <td title="${item.beta_full || '无版本号'}" class="copyable">
                 ${item.beta ? `<span class="version-badge beta-badge">${item.beta}</span>` : '-'}
+            
+            <div class="android_os">OS:${item.devOS || '未知'}</div>
             </td>
+            <td>${item.updateTime || '未知'}</td>
             <td>${item.description}</td>
         `;
                         fragment.appendChild(row);

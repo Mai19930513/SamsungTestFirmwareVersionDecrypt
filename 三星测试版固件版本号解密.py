@@ -85,7 +85,7 @@ def getCountryName(cc):
     '''
     通过设备代号获取地区名称
     '''
-    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲','INS':'印度'}
+    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲','INS':'印度','XAA':'美国'}
     if cc in cc2Country.keys():
         return cc2Country[cc]
     else:
@@ -291,7 +291,7 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         xml = etree.fromstring(content)
         if(len(xml.xpath("//latest//text()"))==0):
             # 新设备初始化一个版本号
-            ccList={"CHC":["ZC","CHC","ZC"],"CHN":["ZC","CHC",""],"TGY":["ZH","OZS","ZC"]} # CHC对应国行，后面的字典分别表示固件AP版本号、运营商CSC版本号前缀及是否带基带版本号，CHN为不带版本号
+            ccList={"CHC":["ZC","CHC","ZC"],"CHN":["ZC","CHC",""],"TGY":["ZH","OZS","ZC"],'XAA':['UE','OYM','UE'],'KOO':['KS','OKR','KS']} # CHC对应国行，后面的字典分别表示固件AP版本号、运营商CSC版本号前缀及是否带基带版本号，CHN为不带版本号
             if(cc in ccList.keys()):
                 latestVer=""
                 latestVerStr="暂无正式版"

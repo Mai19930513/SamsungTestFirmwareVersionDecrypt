@@ -85,7 +85,7 @@ def getCountryName(cc):
     '''
     通过设备代号获取地区名称
     '''
-    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲','INS':'印度','XAA':'美国'}
+    cc2Country = {'CHC': '国行', 'CHN': '国行', 'TGY': '香港','KOO': '韩国','EUX':'欧洲','INS':'印度','XAA':'美国','ATT':'美国'}
     if cc in cc2Country.keys():
         return cc2Country[cc]
     else:

@@ -17,9 +17,13 @@ from func_timeout import func_set_timeout
 import func_timeout
 from dotenv import load_dotenv
 import string
+from concurrent.futures import ProcessPoolExecutor, as_completed
 load_dotenv()
 
 
+isDebug=False
+isFirst = True
+oldMD5Dict={}
 
 def getConnect():
     '''
@@ -116,11 +120,10 @@ def requestXML(url):
         print(f"发生错误:{e.args[0]}")
 
 
-def readXML(model):
+def readXML(model,modelDic):
     '''
     获取官网版本号代码的md5值
     '''
-    global modelDic
     md5Dic = {}
     for cc in modelDic[model]['CC']:
         md5list = []
@@ -210,10 +213,23 @@ def UpdateOldFirmware(newDict:dict):
     '''
     global oldMD5Dict
     MD5VerFilePath="MD5编码后的固件版本号.json"
-    with open(MD5VerFilePath, 'w', encoding='utf-8') as f:
-        oldMD5Dict.update(newDict)
-        f.write(json.dumps(oldMD5Dict, indent=4, ensure_ascii=False))
+    # 先读取历史数据
+    if os.path.exists(MD5VerFilePath):
+        with open(MD5VerFilePath, 'r', encoding='utf-8') as f:
+            try:
+                old_data = json.load(f)
+            except Exception:
+                old_data = {}
+    else:
+        old_data = {}
 
+    # 更新历史数据
+    for k, v in newDict.items():
+        old_data[k] = v
+
+    # 保存
+    with open(MD5VerFilePath, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(old_data, indent=4, ensure_ascii=False))
 def WriteInfo(model:str,cc:str,AddAndRemoveInfo:dict):
     '''
     记录服务器固件变动信息
@@ -272,7 +288,7 @@ def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
         raise ValueError(f"字符 '{char}' 不在给定的字符串中")
 
 #@func_set_timeout(2000)
-def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
+def DecryptionFirmware(model:str, md5Dic:dict, cc:str,modelDic)->dict:
     '''通过穷举解码固件号
     Args:
         model(str):设备型号
@@ -459,7 +475,10 @@ def DecryptionFirmware(model:str, md5Dic:dict, cc:str)->dict:
         Dicts[model][cc]['最新正式版'] = latestVerStr
         Dicts[model][cc]['正式版安卓版本']=currentOS
         if currentOS!='未知':
-            Dicts[model][cc]['测试版安卓版本']=str(int(currentOS)+ord(Dicts[model][cc]['最新测试版'].split('/')[0][-4])-ord(Dicts[model][cc]['最新正式版'].split('/')[0][-4]))
+            if Dicts[model][cc]['最新测试版'].split('/')[0][-4]=='Z':
+                Dicts[model][cc]['测试版安卓版本']=str(int(currentOS)+1)
+            else:
+                Dicts[model][cc]['测试版安卓版本']=str(int(currentOS)+ord(Dicts[model][cc]['最新测试版'].split('/')[0][-4])-ord(Dicts[model][cc]['最新正式版'].split('/')[0][-4]))
         else:
             Dicts[model][cc]['测试版安卓版本']='未知'
         endtime = time.perf_counter()
@@ -550,7 +569,7 @@ def run():
         if os.getenv(k):
             v = os.getenv(k)
             push_config[k] = v
-    global modelDic,oldMD5Dict
+    global modelDic,oldMD5Dict,isFirst
     jsonStr = ""
     decDicts = {"上次更新时间": getNowTime()}
     VerFilePath = 'firmware.json'
@@ -566,12 +585,12 @@ def run():
         if (jsonStr != ''):
             oldJson = json.loads(jsonStr)
         hasNewVersion = False
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        with ProcessPoolExecutor(max_workers=4) as pool:
             tasks = []
             for model in modelDic:
                 # 开启多进程解密
                 task = pool.submit(
-                    getNewVersions, decDicts, oldJson, model)
+                    getNewVersions, decDicts, oldJson, model,modelDic,oldMD5Dict)
                 tasks.append(task)
             for task in concurrent.futures.as_completed(tasks):
                 if task.result() != None:
@@ -582,7 +601,6 @@ def run():
         if hasNewVersion:
             # 固件更新日志
             with open(AddTxtPath, 'a+', encoding='utf-8') as file:
-                isFirst = True
                 for model in modelDic:
                     if (model in decDicts) and (model in oldJson):
                         for cc in modelDic[model]['CC']:
@@ -623,7 +641,6 @@ def run():
     print(f'总耗时:{round(endTime - startTime, 2)}秒')
     # 创建深拷贝，避免破坏原始数据
     firmware_info_mini = deepcopy(decDicts)
-
     # 遍历每个设备型号
     for model_data in firmware_info_mini.values():
         if isinstance(model_data, dict):
@@ -637,122 +654,143 @@ def run():
     with open(VerFilePath, 'w', encoding='utf-8') as f:
         f.write(json.dumps(decDicts, indent=4, ensure_ascii=False))
 
+def process_cc(cc,modelDic,oldMD5Dict,md5Dic,oldJson,model,newMDic,decDicts):
+    if model in oldJson.keys() and cc in oldJson[model].keys():
+        # 拷贝已有设备固件版本内容
+        newMDic[model][cc] = deepcopy(oldJson[model][cc])
+        # 如果没有下列key，则初始化
+        if '最新测试版上传时间' not in newMDic[model][cc].keys():
+            newMDic[model][cc]['最新测试版上传时间'] = '暂无'
+        if  '正式版安卓版本' not in newMDic[model][cc].keys():
+            newMDic[model][cc]['正式版安卓版本'] = ''
+        if '测试版安卓版本' not in newMDic[model][cc].keys():
+            newMDic[model][cc]['测试版安卓版本'] = ''
+    else:
+        # 新增设备初始化内容
+        newMDic[model][cc] = {
+            '版本号':{},
+            '最新测试版':'',
+            '最新正式版':'',
+            '最新版本号说明':'',
+            '解密百分比':'',
+            '最新测试版上传时间':'暂无',
+            '正式版安卓版本':'',
+            '测试版安卓版本':'',
+            '地区':'',
+            '机型':'',
+            '解密数量':0
+        }
+    newMD5Dict={}
+    newMD5Dict[model]={}
+    decDicts.update(newMDic)  # 先保存已有的数据
+    if model in oldMD5Dict.keys() and cc in oldMD5Dict[model].keys():
+        # 获取MD5编码的固件版本号增减信息
+        newMD5Dict[model][cc]=deepcopy(oldMD5Dict[model][cc])
+        oldMD5Vers=oldMD5Dict[model][cc]["版本号"]
+        newMD5Vers=md5Dic[cc]
+        addAndRemoveInfo=getFirmwareAddAndRemoveInfo(oldJson=oldMD5Vers,newJson=newMD5Vers)
+        WriteInfo(model=model,cc=cc,AddAndRemoveInfo=addAndRemoveInfo)
+    else:
+        # 新增设备初始化内容
+        newMD5Dict[model][cc]={
+            '版本号':{},
+            '固件数量':0
+        }
+    newMD5Dict[model][cc]["版本号"]=md5Dic[cc]
+    newMD5Dict[model][cc]["固件数量"]=len(md5Dic[cc])
+    verDic = DecryptionFirmware(model, md5Dic, cc,modelDic)  # 解密获取新数据
+    if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
+        if verDic[model][cc]['最新正式版'].split('/')[0][-4:]>newMDic[model][cc]['最新正式版'].split('/')[0][-4:]:
+            # 正式版更新时发送通知
+            sendMessageByTG_Bot(f"#{model.split('-')[1]} - <{newMDic[model][cc]['机型']} {getCountryName(cc)}版>推送更新",
+                        f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
+            fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
+                link=f"https://doc.samsungmobile.com/{model}/{cc}/doc.html")
+        else:
+            # 服务器撤回固件时发送通知
+            sendMessageByTG_Bot(f"#固件回滚- <{newMDic[model][cc]['机型']} {getCountryName(cc)}版>",f"{newMDic[model][cc]['最新正式版'].split('/')[0]} ➡️ {verDic[model][cc]['最新正式版'].split('/')[0]}")
+        newMDic[model][cc]['最新正式版'] = verDic[model][cc]['最新正式版']
 
-def getNewVersions(decDicts, oldJson, model):
-    global oldMD5Dict
-    md5Dic = readXML(model)  # 返回包含多个地区版本的md5字典
+    newMDic[model][cc]['地区'] = getCountryName(cc)
+    newMDic[model][cc]['机型'] = modelDic[model]['name']
+    if verDic==None:
+        return
+    diffModel = []
+    if verDic[model][cc]['最新测试版'] != '':
+        newMDic[model][cc]['最新测试版'] = verDic[model][cc]['最新测试版']
+    if verDic[model][cc]['最新正式版'] != '':
+        newMDic[model][cc]['最新正式版'] = verDic[model][cc]['最新正式版']
+    if verDic[model][cc]['最新测试版上传时间'] != '':
+        newMDic[model][cc]['最新测试版上传时间'] = verDic[model][cc]['最新测试版上传时间']
+    newMDic[model][cc]['正式版安卓版本']=verDic[model][cc]['正式版安卓版本']
+    newMDic[model][cc]['测试版安卓版本']=verDic[model][cc]['测试版安卓版本']
+    ver = newMDic[model][cc]['最新测试版'].split('/')[0]
+    yearStr = ord(ver[-3])-65+2001  # 获取更新年份
+    monthStr = ord(ver[-2])-64  # 获取更新月份
+    countStr = char_to_number(ver[-1])   # 获取第几次更新
+    definitionStr = f'{yearStr}年{monthStr}月第{countStr}个测试版'
+    newMDic[model][cc]['最新版本号说明'] = definitionStr
+
+    if verDic[model][cc]['解密百分比'] != '':
+        newMDic[model][cc]['解密百分比'] = verDic[model][cc]['解密百分比']
+        # 如果有缓存数据，则获取差集
+    if len(verDic[model][cc]['版本号']) == 0:
+        # 如果没有解密到版本号，则直接返回
+        return (False,newMDic,newMD5Dict) 
+    if len(newMDic[model][cc]['版本号'].keys()) > 0:
+        diffModel = verDic[model][cc]['版本号'].keys(
+        )-newMDic[model][cc]['版本号'].keys()
+    else:
+        diffModel = verDic[model][cc]['版本号'].keys()
+    if len(diffModel) > 0:
+        hasNewVersion = True
+        for key in diffModel:
+            # 存入新的版本号
+            newMDic[model][cc]['版本号'][key] = verDic[model][cc]['版本号'][key]
+    newMDic[model][cc]['版本号'] = dict(
+        sorted(newMDic[model][cc]['版本号'].items(), key=lambda x: x[1].split('/')[0][-3:]))
+    newMDic[model][cc]['解密数量'] = len(newMDic[model][cc]['版本号'])
+    return (hasNewVersion,newMDic,newMD5Dict)
+
+def getNewVersions(decDicts, oldJson, model,modelDic,oldMD5Dict):
+    md5Dic = readXML(model,modelDic)  # 返回包含多个地区版本的md5字典
     if len(md5Dic) == 0:
         return
     newMDic = {}    #保存解密后的固件版本号信息
     newMDic[model] = {}    
-    newMD5Dict={"上次更新时间": getNowTime()}   #最新的MD5编码固件版本号信息
-    newMD5Dict[model]={}    #保存MD5编码后的固件版本号信息
+    md5Dicts_list = []  # 用于收集每个线程的newMD5Dict
     hasNewVersion = False
-    for cc in md5Dic.keys():
-        if model in oldJson.keys() and cc in oldJson[model].keys():
-            # 拷贝已有设备固件版本内容
-            newMDic[model][cc] = deepcopy(oldJson[model][cc])
-            # 如果没有下列key，则初始化
-            if '最新测试版上传时间' not in newMDic[model][cc].keys():
-                newMDic[model][cc]['最新测试版上传时间'] = '暂无'
-            if  '正式版安卓版本' not in newMDic[model][cc].keys():
-                newMDic[model][cc]['正式版安卓版本'] = ''
-            if '测试版安卓版本' not in newMDic[model][cc].keys():
-                newMDic[model][cc]['测试版安卓版本'] = ''
-        else:
-            # 新增设备初始化内容
-            newMDic[model][cc] = {
-                '版本号':{},
-                '最新测试版':'',
-                '最新正式版':'',
-                '最新版本号说明':'',
-                '解密百分比':'',
-                '最新测试版上传时间':'暂无',
-                '正式版安卓版本':'',
-                '测试版安卓版本':'',
-                '地区':'',
-                '机型':'',
-                '解密数量':0
-            }
-        decDicts.update(newMDic)  # 先保存已有的数据
-        if model in oldMD5Dict.keys() and cc in oldMD5Dict[model].keys():
-            # 获取MD5编码的固件版本号增减信息
-            newMD5Dict[model][cc]=deepcopy(oldMD5Dict[model][cc])
-            oldMD5Vers=oldMD5Dict[model][cc]["版本号"]
-            newMD5Vers=md5Dic[cc]
-            addAndRemoveInfo=getFirmwareAddAndRemoveInfo(oldJson=oldMD5Vers,newJson=newMD5Vers)
-            WriteInfo(model=model,cc=cc,AddAndRemoveInfo=addAndRemoveInfo)
-        else:
-            # 新增设备初始化内容
-            newMD5Dict[model][cc]={
-                '版本号':{},
-                '固件数量':0
-            }
-        newMD5Dict[model][cc]["版本号"]=md5Dic[cc]
-        newMD5Dict[model][cc]["固件数量"]=len(md5Dic[cc])
-        verDic = DecryptionFirmware(model, md5Dic, cc)  # 解密获取新数据
-        if newMDic[model][cc]['最新正式版'] != '' and verDic != None and verDic[model][cc]['最新正式版'] != newMDic[model][cc]['最新正式版']:
-            if verDic[model][cc]['最新正式版'].split('/')[0][-4:]>newMDic[model][cc]['最新正式版'].split('/')[0][-4:]:
-                # 正式版更新时发送通知
-                sendMessageByTG_Bot(f"#{model.split('-')[1]} - <{newMDic[model][cc]['机型']} {getCountryName(cc)}版>推送更新",
-                            f"版本:{verDic[model][cc]['最新正式版']}\n[查看更新日志](https://doc.samsungmobile.com/{model}/{cc}/doc.html)")
-                fcm(f"#{model} {getCountryName(cc)}版推送更新,版本:{verDic[model][cc]['最新正式版']}",
-                    link=f"https://doc.samsungmobile.com/{model}/{cc}/doc.html")
-            else:
-                # 服务器撤回固件时发送通知
-                sendMessageByTG_Bot(f"#固件回滚- <{newMDic[model][cc]['机型']} {getCountryName(cc)}版>",f"{newMDic[model][cc]['最新正式版'].split('/')[0]} ➡️ {verDic[model][cc]['最新正式版'].split('/')[0]}")
-            newMDic[model][cc]['最新正式版'] = verDic[model][cc]['最新正式版']
-
-        newMDic[model][cc]['地区'] = getCountryName(cc)
-        newMDic[model][cc]['机型'] = modelDic[model]['name']
-        if verDic==None:
-            continue
-        diffModel = []
-        if verDic[model][cc]['最新测试版'] != '':
-            newMDic[model][cc]['最新测试版'] = verDic[model][cc]['最新测试版']
-        if verDic[model][cc]['最新正式版'] != '':
-            newMDic[model][cc]['最新正式版'] = verDic[model][cc]['最新正式版']
-        if verDic[model][cc]['最新测试版上传时间'] != '':
-            newMDic[model][cc]['最新测试版上传时间'] = verDic[model][cc]['最新测试版上传时间']
-        newMDic[model][cc]['正式版安卓版本']=verDic[model][cc]['正式版安卓版本']
-        newMDic[model][cc]['测试版安卓版本']=verDic[model][cc]['测试版安卓版本']
-        ver = newMDic[model][cc]['最新测试版'].split('/')[0]
-        yearStr = ord(ver[-3])-65+2001  # 获取更新年份
-        monthStr = ord(ver[-2])-64  # 获取更新月份
-        countStr = char_to_number(ver[-1])   # 获取第几次更新
-        definitionStr = f'{yearStr}年{monthStr}月第{countStr}个测试版'
-        newMDic[model][cc]['最新版本号说明'] = definitionStr
-
-        if verDic[model][cc]['解密百分比'] != '':
-            newMDic[model][cc]['解密百分比'] = verDic[model][cc]['解密百分比']
-            # 如果有缓存数据，则获取差集
-        if len(verDic[model][cc]['版本号']) == 0:
-            continue
-        if len(newMDic[model][cc]['版本号'].keys()) > 0:
-            diffModel = verDic[model][cc]['版本号'].keys(
-            )-newMDic[model][cc]['版本号'].keys()
-        else:
-            diffModel = verDic[model][cc]['版本号'].keys()
-        if len(diffModel) > 0:
-            hasNewVersion = True
-            for key in diffModel:
-                # 存入新的版本号
-                newMDic[model][cc]['版本号'][key] = verDic[model][cc]['版本号'][key]
-        newMDic[model][cc]['版本号'] = dict(
-            sorted(newMDic[model][cc]['版本号'].items(), key=lambda x: x[1].split('/')[0][-3:]))
-        newMDic[model][cc]['解密数量'] = len(newMDic[model][cc]['版本号'])
-    UpdateOldFirmware(newMD5Dict)   #更新历史固件Json信息
+    with ProcessPoolExecutor(max_workers=4) as pool:
+        future_to_cc = {pool.submit(process_cc, cc,modelDic,oldMD5Dict,md5Dic,oldJson,model,newMDic,decDicts): cc for cc in md5Dic.keys()}
+        for future in as_completed(future_to_cc):
+            result = future.result()
+            if result is None:
+                continue
+            hasNew, newMDic_part, newMD5Dict_part = result
+            if hasNew:
+                hasNewVersion = True
+            for m, cc_dict in newMDic_part.items():
+                if m not in newMDic:
+                    newMDic[m] = {}
+                for cc, cc_data in cc_dict.items():
+                    newMDic[m][cc] = cc_data
+            md5Dicts_list.append(newMD5Dict_part)
+    # 合并所有线程的newMD5Dict
+    mergedMD5Dict = {"上次更新时间": getNowTime()}
+    mergedMD5Dict[model] = {}
+    for md5Dict in md5Dicts_list:
+        if model in md5Dict:
+            mergedMD5Dict[model].update(md5Dict[model])
+    UpdateOldFirmware(mergedMD5Dict)   #更新历史固件Json信息
     return hasNewVersion, newMDic
 
 
 if __name__ == '__main__':
     try:
-        isDebug=False
-        isFirst=True
         oldMD5Dict=LoadOldMD5Firmware() #获取上次的MD5编码版本号数据
         if isDebug:
-            # modelDic=dict(list(getModelDictsFromDB().items())[:1])  #测试时使用
-            modelDic={'SM-S9370':{'name':'S24 Ultra','CC':['CHC']}} #测试时使用
+            modelDic=dict(list(getModelDictsFromDB().items())[:5])  #测试时使用
+            # modelDic={'SM-S9370':{'name':'S24 Ultra','CC':['CHC']}} #测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

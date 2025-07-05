@@ -21,6 +21,7 @@ import string
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 import threading
 from rich.console import Console
+
 load_dotenv()
 thread_local = threading.local()
 isDebug = False
@@ -273,7 +274,7 @@ def UpdateOldFirmware(newDict: dict):
         f.write(json.dumps(old_data, indent=4, ensure_ascii=False))
 
 
-def WriteInfo(model: str, cc: str, AddAndRemoveInfo: dict):
+def WriteInfo(model: str, cc: str, AddAndRemoveInfo: dict, modelDic: dict):
     """
     记录服务器固件变动信息
     Args:
@@ -281,7 +282,7 @@ def WriteInfo(model: str, cc: str, AddAndRemoveInfo: dict):
         cc(str):设备地区代码
         AddAndRemoveInfo(str):包含增删固件版本信息
     """
-    global modelDic, isFirst
+    global isFirst
     MD5InfoFilePath = "测试版固件变动信息.txt"
     if not os.path.exists(MD5InfoFilePath):
         with open(MD5InfoFilePath, "w") as file:
@@ -343,7 +344,9 @@ def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
 
 
 # @func_set_timeout(2000)
-def DecryptionFirmware(model: str, md5Dic: dict, cc: str, modelDic, oldJson) -> dict:
+def DecryptionFirmware(
+    model: str, md5Dic: dict, cc: str, modelDic: dict, oldJson
+) -> dict:
     """通过穷举解码固件号
     Args:
         model(str):设备型号
@@ -352,7 +355,9 @@ def DecryptionFirmware(model: str, md5Dic: dict, cc: str, modelDic, oldJson) -> 
     Returns:
         dict:设备型号解码后的固件版本号字典
     """
-    printStr(f"开始解密<{model} {getCountryName(cc)}版>测试固件",)
+    printStr(
+        f"开始解密<{model} {getCountryName(cc)}版>测试固件",
+    )
     md5list = md5Dic[cc]
     url = f"https://fota-cloud-dn.ospserver.net/firmware/{cc}/{model}/version.xml"
     content = requestXML(url)
@@ -657,8 +662,9 @@ def DecryptionFirmware(model: str, md5Dic: dict, cc: str, modelDic, oldJson) -> 
 
         # 新增解密数据
         oldDicts[model][cc].update(DecDicts)
+        key_func = make_sort_key(oldDicts[model][cc].values())
         Dicts[model][cc]["最新测试版"] = sorted(
-            oldDicts[model][cc].values(), key=lambda x: x.split("/")[0][-3:]
+            oldDicts[model][cc].values(), key=key_func
         )[
             -1
         ]  # 记录最新版本号
@@ -706,6 +712,50 @@ def DecryptionFirmware(model: str, md5Dic: dict, cc: str, modelDic, oldJson) -> 
         return Dicts
     except Exception as e:
         printStr(f"发生错误:{e}")
+
+
+def make_sort_key(strings):
+    order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    order_map = {c: i for i, c in enumerate(order)}
+
+    # 先提取所有字符串的后四位（基于第一个 '/' 前部分）
+    def get_tail4(s):
+        first_part = s.split("/")[0]
+        return first_part[-4:] if len(first_part) >= 4 else first_part
+
+    # 找出非Z开头的后四位最大字符串 XXXX
+    non_z_strings = [s for s in strings if not get_tail4(s).startswith("Z")]
+    if non_z_strings:
+        XXXX = max(non_z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)))
+    else:
+        XXXX = ""  # 或其它合适的默认值
+
+    # 找出Z开头的字符串，按后三位排序，找出最大字符串 ZXXX
+    z_strings = [s for s in strings if get_tail4(s).startswith("Z")]
+    if z_strings:
+        ZXXX = max(z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)[1:]))
+        zxxx_last3_key = tuple(order_map[c] for c in get_tail4(ZXXX)[1:])
+    else:
+        ZXXX = ""
+        zxxx_last3_key = ()
+
+    def key_func(s):
+        tail4 = get_tail4(s)
+        tail4_key = tuple(order_map[c] for c in tail4)
+        tail3_key = tail4_key[1:]
+
+        if tail4.startswith("Z"):
+            if tail3_key <= zxxx_last3_key:
+                # Z开头且后三位小于等于ZXXX后三位，排最前
+                return (0, tail3_key, s)
+            else:
+                # Z开头且后三位大于ZXXX后三位，排最后
+                return (2, tail3_key, s)
+        else:
+            # 非Z开头，按后四位排序，排中间
+            return (1, tail4_key, s)
+
+    return key_func
 
 
 def sendMessageByTG_Bot(title: str, content: str) -> None:
@@ -792,8 +842,8 @@ def run():
     AddTxtPath = "测试版新增日志.txt"
     startTime = time.perf_counter()
     if not os.path.exists(VerFilePath):
-            with open(VerFilePath, "w") as file:
-                file.write("{}")
+        with open(VerFilePath, "w") as file:
+            file.write("{}")
 
     with open(VerFilePath, "r", encoding="utf-8") as f:
         jsonStr = f.read()
@@ -803,9 +853,7 @@ def run():
         hasNewVersion = False
         with ProcessPoolExecutor(max_workers=4) as pool:
             future_to_model = {
-                pool.submit(
-                    getNewVersions, oldJson, model, modelDic, oldMD5Dict
-                ): model
+                pool.submit(getNewVersions, oldJson, model, modelDic, oldMD5Dict): model
                 for model in modelDic
             }
             for future in concurrent.futures.as_completed(future_to_model):
@@ -826,10 +874,7 @@ def run():
                 for model in modelDic:
                     if (model in decDicts) and (model in oldJson):
                         for cc in modelDic[model]["CC"]:
-                            if (
-                                not cc in oldJson[model]
-                                or not cc in decDicts[model]
-                            ):
+                            if not cc in oldJson[model] or not cc in decDicts[model]:
                                 continue
                             md5Keys = (
                                 decDicts[model][cc]["版本号"].keys()
@@ -837,16 +882,14 @@ def run():
                             )
                             if len(md5Keys) > 0:
                                 if isFirst:
-                                    file.write(
-                                        f"*****记录时间:{getNowTime()}*****\n"
-                                    )
+                                    file.write(f"*****记录时间:{getNowTime()}*****\n")
                                     isFirst = False
                                 Str = ""
                                 newVersions = {}
                                 for md5key in md5Keys:
-                                    newVersions[md5key] = decDicts[model][cc][
-                                        "版本号"
-                                    ][md5key]
+                                    newVersions[md5key] = decDicts[model][cc]["版本号"][
+                                        md5key
+                                    ]
                                 newVersions = dict(
                                     sorted(newVersions.items(), key=lambda x: x[1])
                                 )
@@ -878,8 +921,23 @@ def run():
                     region_data.pop("版本号", None)
     with open(Ver_mini_FilePath, "w", encoding="utf-8") as f:
         f.write(json.dumps(firmware_info_mini, indent=4, ensure_ascii=False))
+    # 写入 firmware.json 前，对每个机型/地区的版本号排序
+    for model in decDicts:
+        if model == "上次更新时间":
+            continue
+        for region in decDicts[model]:
+            if "版本号" in decDicts[model][region]:
+                ver_dict = decDicts[model][region]["版本号"]
+                # 取所有 value
+                values = list(ver_dict.values())
+                # 生成排序 key
+                key_func = make_sort_key(values)
+                # 按 value 排序并重建字典
+                sorted_items = sorted(ver_dict.items(), key=lambda item: key_func(item[1]))
+                decDicts[model][region]["版本号"] = dict(sorted_items)
     with open(VerFilePath, "w", encoding="utf-8") as f:
         f.write(json.dumps(decDicts, indent=4, ensure_ascii=False))
+
 
 def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
     newMDic = {model: {}}
@@ -915,7 +973,9 @@ def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
         addAndRemoveInfo = getFirmwareAddAndRemoveInfo(
             oldJson=oldMD5Vers, newJson=newMD5Vers
         )
-        WriteInfo(model=model, cc=cc, AddAndRemoveInfo=addAndRemoveInfo)
+        WriteInfo(
+            model=model, cc=cc, AddAndRemoveInfo=addAndRemoveInfo, modelDic=modelDic
+        )
     else:
         # 新增设备初始化内容
         newMD5Dict[model][cc] = {"版本号": {}, "固件数量": 0}
@@ -1031,16 +1091,18 @@ def getNewVersions(oldJson, model, modelDic, oldMD5Dict):
     UpdateOldFirmware(mergedMD5Dict)  # 更新历史固件Json信息
     return hasNewVersion, newMDic
 
+
 def init_globals(q):
     global log_queue
     log_queue = q
+
 
 if __name__ == "__main__":
     try:
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
-            modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-            # modelDic={'SM-S9370':{'name':'S24 Ultra','CC':['CHC']}} #测试时使用
+            # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
+            modelDic = {'SM-S9380':{'name':'S25 Ultra','CC':['CHC']}}  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

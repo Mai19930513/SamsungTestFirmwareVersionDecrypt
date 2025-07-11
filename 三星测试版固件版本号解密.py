@@ -905,8 +905,10 @@ def run():
             with open("各机型最新版本.md", "w", encoding="utf-8") as f:
                 textStr = ""
                 for model in sorted(modelDic.keys()):
+                    if (model not in decDicts) or (model not in oldJson):
+                        continue
                     for cc in modelDic[model]["CC"]:
-                        if not cc in decDicts[model].keys():
+                        if  not cc in decDicts[model].keys():
                             continue
                         textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']} \n\n测试版:{decDicts[model][cc]['最新测试版']} \n"
                 f.write(textStr)
@@ -1102,7 +1104,7 @@ if __name__ == "__main__":
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-            modelDic = {'SM-S9380':{'name':'S25 Ultra','CC':['CHC']}}  # 测试时使用
+           modelDic = {'SM-S9380':{'name':'S25 Ultra','CC':['CHC']}}  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

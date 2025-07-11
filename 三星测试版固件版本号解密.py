@@ -776,15 +776,15 @@ def sendMessageByTG_Bot(title: str, content: str) -> None:
     if message1.message_id > 0:
         printStr("TG个人消息发送成功!")
     # 发送到频道
-    # if push_config.get("TG_CHAT_ID"):
-        # message2 = bot.send_message(
-        #     chat_id=push_config.get("TG_CHAT_ID"),
-        #     text=f"{title}\n{content}",
-        #     parse_mode=telegram.ParseMode.MARKDOWN,
-        #     disable_web_page_preview="true",
-        # )
-        # if message2.message_id > 0:
-        #     printStr("TG频道消息发送成功!")
+    if push_config.get("TG_CHAT_ID"):
+        message2 = bot.send_message(
+            chat_id=push_config.get("TG_CHAT_ID"),
+            text=f"{title}\n{content}",
+            parse_mode=telegram.ParseMode.MARKDOWN,
+            disable_web_page_preview="true",
+        )
+        if message2.message_id > 0:
+            printStr("TG频道消息发送成功!")
 
 
 def fcm(title: str, content="", link="") -> None:

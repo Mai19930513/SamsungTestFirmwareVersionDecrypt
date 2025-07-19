@@ -723,25 +723,51 @@ def DecryptionFirmware(
 def make_sort_key(strings):
     order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     order_map = {c: i for i, c in enumerate(order)}
-
+    
     def get_tail4(s):
         first_part = s.split("/")[0]
         return first_part[-4:] if len(first_part) >= 4 else first_part
-
+        
+    # 统计所有非Z开头的后三位
+    non_z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] != "Z"]
+    non_z_last3 = [get_tail4(s)[1:] for s in non_z_strings]
+    
+    # 统计所有Z开头的后三位
+    z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] == "Z"]
+    z_last3 = [get_tail4(s)[1:] for s in z_strings]
+    
+    def last3_key(last3):
+        return tuple(order_map.get(c, -1) for c in last3)
+    
+    # 计算非Z开头的最大后三位和Z开头的最大后三位
+    max_non_z_last3 = max([last3_key(x) for x in non_z_last3], default=None)
+    max_z_last3 = max([last3_key(x) for x in z_last3], default=None)
+    
     def key_func(s):
         tail4 = get_tail4(s)
         if len(tail4) < 4:
-            return (-1, -1, -1, -1)
-        last3 = tail4[-3:]
-        fourth = tail4[-4]
-        # Z优先级最高，Z为0，其它按顺序
-        if fourth == "Z":
-            z_priority = 0
+            # 长度不足4位，排最前
+            return (0, tuple(order_map.get(c, -1) for c in tail4))
+        
+        head = tail4[0]
+        last3 = tail4[1:]
+        last3_tuple = last3_key(last3)
+        
+        if head == "Z":
+            # 如果存在非Z字符串且Z的后三位大于非Z最大后三位，排最后
+            if max_non_z_last3 is not None and last3_tuple > max_non_z_last3:
+                # 如果同时是Z中的最大值，则排在最最后
+                if max_z_last3 is not None and last3_tuple == max_z_last3:
+                    return (3, last3_tuple)
+                return (2, last3_tuple)
+            else:
+                # 如果Z的后三位小于等于非Z最大后三位，排最前
+                return (0, last3_tuple)
         else:
-            z_priority = 1
-        return tuple(order_map.get(c, 98) for c in last3) + (z_priority, order_map.get(fourth, 98))
+            # 非Z开头字符串正常排序
+            return (1, tuple(order_map.get(c, -1) for c in tail4))
+            
     return key_func
-
 
 def sendMessageByTG_Bot(title: str, content: str) -> None:
     """
@@ -1097,7 +1123,10 @@ if __name__ == "__main__":
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-            modelDic = {"SM-S938B": {"name": "S25 Ultra", "CC": ["EUX"]}}  # 测试时使用
+            modelDic = {
+                "SM-S938B": {"name": "S25 Ultra", "CC": ["EUX"]},
+                "SM-F7310": {"name": "Z flip5", "CC": ["CHC"]},
+            }  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

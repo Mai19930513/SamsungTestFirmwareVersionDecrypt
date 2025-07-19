@@ -671,7 +671,9 @@ def DecryptionFirmware(
         Dicts[model][cc]["版本号"] = DecDicts
         Dicts[model][cc]["最新测试版上传时间"] = ""
         if len(DecDicts) > 0:
-            Dicts[model][cc]["最新测试版上传时间"] = getNowTime()
+            new_latest = Dicts[model][cc]["最新测试版"].split("/")[0]
+            if new_latest != lastVersion:
+                Dicts[model][cc]["最新测试版上传时间"] = getNowTime()
         Dicts[model][cc]["最新正式版"] = latestVerStr
         Dicts[model][cc]["正式版安卓版本"] = currentOS
         if currentOS != "未知":
@@ -910,7 +912,7 @@ def run():
                     for cc in modelDic[model]["CC"]:
                         if  not cc in decDicts[model].keys():
                             continue
-                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']} \n\n测试版:{decDicts[model][cc]['最新测试版']} \n"
+                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']} \n测试版:{decDicts[model][cc]['最新测试版']} \n"
                 f.write(textStr)
     endTime = time.perf_counter()
     printStr(f"总耗时:{round(endTime - startTime, 2)}秒")

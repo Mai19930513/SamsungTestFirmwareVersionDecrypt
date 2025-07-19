@@ -21,6 +21,7 @@ import string
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 import threading
 from rich.console import Console
+from collections import OrderedDict
 
 load_dotenv()
 thread_local = threading.local()
@@ -28,6 +29,8 @@ isDebug = False
 isFirst = True
 oldMD5Dict = {}
 console = Console()
+current_latest_version = "16"  # 当前最新Android版本号
+
 
 def getConnect():
     """
@@ -686,7 +689,8 @@ def DecryptionFirmware(
                     - ord(Dicts[model][cc]["最新正式版"].split("/")[0][-4])
                 )
         else:
-            Dicts[model][cc]["测试版安卓版本"] = "未知"
+            Dicts[model][cc]["正式版安卓版本"] = current_latest_version
+            Dicts[model][cc]["测试版安卓版本"] = current_latest_version
         endtime = time.perf_counter()
         # 如果有缓存数据
         if (
@@ -728,14 +732,18 @@ def make_sort_key(strings):
     # 找出非Z开头的后四位最大字符串 XXXX
     non_z_strings = [s for s in strings if not get_tail4(s).startswith("Z")]
     if non_z_strings:
-        XXXX = max(non_z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)))
+        XXXX = max(
+            non_z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s))
+        )
     else:
         XXXX = ""  # 或其它合适的默认值
 
     # 找出Z开头的字符串，按后三位排序，找出最大字符串 ZXXX
     z_strings = [s for s in strings if get_tail4(s).startswith("Z")]
     if z_strings:
-        ZXXX = max(z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)[1:]))
+        ZXXX = max(
+            z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)[1:])
+        )
         zxxx_last3_key = tuple(order_map[c] for c in get_tail4(ZXXX)[1:])
     else:
         ZXXX = ""
@@ -910,9 +918,9 @@ def run():
                     if (model not in decDicts) or (model not in oldJson):
                         continue
                     for cc in modelDic[model]["CC"]:
-                        if  not cc in decDicts[model].keys():
+                        if not cc in decDicts[model].keys():
                             continue
-                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']} \n测试版:{decDicts[model][cc]['最新测试版']} \n"
+                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']}  \n测试版:{decDicts[model][cc]['最新测试版']} \n"
                 f.write(textStr)
     endTime = time.perf_counter()
     printStr(f"总耗时:{round(endTime - startTime, 2)}秒")
@@ -923,8 +931,11 @@ def run():
             for region_data in model_data.values():
                 if isinstance(region_data, dict):
                     region_data.pop("版本号", None)
+    sorted_firmware_info_mini = OrderedDict()
+    for model in sorted(firmware_info_mini.keys()):
+        sorted_firmware_info_mini[model] = firmware_info_mini[model]
     with open(Ver_mini_FilePath, "w", encoding="utf-8") as f:
-        f.write(json.dumps(firmware_info_mini, indent=4, ensure_ascii=False))
+        f.write(json.dumps(sorted_firmware_info_mini, indent=4, ensure_ascii=False))
     # 写入 firmware.json 前，对每个机型/地区的版本号排序
     for model in decDicts:
         if model == "上次更新时间":
@@ -937,10 +948,15 @@ def run():
                 # 生成排序 key
                 key_func = make_sort_key(values)
                 # 按 value 排序并重建字典
-                sorted_items = sorted(ver_dict.items(), key=lambda item: key_func(item[1]))
+                sorted_items = sorted(
+                    ver_dict.items(), key=lambda item: key_func(item[1])
+                )
                 decDicts[model][region]["版本号"] = dict(sorted_items)
+    sorted_decDicts = OrderedDict()
+    for model in sorted(decDicts.keys()):
+        sorted_decDicts[model] = decDicts[model]
     with open(VerFilePath, "w", encoding="utf-8") as f:
-        f.write(json.dumps(decDicts, indent=4, ensure_ascii=False))
+        f.write(json.dumps(sorted_decDicts, indent=4, ensure_ascii=False))
 
 
 def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
@@ -1106,7 +1122,7 @@ if __name__ == "__main__":
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-           modelDic = {'SM-S9380':{'name':'S25 Ultra','CC':['CHC']}}  # 测试时使用
+            modelDic = {"SM-S9380": {"name": "S25 Ultra", "CC": ["CHC"]}}  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

@@ -724,47 +724,22 @@ def make_sort_key(strings):
     order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     order_map = {c: i for i, c in enumerate(order)}
 
-    # 先提取所有字符串的后四位（基于第一个 '/' 前部分）
     def get_tail4(s):
         first_part = s.split("/")[0]
         return first_part[-4:] if len(first_part) >= 4 else first_part
 
-    # 找出非Z开头的后四位最大字符串 XXXX
-    non_z_strings = [s for s in strings if not get_tail4(s).startswith("Z")]
-    if non_z_strings:
-        XXXX = max(
-            non_z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s))
-        )
-    else:
-        XXXX = ""  # 或其它合适的默认值
-
-    # 找出Z开头的字符串，按后三位排序，找出最大字符串 ZXXX
-    z_strings = [s for s in strings if get_tail4(s).startswith("Z")]
-    if z_strings:
-        ZXXX = max(
-            z_strings, key=lambda s: tuple(order_map[c] for c in get_tail4(s)[1:])
-        )
-        zxxx_last3_key = tuple(order_map[c] for c in get_tail4(ZXXX)[1:])
-    else:
-        ZXXX = ""
-        zxxx_last3_key = ()
-
     def key_func(s):
         tail4 = get_tail4(s)
-        tail4_key = tuple(order_map[c] for c in tail4)
-        tail3_key = tail4_key[1:]
-
-        if tail4.startswith("Z"):
-            if tail3_key <= zxxx_last3_key:
-                # Z开头且后三位小于等于ZXXX后三位，排最前
-                return (0, tail3_key, s)
-            else:
-                # Z开头且后三位大于ZXXX后三位，排最后
-                return (2, tail3_key, s)
+        if len(tail4) < 4:
+            return (-1, -1, -1, -1)
+        last3 = tail4[-3:]
+        fourth = tail4[-4]
+        # Z优先级最高，Z为0，其它按顺序
+        if fourth == "Z":
+            z_priority = 0
         else:
-            # 非Z开头，按后四位排序，排中间
-            return (1, tail4_key, s)
-
+            z_priority = 1
+        return tuple(order_map.get(c, 98) for c in last3) + (z_priority, order_map.get(fourth, 98))
     return key_func
 
 
@@ -1122,7 +1097,7 @@ if __name__ == "__main__":
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-            modelDic = {"SM-S9380": {"name": "S25 Ultra", "CC": ["CHC"]}}  # 测试时使用
+            modelDic = {"SM-S938B": {"name": "S25 Ultra", "CC": ["EUX"]}}  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

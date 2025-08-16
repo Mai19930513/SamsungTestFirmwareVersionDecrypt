@@ -199,10 +199,11 @@ def get_letters_range(start: str, end: str) -> str:
     """返回给定区间的字符串(包含end结束字符)"""
     # 获取A-Z的所有大写字母
     letters = "0123456789" + string.ascii_uppercase + string.ascii_lowercase
-    # 找到起始和结束字母的索引位置
-    start_index = letters.index(start)
-    end_index = letters.index(end) + 1  # 加1是为了包含结束字母
-    # 使用切片获取指定范围的字母
+    start_index = letters.find(start)
+    end_index = letters.find(end)
+    if start_index == -1 or end_index == -1:
+        raise ValueError(f"get_letters_range: '{start}' 或 '{end}' 不在合法字符范围内")
+    end_index += 1
     if letters[start_index:end_index] == "":
         raise Exception("字符串开始和结束错误，请检查")
     else:
@@ -324,26 +325,24 @@ def getNowTime() -> str:
 
 def get_next_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
     """
-    返回下一个字符
+    返回下一个字符，如果不存在则返回None
     """
-    if char in alphabet:
-        index = alphabet.index(char)
-        # 如果不是最后一个字符，返回下一个字符，否则返回第一个字符
-        return alphabet[(index + 1) % len(alphabet)]
-    else:
-        raise ValueError(f"字符 '{char}' 不在给定的字符串中")
+    index = alphabet.find(char)
+    if index == -1:
+        return None
+    # 如果不是最后一个字符，返回下一个字符，否则返回第一个字符
+    return alphabet[(index + 1) % len(alphabet)]
 
 
 def get_pre_char(char, alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
     """
-    返回上一个字符
+    返回上一个字符，如果不存在则返回None
     """
-    if char in alphabet:
-        index = alphabet.index(char)
-        # 如果不是第一个字符，返回上一个字符，否则返回最后字符
-        return alphabet[(index - 1) % len(alphabet)]
-    else:
-        raise ValueError(f"字符 '{char}' 不在给定的字符串中")
+    index = alphabet.find(char)
+    if index == -1:
+        return None
+    # 如果不是第一个字符，返回上一个字符，否则返回最后字符
+    return alphabet[(index - 1) % len(alphabet)]
 
 
 # @func_set_timeout(2000)
@@ -426,10 +425,12 @@ def DecryptionFirmware(
         if (
             model in oldJson.keys()
             and cc in oldJson[model].keys()
-            and "最新测试版" in oldJson[model][cc].keys()
-            and oldJson[model][cc]["最新测试版"] != ""
+            and "常规更新测试版" in oldJson[model][cc].keys()
         ):
-            lastVersion = oldJson[model][cc]["最新测试版"].split("/")[0]
+            if "暂无" in oldJson[model][cc]["大版本测试版"].split("/")[0]:
+                lastVersion = oldJson[model][cc]["常规更新测试版"].split("/")[0]
+            else:
+                lastVersion = oldJson[model][cc]["大版本测试版"].split("/")[0]
             oldDicts[model][cc] = deepcopy(oldJson[model][cc]["版本号"])
             # CpVersions保存最近的3个基带版本
             seen = set()
@@ -666,26 +667,39 @@ def DecryptionFirmware(
         # 新增解密数据
         oldDicts[model][cc].update(DecDicts)
         key_func = make_sort_key(oldDicts[model][cc].values())
-        Dicts[model][cc]["最新测试版"] = sorted(
-            oldDicts[model][cc].values(), key=key_func
-        )[
-            -1
-        ]  # 记录最新版本号
+        sortedList = sorted(oldDicts[model][cc].values(), key=key_func)
+        if latestVerStr != "暂无正式版":
+            stableVersion = latestVerStr.split("/")[0]
+            currentChar = stableVersion[-4]
+            majorChar = get_next_char(stableVersion[-4])  # 获取大版本号的下一个字符
+            minorVersion = getLatestVersion(sortedList, currentChar)  # 获取日常系统更新
+            majorVerison = getLatestVersion(sortedList, majorChar)  # 获取大版本更新
+            if majorVerison == None:
+                majorVerison = "暂无大版本测试版"
+            else :
+                majorChar = get_next_char(stableVersion[-4])+"Z" 
+                majorVerison = getLatestVersion(sortedList, majorChar) 
+            Dicts[model][cc]["常规更新测试版"] = minorVersion
+            Dicts[model][cc]["大版本测试版"] = majorVerison
+        else:
+            Dicts[model][cc]["常规更新测试版"] = sortedList[-1]
+            Dicts[model][cc]["大版本测试版"] = "暂无大版本测试版"
+        # Dicts[model][cc]["大版本测试版"]
         Dicts[model][cc]["版本号"] = DecDicts
         Dicts[model][cc]["最新测试版上传时间"] = ""
         if len(DecDicts) > 0:
-            new_latest = Dicts[model][cc]["最新测试版"].split("/")[0]
+            new_latest = Dicts[model][cc]["大版本测试版"].split("/")[0]
             if new_latest != lastVersion:
                 Dicts[model][cc]["最新测试版上传时间"] = getNowTime()
         Dicts[model][cc]["最新正式版"] = latestVerStr
         Dicts[model][cc]["正式版安卓版本"] = currentOS
         if currentOS != "未知":
-            if Dicts[model][cc]["最新测试版"].split("/")[0][-4] == "Z":
+            if Dicts[model][cc]["大版本测试版"].split("/")[0][-4] == "Z":
                 Dicts[model][cc]["测试版安卓版本"] = str(int(currentOS) + 1)
             else:
                 Dicts[model][cc]["测试版安卓版本"] = str(
                     int(currentOS)
-                    + ord(Dicts[model][cc]["最新测试版"].split("/")[0][-4])
+                    + ord(Dicts[model][cc]["大版本测试版"].split("/")[0][-4])
                     - ord(Dicts[model][cc]["最新正式版"].split("/")[0][-4])
                 )
         else:
@@ -720,54 +734,107 @@ def DecryptionFirmware(
         printStr(f"发生错误:{e}")
 
 
+# def make_sort_key(strings):
+#     order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#     order_map = {c: i for i, c in enumerate(order)}
+
+#     def get_tail4(s):
+#         first_part = s.split("/")[0]
+#         return first_part[-4:] if len(first_part) >= 4 else first_part
+
+#     # 统计所有非Z开头的后三位
+#     non_z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] != "Z"]
+#     non_z_last3 = [get_tail4(s)[1:] for s in non_z_strings]
+
+#     # 统计所有Z开头的后三位
+#     z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] == "Z"]
+#     z_last3 = [get_tail4(s)[1:] for s in z_strings]
+
+#     def last3_key(last3):
+#         return tuple(order_map.get(c, -1) for c in last3)
+
+#     # 计算非Z开头的最大后三位和Z开头的最大后三位
+#     max_non_z_last3 = max([last3_key(x) for x in non_z_last3], default=None)
+#     max_z_last3 = max([last3_key(x) for x in z_last3], default=None)
+
+#     def key_func(s):
+#         tail4 = get_tail4(s)
+#         if len(tail4) < 4:
+#             # 长度不足4位，排最前
+#             return (0, tuple(order_map.get(c, -1) for c in tail4))
+
+#         head = tail4[0]
+#         last3 = tail4[1:]
+#         last3_tuple = last3_key(last3)
+
+#         if head == "Z":
+#             # 如果存在非Z字符串且Z的后三位大于非Z最大后三位，排最后
+#             if max_non_z_last3 is not None and last3_tuple > max_non_z_last3:
+#                 # 如果同时是Z中的最大值，则排在最最后
+#                 if max_z_last3 is not None and last3_tuple == max_z_last3:
+#                     return (3, last3_tuple)
+#                 return (2, last3_tuple)
+#             else:
+#                 # 如果Z的后三位小于等于非Z最大后三位，排最前
+#                 return (0, last3_tuple)
+#         else:
+#             # 非Z开头字符串正常排序
+#             return (1, tuple(order_map.get(c, -1) for c in tail4))
+
+#     return key_func
+
+
 def make_sort_key(strings):
     order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     order_map = {c: i for i, c in enumerate(order)}
-    
+
     def get_tail4(s):
         first_part = s.split("/")[0]
         return first_part[-4:] if len(first_part) >= 4 else first_part
-        
-    # 统计所有非Z开头的后三位
-    non_z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] != "Z"]
-    non_z_last3 = [get_tail4(s)[1:] for s in non_z_strings]
-    
-    # 统计所有Z开头的后三位
-    z_strings = [s for s in strings if len(get_tail4(s)) == 4 and get_tail4(s)[0] == "Z"]
-    z_last3 = [get_tail4(s)[1:] for s in z_strings]
-    
-    def last3_key(last3):
-        return tuple(order_map.get(c, -1) for c in last3)
-    
-    # 计算非Z开头的最大后三位和Z开头的最大后三位
-    max_non_z_last3 = max([last3_key(x) for x in non_z_last3], default=None)
-    max_z_last3 = max([last3_key(x) for x in z_last3], default=None)
-    
+
     def key_func(s):
         tail4 = get_tail4(s)
         if len(tail4) < 4:
-            # 长度不足4位，排最前
-            return (0, tuple(order_map.get(c, -1) for c in tail4))
-        
-        head = tail4[0]
-        last3 = tail4[1:]
-        last3_tuple = last3_key(last3)
-        
-        if head == "Z":
-            # 如果存在非Z字符串且Z的后三位大于非Z最大后三位，排最后
-            if max_non_z_last3 is not None and last3_tuple > max_non_z_last3:
-                # 如果同时是Z中的最大值，则排在最最后
-                if max_z_last3 is not None and last3_tuple == max_z_last3:
-                    return (3, last3_tuple)
-                return (2, last3_tuple)
-            else:
-                # 如果Z的后三位小于等于非Z最大后三位，排最前
-                return (0, last3_tuple)
-        else:
-            # 非Z开头字符串正常排序
-            return (1, tuple(order_map.get(c, -1) for c in tail4))
-            
+            return (-1, -1, -1, -1)
+        last3 = tail4[-3:]
+        fourth = tail4[-4]
+        # Z排前面，其余按顺序
+        z_priority = 0 if fourth == "Z" else 1
+        return tuple(order_map.get(c, 98) for c in last3) + (
+            z_priority,
+            order_map.get(fourth, 98),
+        )
+
     return key_func
+
+
+def getLatestVersion(version_list, chars):
+    """
+    过滤倒数第四位为指定字符集的版本号，并按后三位升序，返回最大的版本号。
+    :param version_list: 版本号字符串列表
+    :param chars: 指定倒数第四位字符集（如 "ZAB"）
+    :return: 最大版本号字符串（如无则返回None）
+    """
+    order = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    order_map = {c: i for i, c in enumerate(order)}
+
+    def get_tail4(s):
+        first_part = s.split("/")[0]
+        return first_part[-4:] if len(first_part) >= 4 else first_part
+
+    # 支持多个字符过滤
+    filtered = [
+        s for s in version_list if len(get_tail4(s)) == 4 and get_tail4(s)[0] in chars
+    ]
+    if not filtered:
+        return None
+
+    def last3_key(s):
+        tail4 = get_tail4(s)
+        return tuple(order_map.get(c, -1) for c in tail4[1:])
+
+    return max(filtered, key=last3_key)
+
 
 def sendMessageByTG_Bot(title: str, content: str) -> None:
     """
@@ -921,7 +988,7 @@ def run():
                     for cc in modelDic[model]["CC"]:
                         if not cc in decDicts[model].keys():
                             continue
-                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']}  \n测试版:{decDicts[model][cc]['最新测试版']} \n"
+                        textStr += f"#### {modelDic[model]['name']} {getCountryName(cc)}版: \n正式版:{decDicts[model][cc]['最新正式版']}  \n日常更新测试版:{decDicts[model][cc]['常规更新测试版']}  \n大版本测试版:{decDicts[model][cc]['大版本测试版']} \n"
                 f.write(textStr)
     endTime = time.perf_counter()
     printStr(f"总耗时:{round(endTime - startTime, 2)}秒")
@@ -975,7 +1042,7 @@ def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
         # 新增设备初始化内容
         newMDic[model][cc] = {
             "版本号": {},
-            "最新测试版": "",
+            "大版本测试版": "",
             "最新正式版": "",
             "最新版本号说明": "",
             "解密百分比": "",
@@ -1034,8 +1101,10 @@ def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
     newMDic[model][cc]["机型"] = modelDic[model]["name"]
     if verDic == None:
         return
-    if verDic[model][cc]["最新测试版"] != "":
-        newMDic[model][cc]["最新测试版"] = verDic[model][cc]["最新测试版"]
+    if verDic[model][cc]["大版本测试版"] != "":
+        newMDic[model][cc]["大版本测试版"] = verDic[model][cc]["大版本测试版"]
+    if verDic[model][cc]["常规更新测试版"] != "":
+        newMDic[model][cc]["常规更新测试版"] = verDic[model][cc]["常规更新测试版"]
     if verDic[model][cc]["最新正式版"] != "":
         newMDic[model][cc]["最新正式版"] = verDic[model][cc]["最新正式版"]
     if verDic[model][cc]["最新测试版上传时间"] != "":
@@ -1046,13 +1115,15 @@ def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
     newMDic[model][cc]["测试版安卓版本"] = verDic[model][cc]["测试版安卓版本"]
 
     # 版本号说明
-    ver = newMDic[model][cc]["最新测试版"].split("/")[0]
-    yearStr = ord(ver[-3]) - 65 + 2001  # 获取更新年份
-    monthStr = ord(ver[-2]) - 64  # 获取更新月份
-    countStr = char_to_number(ver[-1])  # 获取第几次更新
-    definitionStr = f"{yearStr}年{monthStr}月第{countStr}个测试版"
-    newMDic[model][cc]["最新版本号说明"] = definitionStr
-
+    ver = newMDic[model][cc]["大版本测试版"].split("/")[0]
+    if "暂无" not in ver:
+        yearStr = ord(ver[-3]) - 65 + 2001  # 获取更新年份
+        monthStr = ord(ver[-2]) - 64  # 获取更新月份
+        countStr = char_to_number(ver[-1])  # 获取第几次更新
+        definitionStr = f"{yearStr}年{monthStr}月第{countStr}个测试版"
+        newMDic[model][cc]["最新版本号说明"] = definitionStr
+    else:
+        newMDic[model][cc]["最新版本号说明"] = "暂无"
     if verDic[model][cc]["解密百分比"] != "":
         newMDic[model][cc]["解密百分比"] = verDic[model][cc]["解密百分比"]
         # 如果有缓存数据，则获取差集
@@ -1123,10 +1194,7 @@ if __name__ == "__main__":
         oldMD5Dict = LoadOldMD5Firmware()  # 获取上次的MD5编码版本号数据
         if isDebug:
             # modelDic = dict(list(getModelDictsFromDB().items())[:5])  # 测试时使用
-            modelDic = {
-                "SM-S938B": {"name": "S25 Ultra", "CC": ["EUX"]},
-                "SM-F7310": {"name": "Z flip5", "CC": ["CHC"]},
-            }  # 测试时使用
+            modelDic = {"SM-S731U": {"name": "S25 FE", "CC": ["ATT"]}}  # 测试时使用
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()

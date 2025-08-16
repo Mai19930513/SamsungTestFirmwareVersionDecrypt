@@ -668,7 +668,7 @@ def DecryptionFirmware(
         oldDicts[model][cc].update(DecDicts)
         key_func = make_sort_key(oldDicts[model][cc].values())
         sortedList = sorted(oldDicts[model][cc].values(), key=key_func)
-        if latestVerStr != "暂无正式版":
+        if latestVerStr != "暂无正式版" and latestVerStr!=None:
             stableVersion = latestVerStr.split("/")[0]
             currentChar = stableVersion[-4]
             majorChar = get_next_char(stableVersion[-4])  # 获取大版本号的下一个字符

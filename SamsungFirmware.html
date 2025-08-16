@@ -157,17 +157,29 @@
 
         .table-container {
             top: 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: auto;
             /* 固定在页面顶部 */
             background-color: white;
             /* 设置背景颜色，避免透明 */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
             /* 添加阴影效果 */
             position: relative;
             z-index: 0;
-            overflow-x: auto;
-            /* 启用水平滚动条 */
-            max-width: 100%;
-            /* 确保表格容器不超出屏幕宽度 */
+        }
+
+        #firmwareTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #firmwareTable thead th {
+            position: sticky;
+            top: 0;
+            background: var(--primary-color);
+            color: white;
+            z-index: 2;
         }
 
         .last-update {
@@ -215,14 +227,9 @@
                 font-size: 0.8rem;
             }
 
-            /* th:nth-child(3),
-            td:nth-child(3), */
             /* 隐藏地区代码 */
-            /* th:nth-child(4),
-            td:nth-child(4), */
-            /* 隐藏地区名称 */
-            th:nth-child(7),
-            td:nth-child(7) {
+            th:nth-child(3),
+            td:nth-child(3) {
                 /* 隐藏测试版本号说明 */
                 display: none;
             }
@@ -335,9 +342,9 @@
         }
 
         .android_os {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             /* 字体稍小 */
-            color: #6c757d;
+            color: #4a90e2;
             /* 使用灰色 */
             margin-top: 0.3rem;
             /* 与上方内容保持间距 */
@@ -345,19 +352,71 @@
             /* 独占一行 */
             font-weight: bold;
             /* 加粗字体 */
-            padding: 0.2rem 0.5rem;
+            padding: 0.1rem 0.4rem;
             /* 内边距 */
-            border-radius: 4px;
+            border-radius: 20px;
             /* 圆角边框 */
             text-align: center;
             /* 居中对齐 */
+            border: 0.5px SOLID
+        }
+
+        @keyframes fadeInRow {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tr-fade-in {
+            animation: fadeInRow 0.3s ease;
+        }
+
+        .end-tip-row {
+            background: linear-gradient(90deg, #e3f0ff 0%, #f0f0f0 100%);
+            color: #4a90e2;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 0 0 12px 12px;
+            font-size: 1.05rem;
+            letter-spacing: 2px;
+            animation: fadeInEndTip 0.6s;
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+        }
+
+        @keyframes fadeInEndTip {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fixed-header-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            background: #fff;
+            /* 保证有背景色，避免内容叠加 */
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.06);
+            padding-bottom: 1rem;
+            /* 可选：加点阴影和间距 */
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1><i class="fas fa-mobile-alt"></i>三星测试版固件版本查询</h1>
+        <h1><i class="title"></i>三星测试版固件版本查询</h1>
         <div id="lastUpdate" class="last-update"></div>
         <div class="filters">
             <div class="filter-group">
@@ -386,24 +445,23 @@
                         <th>地区名称</th>
                         <th>最新正式版</th>
                         <th>最新测试版</th>
-                        <th>测试版上线时间</th>
+                        <th id="sortUpdateTime" class="sortable">测试版上线时间</th>
                         <th>测试版本号说明</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
             <div class="no-results" id="noResults">
-                <i class="fas fa-info-circle"></i> 没有找到匹配的结果
+                <i></i> 没有找到匹配的结果
             </div>
         </div>
 
     </div>
 
     <script>
-
         document.addEventListener('DOMContentLoaded', () => {
-            // const DATA_URL = 'https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware.json';
-            const DATA_URL = 'https://ghfast.top/https://raw.githubusercontent.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/refs/heads/master/firmware_mini.json';
+            const timestamp = Date.now()
+            const DATA_URL = `https://cdn.jsdelivr.net/gh/Mai19930513/SamsungTestFirmwareVersionDecrypt/firmware_mini.json?v=${timestamp}`;
             class FirmwareTable {
                 constructor() {
                     this.tableBody = document.querySelector('#firmwareTable tbody');
@@ -412,12 +470,57 @@
                     this.isLoading = false; // 是否正在加载数据
                     this.filters = { model: '', region: '' }; // 筛选条件
                     this.sortOrder = 'desc'; // 默认排序顺序为降序
+                    this.sortKey = 'model';
+                    this.copyEventBound = false; // 事件委托标记
                     this.initFilters();
                     this.loadData();
                     this.initScrollListener();
                     this.initSortListeners(); // 初始化排序事件监听器
+                    this.addCopyEvent(); // 只需绑定一次事件委托
+                    this.checkAutoLoad(); // 页面初始化时检测
                 }
+                initSortListeners() {
+                    const sortModelHeader = document.getElementById('sortModel');
+                    const sortUpdateTimeHeader = document.getElementById('sortUpdateTime'); // 新增
 
+                    sortModelHeader.addEventListener('click', () => {
+                        this.sortKey = 'model';
+                        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+                        sortModelHeader.classList.toggle('desc', this.sortOrder === 'desc');
+                        sortUpdateTimeHeader.classList.remove('desc');
+                        this.sortData('model', this.sortOrder);
+                        this.resetTable();
+                    });
+
+                    sortUpdateTimeHeader.addEventListener('click', () => {
+                        this.sortKey = 'updateTime';
+                        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+                        sortUpdateTimeHeader.classList.toggle('desc', this.sortOrder === 'desc');
+                        sortModelHeader.classList.remove('desc');
+                        this.sortData('updateTime', this.sortOrder);
+                        this.resetTable();
+                    });
+                }
+                sortData(key, order) {
+                    this.processedData.sort((a, b) => {
+                        let valueA = a[key];
+                        let valueB = b[key];
+                        // 针对时间字段做特殊处理
+                        if (key === 'updateTime') {
+                            // 统一为时间戳，未知排最后
+                            valueA = Date.parse(valueA) || 0;
+                            valueB = Date.parse(valueB) || 0;
+                        } else {
+                            valueA = valueA.toLowerCase();
+                            valueB = valueB.toLowerCase();
+                        }
+                        if (order === 'asc') {
+                            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                        } else {
+                            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                        }
+                    });
+                }
                 async loadData() {
                     try {
                         const response = await fetch(DATA_URL)
@@ -448,7 +551,7 @@
                             return;
                         }
                         Object.entries(regions).forEach(([regionCode, details]) => {
-                            if (!details || !details.最新正式版 || !details.最新测试版) {
+                            if (!details || !details.最新正式版 || !details.常规更新测试版) {
                                 console.warn('跳过无效数据:', { model, regionCode, details });
                                 return; // 跳过无效数据
                             }
@@ -458,8 +561,10 @@
                                 regionName: details.地区,
                                 official: this.parseVersion(details.最新正式版),
                                 official_full: details.最新正式版,
-                                beta: this.parseVersion(details.最新测试版),
-                                beta_full: details.最新测试版,
+                                major: this.parseVersion(details.大版本测试版),
+                                major_full: details.大版本测试版,
+                                minor: this.parseVersion(details.常规更新测试版),
+                                minor_full: details.常规更新测试版,
                                 description: details.最新版本号说明,
                                 deviceName: details.机型,
                                 updateTime: details.最新测试版上传时间,
@@ -469,22 +574,39 @@
                         });
                     });
                 }
-
-                parseVersion(version) {
-                    {
-                        if (!version || typeof version !== 'string') {
-                            console.warn('无效的版本号:', version);
-                            return "未知版本"; // 返回默认值
-                        }
-                        const parts = version.split('/');
-                        return parts[0]; // 返回分割后的第一个部分
+                checkAutoLoad() {
+                    // 防止递归死循环
+                    if (this.isLoading) return;
+                    // 获取当前筛选后的数据总量
+                    const filteredData = this.processedData.filter(item => {
+                        const modelMatch = item.model.toLowerCase().includes(this.filters.model.toLowerCase());
+                        const regionMatch = item.regionCode.toLowerCase().includes(this.filters.region.toLowerCase());
+                        return modelMatch && regionMatch;
+                    });
+                    // 只要页面未填满且还有数据就继续加载
+                    if (
+                        this.currentIndex < filteredData.length &&
+                        document.body.scrollHeight <= window.innerHeight + 10
+                    ) {
+                        this.renderTable();
                     }
-
+                }
+                parseVersion(version) {
+                    if (!version || typeof version !== 'string') {
+                        console.warn('无效的版本号:', version);
+                        return "未知版本"; // 返回默认值
+                    }
+                    const parts = version.split('/');
+                    return parts[0]; // 返回分割后的第一个部分
                 }
 
                 renderTable() {
                     if (this.isLoading) return; // 防止重复加载
                     this.isLoading = true;
+                    // 先移除已存在的“已到最后”提示行
+                    const lastTipRow = this.tableBody.querySelector('tr[data-tip="end"]');
+                    if (lastTipRow) lastTipRow.remove();
+
                     // 应用筛选条件
                     const filteredData = this.processedData.filter(item => {
                         const modelMatch = item.model.toLowerCase().includes(this.filters.model.toLowerCase());
@@ -500,41 +622,61 @@
                     const fragment = document.createDocumentFragment();
                     nextData.forEach(item => {
                         const row = document.createElement('tr');
+                        row.classList.add('tr-fade-in'); // 添加动画类
                         row.innerHTML = `
-            <td>${item.deviceName}</td>
-            <td>${item.model}</td>
-            <td>${item.regionCode}</td>
-            <td>${item.regionName}</td>
-            <td title="${item.official_full || '无版本号'}">
-                ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
-            <div class="android_os">OS:${item.stableOS || '未知'}</div>
-                </td>
-            <td title="${item.beta_full || '无版本号'}" class="copyable">
-                ${item.beta ? `<span class="version-badge beta-badge">${item.beta}</span>` : '-'}
-            
-            <div class="android_os">OS:${item.devOS || '未知'}</div>
-            </td>
-            <td>${item.updateTime || '未知'}</td>
-            <td>${item.description}</td>
-        `;
+                        <td>${item.deviceName}</td>
+                        <td>${item.model}</td>
+                        <td>${item.regionCode}</td>
+                        <td>${item.regionName}</td>
+                        <td style="min-width:180; vertical-align:middle; ">
+                            <div style="margin-bottom:0.5em;">
+                                ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
+                            </div>
+                            <div class="android_os" style="margin-bottom:0.2em;">Android OS:${item.stableOS || '未知'}</div>
+                        </td>
+                        <td style="min-width:180px; vertical-align:middle; ">
+                            <div>
+                                <span style="font-weight:bold;color:#4a90e2;display:inline-block;text-align:right;">日常更新(OS:${item.stableOS || '未知'})：</span>
+                                ${item.minor ? `<span class="version-badge beta-badge">${item.minor}</span>` : '-'}
+                            </div>
+                            <div>
+                                <span style="font-weight:bold;color:#6c5ce7;display:inline-block;text-align:right;">下个版本(OS:${item.devOS || '未知'})：</span>
+                                ${item.major ? `<span class="version-badge beta-badge">${item.major}</span>` : '-'}
+                            </div>
+                        </td>
+                        <td>${item.updateTime || '未知'}</td>
+                        <td>${item.description}</td>
+                    `;
                         fragment.appendChild(row);
                     });
-
+                    // 判断是否已到最后，插入提示行
+                    if (this.currentIndex >= filteredData.length && filteredData.length > 0) {
+                        const tipRow = document.createElement('tr');
+                        tipRow.setAttribute('data-tip', 'end'); // 标记提示行
+                        tipRow.className = 'end-tip-row'; // 添加美观样式和动画
+                        tipRow.innerHTML = `<td colspan="8">加载完毕！共 ${filteredData.length} 条数据</td>`;
+                        fragment.appendChild(tipRow);
+                    }
                     this.tableBody.appendChild(fragment);
                     this.isLoading = false;
 
                     document.getElementById('noResults').style.display =
                         filteredData.length ? 'none' : 'block';
-                    this.addCopyEvent();
+
+                    // 每次渲染后都检测是否需要继续加载
+                    setTimeout(() => {
+                        this.checkAutoLoad();
+                    }, 0);
                 }
 
+                // 滚动事件节流
                 initScrollListener() {
-                    window.addEventListener('scroll', () => {
-                        // 检查是否接近页面底部
+                    window.addEventListener('scroll', throttle(() => {
                         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
                             this.renderTable();
                         }
-                    });
+                        this.checkAutoLoad(); // 每次滚动后都检测
+                    }, 200)); // 200ms 节流
                 }
 
                 initFilters() {
@@ -566,42 +708,6 @@
                     }, 300));
                 }
 
-                // 初始化排序事件监听器
-                initSortListeners() {
-                    const sortModelHeader = document.getElementById('sortModel');
-                    sortModelHeader.addEventListener('click', () => {
-                        // 切换排序顺序
-                        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-
-                        // 更新箭头样式
-                        if (this.sortOrder === 'asc') {
-                            sortModelHeader.classList.remove('desc');
-                        } else {
-                            sortModelHeader.classList.add('desc');
-                        }
-
-                        // 按设备型号排序
-                        this.sortData('model', this.sortOrder);
-
-                        // 重新渲染表格
-                        this.resetTable();
-                    });
-                }
-
-                // 排序数据
-                sortData(key, order) {
-                    this.processedData.sort((a, b) => {
-                        const valueA = a[key].toLowerCase();
-                        const valueB = b[key].toLowerCase();
-
-                        if (order === 'asc') {
-                            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-                        } else {
-                            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
-                        }
-                    });
-                }
-
                 resetTable() {
                     this.currentIndex = 0; // 重置索引
                     this.tableBody.innerHTML = ''; // 清空表格
@@ -628,17 +734,12 @@
                     }
                 }
 
+                // 事件委托，只绑定一次
                 addCopyEvent() {
-                    const copyableCells = document.querySelectorAll('.copyable');
-                    copyableCells.forEach(cell => {
-                        // 移除之前绑定的事件监听器
-                        cell.replaceWith(cell.cloneNode(true));
-                    });
-
-                    // 重新获取更新后的 copyableCells
-                    const updatedCopyableCells = document.querySelectorAll('.copyable');
-                    updatedCopyableCells.forEach(cell => {
-                        cell.addEventListener('click', () => {
+                    if (this.copyEventBound) return;
+                    this.tableBody.addEventListener('click', (e) => {
+                        const cell = e.target.closest('.copyable');
+                        if (cell) {
                             const textToCopy = cell.getAttribute('title');
                             if (textToCopy && textToCopy !== '无版本号') {
                                 navigator.clipboard.writeText(textToCopy).then(() => {
@@ -649,8 +750,9 @@
                             } else {
                                 this.showCustomPopup('无可复制的版本号');
                             }
-                        });
+                        }
                     });
+                    this.copyEventBound = true;
                 }
 
                 // 自定义弹窗显示方法
@@ -679,6 +781,17 @@
                     clearTimeout(timer);
                     timer = setTimeout(() => func.apply(this, args), delay);
                 };
+            }
+            // 节流函数
+            function throttle(func, delay) {
+                let last = 0;
+                return function (...args) {
+                    const now = Date.now();
+                    if (now - last > delay) {
+                        last = now;
+                        func.apply(this, args);
+                    }
+                }
             }
             // 初始化表格
             new FirmwareTable();

@@ -697,11 +697,18 @@ def DecryptionFirmware(
             if Dicts[model][cc]["大版本测试版"].split("/")[0][-4] == "Z":
                 Dicts[model][cc]["测试版安卓版本"] = str(int(currentOS) + 1)
             else:
-                Dicts[model][cc]["测试版安卓版本"] = str(
-                    int(currentOS)
-                    + ord(Dicts[model][cc]["大版本测试版"].split("/")[0][-4])
-                    - ord(Dicts[model][cc]["最新正式版"].split("/")[0][-4])
-                )
+                if '暂无' in Dicts[model][cc]["大版本测试版"].split("/")[0]:
+                    Dicts[model][cc]["测试版安卓版本"] = str(
+                        int(currentOS)
+                        + ord(Dicts[model][cc]["常规更新测试版"].split("/")[0][-4])
+                        - ord(Dicts[model][cc]["最新正式版"].split("/")[0][-4])
+                    )
+                else:
+                    Dicts[model][cc]["测试版安卓版本"] = str(
+                        int(currentOS)
+                        + ord(Dicts[model][cc]["大版本测试版"].split("/")[0][-4])
+                        - ord(Dicts[model][cc]["最新正式版"].split("/")[0][-4])
+                    )
         else:
             Dicts[model][cc]["正式版安卓版本"] = current_latest_version
             Dicts[model][cc]["测试版安卓版本"] = current_latest_version

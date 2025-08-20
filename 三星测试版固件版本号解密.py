@@ -1126,11 +1126,18 @@ def process_cc(cc, modelDic, oldMD5Dict, md5Dic, oldJson, model):
 
     # 版本号说明
     ver = newMDic[model][cc]["大版本测试版"].split("/")[0]
+    ver2 = newMDic[model][cc]["常规更新测试版"].split("/")[0]
     if "暂无" not in ver:
         yearStr = ord(ver[-3]) - 65 + 2001  # 获取更新年份
         monthStr = ord(ver[-2]) - 64  # 获取更新月份
         countStr = char_to_number(ver[-1])  # 获取第几次更新
-        definitionStr = f"{yearStr}年{monthStr}月第{countStr}个测试版"
+        definitionStr = f"{yearStr}年{monthStr}月第{countStr}个大版本测试版"
+        newMDic[model][cc]["最新版本号说明"] = definitionStr
+    elif "暂无" not in ver2:
+        yearStr = ord(ver2[-3]) - 65 + 2001  # 获取更新年份
+        monthStr = ord(ver2[-2]) - 64  # 获取更新月份
+        countStr = char_to_number(ver2[-1])  # 获取第几次更新
+        definitionStr = f"{yearStr}年{monthStr}月第{countStr}个常规更新测试版"
         newMDic[model][cc]["最新版本号说明"] = definitionStr
     else:
         newMDic[model][cc]["最新版本号说明"] = "暂无"

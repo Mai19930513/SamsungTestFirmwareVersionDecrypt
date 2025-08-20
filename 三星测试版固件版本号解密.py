@@ -421,16 +421,18 @@ def DecryptionFirmware(
         startBLVersion = "0"  # 设置默认BL版本号为0
         endBLVersion = "2"
         # 初始化结束
-        lastVersion = ""
+        lastVersion1 = ""    #上次常规版本号
+        lastVersion2 = ""    #上次大版本版本号
         if (
             model in oldJson.keys()
             and cc in oldJson[model].keys()
             and "常规更新测试版" in oldJson[model][cc].keys()
         ):
             if "暂无" in oldJson[model][cc]["大版本测试版"].split("/")[0]:
-                lastVersion = oldJson[model][cc]["常规更新测试版"].split("/")[0]
+                lastVersion1 = oldJson[model][cc]["常规更新测试版"].split("/")[0]
             else:
-                lastVersion = oldJson[model][cc]["大版本测试版"].split("/")[0]
+                lastVersion1 = oldJson[model][cc]["常规更新测试版"].split("/")[0]
+                lastVersion2 = oldJson[model][cc]["大版本测试版"].split("/")[0]
             oldDicts[model][cc] = deepcopy(oldJson[model][cc]["版本号"])
             # CpVersions保存最近的3个基带版本
             seen = set()
@@ -441,11 +443,11 @@ def DecryptionFirmware(
                 -12:
             ]  # 保存最近的12个基带版本
             CpVersions = newMV
-        if lastVersion != "":
-            startBLVersion = lastVersion[-5]
+        if lastVersion1 != "":
+            startBLVersion = lastVersion1[-5]
             if latestVer != "":
                 startUpdateCount = latestVer[0][-4]
-            startYear = lastVersion[-3]  #'A'表示2001年
+            startYear = lastVersion1[-3]  #'A'表示2001年
         if latestVer != "":
             endBLVersion = get_next_char(
                 latestVer[0][-5], "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -688,9 +690,9 @@ def DecryptionFirmware(
         Dicts[model][cc]["版本号"] = DecDicts
         Dicts[model][cc]["最新测试版上传时间"] = ""
         if len(DecDicts) > 0:
-            new_latest1 = Dicts[model][cc]["大版本测试版"].split("/")[0]
+            new_latest1 = Dicts[model][cc]["常规更新测试版"].split("/")[0]
             new_latest2 = Dicts[model][cc]["大版本测试版"].split("/")[0]
-            if new_latest1 != lastVersion or new_latest2 != lastVersion:
+            if new_latest1 != lastVersion1 or new_latest2 != lastVersion2:
                 Dicts[model][cc]["最新测试版上传时间"] = getNowTime()
         Dicts[model][cc]["最新正式版"] = latestVerStr
         Dicts[model][cc]["正式版安卓版本"] = currentOS

@@ -688,8 +688,9 @@ def DecryptionFirmware(
         Dicts[model][cc]["版本号"] = DecDicts
         Dicts[model][cc]["最新测试版上传时间"] = ""
         if len(DecDicts) > 0:
-            new_latest = Dicts[model][cc]["大版本测试版"].split("/")[0]
-            if new_latest != lastVersion:
+            new_latest1 = Dicts[model][cc]["大版本测试版"].split("/")[0]
+            new_latest2 = Dicts[model][cc]["大版本测试版"].split("/")[0]
+            if new_latest1 != lastVersion or new_latest2 != lastVersion:
                 Dicts[model][cc]["最新测试版上传时间"] = getNowTime()
         Dicts[model][cc]["最新正式版"] = latestVerStr
         Dicts[model][cc]["正式版安卓版本"] = currentOS

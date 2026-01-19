@@ -22,6 +22,8 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_compl
 import threading
 from rich.console import Console
 from collections import OrderedDict
+from urllib.parse import urljoin
+import re
 
 load_dotenv()
 thread_local = threading.local()
@@ -1205,6 +1207,232 @@ def init_globals(q):
     global log_queue
     log_queue = q
 
+def _now_shanghai_str() -> str:
+    return getNowTime()  # 复用你已有的函数 [file:1]
+
+def _parse_time_str(s: str) -> datetime | None:
+    if not s:
+        return None
+    try:
+        # getNowTime() 返回形如 2026-01-19 12:53
+        # 按上海时区理解
+        tz = timezone(timedelta(hours=8), name="Asia/Shanghai")
+        dt = datetime.strptime(s, "%Y-%m-%d %H:%M")
+        return dt.replace(tzinfo=tz)
+    except Exception:
+        return None
+
+def _days_since(time_str: str) -> int | None:
+    dt = _parse_time_str(time_str)
+    if not dt:
+        return None
+    tz = timezone(timedelta(hours=8), name="Asia/Shanghai")
+    now_dt = datetime.utcnow().replace(tzinfo=timezone.utc).astimezone(tz)
+    return (now_dt - dt).days
+
+def _clean_text(s: str) -> str:
+    if s is None:
+        return ""
+    return re.sub(r"\s+", " ", s).strip()
+
+def _extract_row_fields_from_html(row_html: str) -> dict:
+    html = f"<div>{row_html}</div>"
+    root = etree.HTML(html)
+    divs = root.xpath("//div[contains(@class,'col-md-3')]")
+    texts = []
+    for d in divs:
+        t = _clean_text("".join(d.xpath(".//text()")))
+        t = t.replace("：", ":")
+        t = re.sub(r"\s*:\s*", ":", t)
+        texts.append(t)
+
+    result = {"版本号": "", "Android版本": "", "发布日期": "", "安全补丁级别": ""}
+    result["版本号"] = texts[0].split(":", 1)[1].strip()
+    result["Android版本"] = texts[1].split(":", 1)[1].strip()
+    result["发布日期"] = texts[2].split(":", 1)[1].strip()
+    result["安全补丁级别"] = texts[3].split(":", 1)[1].strip()
+    return result
+
+def _get_real_doc_url(model: str, cc: str) -> str | None:
+    entry_url = f"https://doc.samsungmobile.com/{model}/{cc}/doc.html"
+    content = requestXML(entry_url)
+    if not content:
+        return None
+
+    root = etree.HTML(content)
+    value = root.xpath("//input[@id='dflt_page']/@value")
+    if not value:
+        return None
+
+    rel = value[0].strip()
+    return urljoin(entry_url, rel)
+
+def _parse_update_rows(real_url: str) -> list[dict]:
+    content = requestXML(real_url)
+    if not content:
+        return []
+
+    root = etree.HTML(content)
+    rows = root.xpath("//*[contains(concat(' ', normalize-space(@class), ' '), ' row ')]")
+    if not rows or len(rows) <= 1:
+        return []
+
+    log_rows = rows[1:]
+    items = []
+    for r in log_rows:
+        row_html = etree.tostring(r, encoding="unicode", method="html")
+        item = _extract_row_fields_from_html(row_html)
+        if any(item.values()):
+            items.append(item)
+
+    # 转成从最早到最新
+    items.reverse()
+
+    # 加序号（从1开始）
+    for i, it in enumerate(items, start=1):
+        it["index"] = i
+    return items
+
+def _load_update_json(path: str) -> dict:
+    if not os.path.exists(path):
+        return {"生成时间": "", "models": {}}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            s = f.read().strip()
+            if not s:
+                return {"生成时间": "", "models": {}}
+            return json.loads(s)
+    except Exception:
+        return {"生成时间": "", "models": {}}
+
+def _save_update_json(path: str, data: dict):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(json.dumps(data, indent=4, ensure_ascii=False))
+
+def should_update_cc(cc_node: dict, force: bool = False, interval_days: int = 15) -> bool:
+    """
+    cc_node 结构示例：
+    {
+      "real_url": "...",
+      "logs": [...],
+      "last_update_time": "2026-01-01 12:00"
+    }
+    """
+    if force:
+        return True
+
+    real_url = (cc_node or {}).get("real_url", "") or ""
+    logs = (cc_node or {}).get("logs", []) or []
+    last_time = (cc_node or {}).get("last_update_time", "") or ""
+
+    # real_url 为空：无日志（未发布），永不更新
+    if real_url == "":
+        return False
+
+    # 有 real_url 但 logs 为空：上次失败/被拒，强制重试
+    if real_url != "" and len(logs) == 0:
+        return True
+
+    # 有 real_url 且 logs 非空：按 28 天间隔更新
+    days = _days_since(last_time)
+    if days is None:
+        # 没记录过时间但 logs 竟然有：保险起见更新一次并补时间
+        return True
+    return days >= interval_days
+
+def update_single_model_cc(result: dict, model: str, name: str, cc: str, force: bool = False):
+    """
+    更新 result["models"][model]["cc"][cc]，并维护 last_update_time。
+    """
+    if "models" not in result:
+        result["models"] = {}
+    if model not in result["models"]:
+        result["models"][model] = {"name": name, "cc": {}, "last_update_time": ""}
+
+    mnode = result["models"][model]
+    mnode["name"] = name
+
+    if "cc" not in mnode:
+        mnode["cc"] = {}
+    if cc not in mnode["cc"]:
+        # 初始化：先尝试拿 real_url（若拿不到，先置空）
+        mnode["cc"][cc] = {"real_url": "", "logs": [], "last_update_time": ""}
+
+    cc_node = mnode["cc"][cc]
+
+    # # 如果 real_url 还没填过，先尝试获取一次；拿不到就保持空
+    # if (cc_node.get("real_url") or "") == "":
+    #     real_url = _get_real_doc_url(model, cc)
+    #     cc_node["real_url"] = real_url or ""
+
+    # 根据你的规则决定是否抓 logs
+    if should_update_cc(cc_node, force=force, interval_days=28):
+        real_url = cc_node.get("real_url", "") or ""
+        if real_url != "":
+            logs = _parse_update_rows(real_url)
+            cc_node["logs"] = logs
+            cc_node["last_update_time"] = getNowTime()
+
+    # 写回
+    mnode["cc"][cc] = cc_node
+
+    # 维护“机型上次更新时间”：取该 model 下各 cc 的 last_update_time 最大值
+    last_times = []
+    for _cc, _node in (mnode.get("cc") or {}).items():
+        t = _node.get("last_update_time", "")
+        dt = _parse_time_str(t)
+        if dt:
+            last_times.append((dt, t))
+    if last_times:
+        last_times.sort(key=lambda x: x[0])
+        mnode["last_update_time"] = last_times[-1][1]
+    else:
+        mnode["last_update_time"] = ""
+
+    result["models"][model] = mnode
+
+def generate_update_timeline_json_incremental(
+    modelDic: dict,
+    out_file: str = "更新时间.json",
+    force_models: set[str] | None = None,
+    force_ccs: set[tuple[str, str]] | None = None
+) -> dict:
+    """
+    - force_models: 强制更新某些 model（例如 {"SM-S9360"}）
+    - force_ccs: 强制更新某些 (model, cc)（例如 {("SM-S9360","CHC")})
+    """
+    force_models = force_models or set()
+    force_ccs = force_ccs or set()
+
+    result = _load_update_json(out_file)
+    if "models" not in result:
+        result["models"] = {}
+
+    result["生成时间"] = getNowTime()
+
+    for model, info in modelDic.items():
+        name = info.get("name", "")
+        cc_list = info.get("CC", []) or []
+        for cc in cc_list:
+            force = (model in force_models) or ((model, cc) in force_ccs)
+            update_single_model_cc(result, model=model, name=name, cc=cc, force=force)
+
+    _save_update_json(out_file, result)
+    return result
+
+# 你提到的 process_cc：这里给一个可用的“手动强制更新某机型/地区”的入口
+def process_cc(model: str, cc: str, modelDic: dict, out_file: str = "更新时间线.json", force_update: bool = True) -> dict:
+    """
+    手动调用：仅更新指定 model/cc（并遵循 force_update=True 强制更新）
+    """
+    result = _load_update_json(out_file)
+    name = modelDic.get(model, {}).get("name", "")
+    update_single_model_cc(result, model=model, name=name, cc=cc, force=force_update)
+    result["生成时间"] = getNowTime()
+    _save_update_json(out_file, result)
+    return result
+
+
 
 if __name__ == "__main__":
     try:
@@ -1215,6 +1443,7 @@ if __name__ == "__main__":
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()
+        generate_update_timeline_json_incremental(modelDic)
     except func_timeout.exceptions.FunctionTimedOut:
         printStr("任务超时，已退出执行!")
     except Exception as e:

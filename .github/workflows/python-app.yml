@@ -41,9 +41,10 @@ jobs:
           git config --global user.name ${{ secrets.USERNAME }}
           git config --global user.email ${{ secrets.USEREMAIL }}
           export TZ='Asia/Shanghai'
-          git add .
-          git commit -m "更新json文件" -a
+          git add -A
+          git diff-index --quiet HEAD -- || git commit -m "更新json文件"
     - name: 推送json文件
       uses: ad-m/github-push-action@master
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+

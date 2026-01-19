@@ -1393,7 +1393,7 @@ def update_single_model_cc(result: dict, model: str, name: str, cc: str, force: 
 
 def generate_update_timeline_json_incremental(
     modelDic: dict,
-    out_file: str = "更新时间.json",
+    out_file: str = "更新时间线.json",
     force_models: set[str] | None = None,
     force_ccs: set[tuple[str, str]] | None = None
 ) -> dict:
@@ -1419,19 +1419,6 @@ def generate_update_timeline_json_incremental(
 
     _save_update_json(out_file, result)
     return result
-
-# 你提到的 process_cc：这里给一个可用的“手动强制更新某机型/地区”的入口
-def process_cc(model: str, cc: str, modelDic: dict, out_file: str = "更新时间线.json", force_update: bool = True) -> dict:
-    """
-    手动调用：仅更新指定 model/cc（并遵循 force_update=True 强制更新）
-    """
-    result = _load_update_json(out_file)
-    name = modelDic.get(model, {}).get("name", "")
-    update_single_model_cc(result, model=model, name=name, cc=cc, force=force_update)
-    result["生成时间"] = getNowTime()
-    _save_update_json(out_file, result)
-    return result
-
 
 
 if __name__ == "__main__":

@@ -1361,9 +1361,9 @@ def update_single_model_cc(result: dict, model: str, name: str, cc: str, force: 
     cc_node = mnode["cc"][cc]
 
     # # 如果 real_url 还没填过，先尝试获取一次；拿不到就保持空
-    # if (cc_node.get("real_url") or "") == "":
-    #     real_url = _get_real_doc_url(model, cc)
-    #     cc_node["real_url"] = real_url or ""
+    if (cc_node.get("real_url") or "") == "":
+        real_url = _get_real_doc_url(model, cc)
+        cc_node["real_url"] = real_url or ""
 
     # 根据你的规则决定是否抓 logs
     if should_update_cc(cc_node, force=force, interval_days=28):

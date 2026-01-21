@@ -1309,7 +1309,7 @@ def _save_update_json(path: str, data: dict):
     with open(path, "w", encoding="utf-8") as f:
         f.write(json.dumps(data, indent=4, ensure_ascii=False))
 
-def should_update_cc(cc_node: dict, force: bool = False, interval_days: int = 15) -> bool:
+def should_update_cc(cc_node: dict, force: bool = False, interval_days: int = 2) -> bool:
     """
     cc_node 结构示例：
     {

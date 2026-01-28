@@ -1366,7 +1366,7 @@ def update_single_model_cc(result: dict, model: str, name: str, cc: str, force: 
         cc_node["real_url"] = real_url or ""
 
     # 根据你的规则决定是否抓 logs
-    if should_update_cc(cc_node, force=force, interval_days=28):
+    if should_update_cc(cc_node, force=force, interval_days=3):
         real_url = cc_node.get("real_url", "") or ""
         if real_url != "":
             logs = _parse_update_rows(real_url)

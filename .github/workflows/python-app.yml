@@ -5,8 +5,8 @@ name: 生成固件解密json文件
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0,3,5,7,10,12,14,16,18,20 * * *'
+#  schedule:
+#    - cron: '0 0,3,5,7,10,12,14,16,18,20 * * *'
   repository_dispatch:
     types: [telegram_trigger]  
 jobs:
@@ -47,4 +47,5 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
 

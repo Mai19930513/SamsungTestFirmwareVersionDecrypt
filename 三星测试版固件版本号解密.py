@@ -1504,7 +1504,7 @@ if __name__ == "__main__":
         else:
             modelDic = getModelDictsFromDB()  # 获取型号信息
         run()
-        # generate_update_timeline_json_incremental(modelDic)
+        generate_update_timeline_json_incremental(modelDic)
     except func_timeout.exceptions.FunctionTimedOut:
         printStr("任务超时，已退出执行!")
     except Exception as e:

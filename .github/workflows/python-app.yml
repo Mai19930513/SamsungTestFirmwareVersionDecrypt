@@ -3,7 +3,8 @@ name: 生成固件解密json文件
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0,3,5,7,10,12,14,16,18,20 * * *'
+    - cron: '0 7-20/2 * * *'
+      timezone: 'Asia/Shanghai'
   repository_dispatch:
     types: [telegram_trigger]
 

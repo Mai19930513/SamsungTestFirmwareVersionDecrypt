@@ -3,10 +3,10 @@ import concurrent.futures
 import time
 import requests
 from requests.exceptions import ProxyError, RequestException
+from urllib3.util import SKIP_HEADER
 import hashlib
 from lxml import etree
 import os
-import random
 from datetime import datetime
 from datetime import timezone
 from datetime import timedelta
@@ -137,7 +137,8 @@ def requestXML(url, max_retries=3, sleep_sec=1):
         "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_3 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 MQQBrowser/11.8.3 Mobile/15B87 Safari/604.1 QBWebViewUA/2 QBWebViewType/1 WKType/1",
         "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15",
     ]
-    headers = {"User-Agent": random.choice(UA_list), "Connection": "close"}
+    # None 仍会让 urllib3 补发默认 UA；SKIP_HEADER 才会完全省略该请求头。
+    headers = {"User-Agent": SKIP_HEADER, "Connection": "close"}
     for attempt in range(1, max_retries + 1):
         try:
             session = get_session()

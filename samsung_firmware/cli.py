@@ -16,6 +16,7 @@ def main(argv=None):
     parser.add_argument("--model", action="append", help="只处理指定机型，可重复")
     parser.add_argument("--region", action="append", help="只处理指定 CSC，可重复")
     parser.add_argument("--metadata-only", action="store_true", help="抓取并查询下载信息，跳过穷举")
+    parser.add_argument("--sync-notification-config", action="store_true", help="仅保存 Telegram 群组配置，不扫描固件或发送消息")
     parser.add_argument("--migrate-only", action="store_true", help="仅将现有 JSON 导入数据库，不联网")
     parser.add_argument("--force", action="store_true", help="重新验证 HTTP 缓存、跳过搜索/下载缓存并从头搜索")
     parser.add_argument("--output-dir", help="JSON 和日志输出目录")

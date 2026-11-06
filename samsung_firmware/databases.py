@@ -7,6 +7,7 @@ from dataclasses import replace
 
 from .files import atomic_json, load_json, now_text
 from .storage import Store
+from .mysql_errors import CloudDatabaseError, mysql_error_summary
 
 
 class Databases:
@@ -25,14 +26,50 @@ class Databases:
         if settings.storage_target in {"cloud", "both"}:
             try:
                 self.cloud = Store(replace(settings, db_backend="mysql"))
-            except Exception:
+            except Exception as error:
                 self.cloud_error = True
                 if not self.local:
-                    raise RuntimeError("云数据库连接失败，请检查 MySQL 参数、端口和 TLS 证书") from None
-                print("云数据库暂不可用，将保存本地数据和待同步队列。", flush=True)
+                    raise CloudDatabaseError(mysql_error_summary(error)) from None
+                print("云数据库暂不可用，将保存本地数据和待同步队列。" + mysql_error_summary(error), flush=True)
 
         # Cloud-only runs also retain local checkpoints for encrypted Actions state.
         self.progress = self.local or Store(replace(settings, db_backend="sqlite"))
+
+    def telegram_group_id(self):
+        # Cloud is authoritative when configured; SQLite also survives runner changes
+        # through encrypted Actions state. Never export this setting to public JSON.
+        import re
+
+        def valid(value):
+            return isinstance(value, str) and bool(re.fullmatch(r"-[1-9][0-9]*|@[A-Za-z][A-Za-z0-9_]{4,31}", value))
+
+        stores = [store for store in (self.cloud, self.progress) if store is not None]
+        values = {}
+        for store in stores:
+            try:
+                values[store] = store.get_setting("telegram_group_id")
+            except Exception:
+                if store is not self.cloud:
+                    raise
+                self.cloud_error = True
+                print("云端通知配置读取失败，使用本地已保存配置。", flush=True)
+        value = next((values[store] for store in stores if valid(values.get(store))), None)
+        if value is None:
+            fallback = os.getenv("TG_CHAT_ID", "").strip()
+            value = fallback if valid(fallback) else None
+        if value:
+            for store in stores:
+                if store not in values or values.get(store) == value:
+                    continue
+                try:
+                    with store.transaction():
+                        store.set_setting("telegram_group_id", value)
+                except Exception:
+                    if store is not self.cloud:
+                        raise
+                    self.cloud_error = True
+                    print("云端通知配置保存失败，本地配置保留，下次重试。", flush=True)
+        return value
 
     def search_progress(self, model, region):
         return self.progress.search_progress(model, region, self.settings.search_cache_hours)
@@ -53,11 +90,13 @@ class Databases:
                 continue
             try:
                 snapshots = store.snapshots()
-            except Exception:
+            except Exception as error:
                 if store is self.cloud and self.local:
                     self.cloud_error = True
-                    print("云数据库读取失败，继续使用本地数据。", flush=True)
+                    print("云数据库读取失败，继续使用本地数据。" + mysql_error_summary(error), flush=True)
                     continue
+                if store is self.cloud:
+                    raise CloudDatabaseError("云数据库读取失败：" + mysql_error_summary(error)) from None
                 raise
             for model, regions in snapshots.items():
                 for region, record in regions.items():
@@ -107,11 +146,11 @@ class Databases:
                     write(self.cloud, pending.values())
                     self.pending_path.unlink(missing_ok=True)
                     self.cloud_error = False
-                except Exception:
+                except Exception as error:
                     self.cloud_error = True
-                    print("云数据库写入失败，待同步数据已安全保留，下次选择 cloud/both 时重试。", flush=True)
+                    print("云数据库写入失败，待同步数据已安全保留，下次选择 cloud/both 时重试。" + mysql_error_summary(error), flush=True)
                     if not self.local:
-                        raise RuntimeError("云数据库写入失败；待同步队列已保存在本地") from None
+                        raise CloudDatabaseError("云数据库写入失败；待同步队列已保存在本地。" + mysql_error_summary(error)) from None
 
     def close(self):
         for store in {self.local, self.cloud, self.progress}:

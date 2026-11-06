@@ -6,7 +6,7 @@ from .files import atomic_json, atomic_write, load_json, now_text
 from .fus import empty_download, get_download
 from .models import load_models
 from .network import HttpClient
-from .records import public_record, update_record
+from .records import public_record, refresh_test_fields, update_record
 from .databases import Databases
 from .events import firmware_events
 
@@ -37,6 +37,7 @@ def load_state(settings, store):
                 cleaned.setdefault("最新固件下载", empty_download("not_checked", cleaned.get("最新正式版", "")))
                 cleaned["最新固件下载链接"] = cleaned["最新固件下载"].get("url")
                 cleaned["测试版下载状态"] = "not_provided_by_public_fota"
+                refresh_test_fields(cleaned)
                 regions[region] = cleaned
     return existing
 
@@ -88,6 +89,10 @@ def execute_run(settings, args):
     store = Databases(settings)
     client = HttpClient(settings)
     try:
+        group_id = store.telegram_group_id()
+        if getattr(args, "sync_notification_config", False):
+            print("Telegram 群组配置已保存至数据库；未发送消息。" if group_id else "未配置 Telegram 群组 ID；未发送消息。")
+            return 3 if store.cloud_error else 0
         data = load_state(settings, store)
         hashes = load_json(settings.output_dir / HASH_FILE)
         old_data, old_hashes = deepcopy(data), deepcopy(hashes)
@@ -170,14 +175,14 @@ def execute_run(settings, args):
         if settings.notifications:
             from .notify import enqueue
 
-            enqueue(settings, events)
+            enqueue(settings, events, group_id)
         store.persist(data, observations, search_updates)
         export_state(settings, data, hashes)
         log_changes(settings, old_data, data, old_hashes, hashes, pairs)
         if settings.notifications:
             from .notify import notify
 
-            notify(settings)
+            notify(settings, group_id, data)
         if settings.timeline:
             from .timeline import update_timeline
 

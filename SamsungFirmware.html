@@ -580,6 +580,7 @@
                                 updateTime: details.最新测试版上传时间,
                                 stableOS: details.正式版安卓版本,
                                 devOS: details.测试版安卓版本,
+                                devOSBasis: details.测试版安卓版本依据 || '',
                                 download: details.最新固件下载,
                             });
                         });
@@ -647,15 +648,16 @@
                             <div class="android_os" style="margin-bottom:0.2em;">Android OS:${item.stableOS || '未知'}</div>
                             ${item.serverOfficial && item.serverOfficial !== item.official_full ? `<div class="copyable" title="${item.serverOfficial}">服务器 (${item.serverSource || '未知'})：${item.serverOfficial.split('/')[0]}</div>` : ''}
                         </td>
-                        <td style="min-width:180px; vertical-align:middle;text-align:left" title="${item.beta_full || '无版本号'}" class="copyable">
+                        <td style="min-width:180px; vertical-align:middle;text-align:left" title="${item.devOSBasis || '测试固件'}" class="copyable">
                             <div>
-                                <span style="font-weight:bold;color:#4a90e2;display:inline-block;text-align:right;">日常更新(OS:${item.stableOS || '未知'})：</span>
+                                <span style="font-weight:bold;color:#4a90e2;display:inline-block;text-align:right;">常规测试版：</span>
                                 ${item.minor ? `<span class="version-badge beta-badge copyable" title="${item.minor_full || '无版本号'}">${item.minor}</span>` : '-'}
                             </div>
                             <div>
-                                <span style="font-weight:bold;color:#6c5ce7;display:inline-block;text-align:right;">下个版本(OS:${item.devOS || '未知'})：</span>
+                                <span style="font-weight:bold;color:#6c5ce7;display:inline-block;text-align:right;">大版本测试版：</span>
                                 ${item.major ? `<span class="version-badge beta-badge copyable" title="${item.major_full || '无版本号'}">${item.major}</span>` : '-'}
                             </div>
+                            <div class="android_os" title="${item.devOSBasis}">测试版 Android：${item.devOS || '待确认'}${item.devOSBasis.includes('推断') ? '（推断）' : ''}</div>
                         </td>
                         <td>${item.updateTime || '未知'}</td>
                         <td>${item.description}</td>

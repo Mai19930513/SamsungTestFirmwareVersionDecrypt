@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 
 from .network import valid_version
+from .versions import version_key
 
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -15,12 +16,6 @@ BOOTSTRAP = {"CHC": ("ZC", "CHC", "ZC"), "CHN": ("ZC", "CHC", ""),
              "EUX": ("XX", "OXM", "XX"), "INS": ("XX", "ODM", "XX"),
              "XAA": ("UE", "OYM", "UE"), "ATT": ("SQ", "OYN", "SQ")}
 
-
-def version_key(version):
-    ap = version.split("/")[0]
-    if len(ap) < 6:
-        return (-1,) * 6
-    return tuple(ALPHABET.find(char) for char in ap[-3:] + ap[-5:-3]) + (ap[-6] == "U",)
 
 
 def target_hashes(values, key):
@@ -116,7 +111,7 @@ def candidate_groups(model, region, stable, known, settings, start_group=0):
 
 
 def search_signature(model, region, stable, targets, known, settings):
-    payload = [3, model, region, stable, sorted(targets), sorted(set(known.values())),
+    payload = [4, model, region, stable, sorted(targets), sorted(set(known.values())),
                search_ranges(stable, known.values(), settings), settings.month_codes,
                settings.serial_codes, settings.modem_limit, settings.hmac_key]
     return hashlib.sha256(json.dumps(payload, ensure_ascii=True).encode()).hexdigest()

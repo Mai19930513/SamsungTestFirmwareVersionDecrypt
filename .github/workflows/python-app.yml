@@ -1,6 +1,13 @@
 name: Samsung firmware monitor
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - 'samsung_firmware/notify.py'
+      - 'samsung_firmware/databases.py'
+      - 'samsung_firmware/storage.py'
+      - '.github/workflows/python-app.yml'
   workflow_dispatch:
     inputs:
       storage:
@@ -62,6 +69,9 @@ jobs:
       FW_DOWNLOADS: ${{ vars.FW_DOWNLOADS || 'true' }}
       FW_TIMELINE: ${{ vars.FW_TIMELINE || 'true' }}
       FW_NOTIFICATIONS: ${{ vars.FW_NOTIFICATIONS || (secrets.TG_BOT_TOKEN != '' && secrets.TG_USER_ID != '' && 'true') || 'false' }}
+      FW_NOTIFY_GROUPS: 'false'
+      FW_NOTIFY_BATCH_SECONDS: ${{ vars.FW_NOTIFY_BATCH_SECONDS || '300' }}
+      FW_NOTIFY_COOLDOWN_SECONDS: ${{ vars.FW_NOTIFY_COOLDOWN_SECONDS || '1800' }}
       FW_NOTIFY_INITIAL: ${{ vars.FW_NOTIFY_INITIAL || 'false' }}
       FW_NOTIFY_DOWNLOAD_LINK: ${{ vars.FW_NOTIFY_DOWNLOAD_LINK || 'true' }}
 
@@ -119,7 +129,9 @@ jobs:
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: |
           result=0
-          if [ "$FW_SCAN_MODE" = full ]; then
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            python '三星测试版固件版本号解密.py' --sync-notification-config || result=$?
+          elif [ "$FW_SCAN_MODE" = full ]; then
             python '三星测试版固件版本号解密.py' --metadata-only --no-timeline || result=$?
             if [ "$result" = 0 ] || [ "$result" = 2 ] || [ "$result" = 3 ]; then
               second=0
@@ -155,7 +167,7 @@ jobs:
           if-no-files-found: error
 
       - name: 提交公开固件信息
-        if: success() && steps.firmware.outcome == 'success'
+        if: success() && steps.firmware.outcome == 'success' && github.event_name != 'push'
         run: |
           git config --local user.name 'github-actions[bot]'
           git config --local user.email 'github-actions[bot]@users.noreply.github.com'
@@ -184,11 +196,11 @@ jobs:
             printf -- '- 扫描模式：`%s`\n' "$FW_SCAN_MODE"
             printf -- '- 扫描退出码：`%s`（0 完成，2 FOTA 部分失败，3 云端补传待处理）\n' "${SCAN_RESULT:-未运行}"
             printf -- '- 状态恢复 / 打包 / 上传：`%s` / `%s` / `%s`\n' "$STATE_RESTORE" "$STATE_PACK" "$STATE_UPLOAD"
-            printf -- '- 正式版通知仅发送个人 TG_USER_ID；下载地址需要 FUS 会话认证。\n'
+            printf -- '- 群组通知已暂停；个人通知按机型/地区合并，下载地址需要 FUS 会话认证。\n'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 写入解码进度摘要
-        if: always() && steps.firmware.outcome != 'skipped'
+        if: always() && steps.firmware.outcome != 'skipped' && github.event_name != 'push'
         run: |
           python - <<'PYTHON'
           import json

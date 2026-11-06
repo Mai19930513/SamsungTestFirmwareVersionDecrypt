@@ -6,24 +6,42 @@ import time
 from contextlib import contextmanager
 
 from .files import now_text
+from .mysql_errors import CloudDatabaseError, mysql_error_summary
 
 
 def mysql_connection():
     import pymysql
 
     if pymysql.VERSION[:3] < (1, 2, 3):
-        raise RuntimeError("请按 requirements.txt 升级 PyMySQL，以确保云连接强制使用 TLS")
+        raise CloudDatabaseError("[dependency] 请按 requirements.txt 升级 PyMySQL 至 1.2.3 或更高版本，以确保云连接强制使用 TLS")
     host = os.getenv("FW_MYSQL_HOST") or os.getenv("HOST")
     user = os.getenv("FW_MYSQL_USER") or os.getenv("DBUSER")
     database = os.getenv("FW_MYSQL_DATABASE") or os.getenv("DATABASE")
     password = os.getenv("FW_MYSQL_PASSWORD") or os.getenv("PASSWORD")
     if not all((host, user, database, password)):
-        raise ValueError("MySQL configuration is incomplete")
-    tls = ssl.create_default_context(cafile=os.getenv("FW_MYSQL_SSL_CA") or None)
-    return pymysql.connect(host=host, user=user, password=password, database=database,
-                           port=int(os.getenv("FW_MYSQL_PORT", "3306")), charset="utf8mb4",
-                           connect_timeout=10, read_timeout=30, write_timeout=30,
-                           ssl=tls, autocommit=False, cursorclass=pymysql.cursors.DictCursor)
+        raise CloudDatabaseError("[configuration] MySQL 配置不完整；需要 FW_MYSQL_HOST、FW_MYSQL_USER、FW_MYSQL_PASSWORD、FW_MYSQL_DATABASE")
+    host, user, database = host.strip(), user.strip(), database.strip()
+    if not host or any(value in host for value in ("://", "/", "@")) or any(char.isspace() for char in host):
+        raise CloudDatabaseError("[configuration] FW_MYSQL_HOST 只填写数据库主机名，不要填写连接 URI、用户名或路径")
+    if not user or not database:
+        raise CloudDatabaseError("[configuration] FW_MYSQL_USER 和 FW_MYSQL_DATABASE 不能只包含空白")
+    try:
+        port = int(os.getenv("FW_MYSQL_PORT", "3306"))
+        if not 1 <= port <= 65535:
+            raise ValueError
+    except ValueError:
+        raise CloudDatabaseError("[configuration] FW_MYSQL_PORT 必须是 1–65535 的整数，并与 Aiven 服务实际端口一致") from None
+    try:
+        tls = ssl.create_default_context(cafile=os.getenv("FW_MYSQL_SSL_CA", "").strip() or None)
+    except (OSError, ValueError):
+        raise CloudDatabaseError("[tls_ca_file] 无法读取有效的 CA 证书；GitHub Secret FW_MYSQL_CA_PEM 必须是保留换行的完整 PEM 内容，不是文件路径") from None
+    try:
+        return pymysql.connect(host=host, user=user, password=password, database=database,
+                               port=port, charset="utf8mb4",
+                               connect_timeout=10, read_timeout=30, write_timeout=30,
+                               ssl=tls, autocommit=False, cursorclass=pymysql.cursors.DictCursor)
+    except Exception as error:
+        raise CloudDatabaseError("云数据库连接失败：" + mysql_error_summary(error)) from None
 
 
 class Store:
@@ -41,16 +59,23 @@ class Store:
             self.connection.execute("PRAGMA busy_timeout=30000")
         text_type = "LONGTEXT" if self.mysql else "TEXT"
         definitions = {
+            "firmware_settings": "name VARCHAR(64) PRIMARY KEY, value TEXT NOT NULL",
             "firmware_devices": f"model VARCHAR(32), region VARCHAR(3), snapshot {text_type} NOT NULL, updated_at VARCHAR(32), PRIMARY KEY(model, region)",
             "firmware_versions": "model VARCHAR(32), region VARCHAR(3), hash VARCHAR(64), algorithm VARCHAR(16), version VARCHAR(140), ap VARCHAR(32), csc VARCHAR(32), cp VARCHAR(32), build_year INTEGER, build_month INTEGER, build_number INTEGER, bootloader VARCHAR(1), first_seen VARCHAR(32), last_seen VARCHAR(32), active INTEGER, PRIMARY KEY(model, region, hash)",
             "firmware_hashes": "model VARCHAR(32), region VARCHAR(3), hash VARCHAR(64), algorithm VARCHAR(16), first_seen VARCHAR(32), last_seen VARCHAR(32), active INTEGER, PRIMARY KEY(model, region, hash)",
             "firmware_search_progress": f"model VARCHAR(32), region VARCHAR(3), result {text_type} NOT NULL, updated_at DOUBLE, PRIMARY KEY(model, region)",
             "firmware_search_cache": f"signature VARCHAR(64) PRIMARY KEY, result {text_type} NOT NULL, completed_at DOUBLE",
         }
-        for table, definition in definitions.items():
-            suffix = " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" if self.mysql else ""
-            self.execute(f"CREATE TABLE IF NOT EXISTS {table} ({definition}){suffix}")
-        self.connection.commit()
+        try:
+            for table, definition in definitions.items():
+                suffix = " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" if self.mysql else ""
+                self.execute(f"CREATE TABLE IF NOT EXISTS {table} ({definition}){suffix}")
+            self.connection.commit()
+        except Exception as error:
+            self.connection.close()
+            if self.mysql:
+                raise CloudDatabaseError("云数据库初始化数据表失败：" + mysql_error_summary(error)) from None
+            raise
 
     def execute(self, statement, parameters=()):
         cursor = self.connection.cursor()
@@ -85,6 +110,13 @@ class Store:
         except BaseException:
             self.connection.rollback()
             raise
+
+    def get_setting(self, name):
+        rows = self.execute("SELECT value FROM firmware_settings WHERE name=?", (name,))
+        return rows[0]["value"] if rows else None
+
+    def set_setting(self, name, value):
+        self.upsert_many("firmware_settings", ("name", "value"), ("name",), [(name, value)])
 
     def snapshots(self):
         result = {}

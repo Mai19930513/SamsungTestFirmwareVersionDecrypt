@@ -16,7 +16,7 @@
 | `FW_STATE_KEY` | 默认必填，64 个十六进制字符，用于 AES-256-GCM 加密运行状态 |
 | `TG_BOT_TOKEN` | Telegram 机器人 Token |
 | `TG_USER_ID` | 个人数字 ID，正式版上线和回滚只发这里；需先向机器人发起对话 |
-| `TG_CHAT_ID` | 可选群组 ID，仅测试版通知使用 |
+| `TG_CHAT_ID` | 可选群组 ID；仅数据库缺失时读入并保存，群组发送当前暂停 |
 | `FW_MYSQL_HOST` | 云数据库主机，兼容旧 Secret `HOST` |
 | `FW_MYSQL_USER` | 云数据库用户，兼容 `DBUSER` |
 | `FW_MYSQL_PASSWORD` | 云数据库密码，兼容 `PASSWORD` |
@@ -42,6 +42,8 @@ python -c 'import secrets; print(secrets.token_hex(32))'
 | `FW_PERSIST_STATE` | `true` | 是否跨次保存加密状态；关闭后本地数据库和待发送/补传队列随 runner 丢失 |
 | `FW_STATE_RETENTION_DAYS` | `30` | 加密 artifact 保留天数，公共仓库可设 1–90，受仓库策略限制 |
 | `FW_NOTIFICATIONS` | 自动 | 同时有 Token 和个人 ID 时开启；设 `false` 可明确关闭 |
+| `FW_NOTIFY_BATCH_SECONDS` | `300` | 合并窗口秒数，到期由下一轮扫描发送 |
+| `FW_NOTIFY_COOLDOWN_SECONDS` | `1800` | 同机型/地区最小发送间隔秒数 |
 | `FW_NOTIFY_INITIAL` | `false` | 是否通知首次发现的现有正式版 |
 | `FW_NOTIFY_DOWNLOAD_LINK` | `true` | 正式版消息是否附加同版本的 FUS 地址 |
 | `FW_DOWNLOAD_CACHE_HOURS` | `0` | 第一阶段每次检查 FUS，避免错过先于手机 OTA 的服务器上架 |
@@ -62,7 +64,7 @@ python -c 'import secrets; print(secrets.token_hex(32))'
 ## 每次运行的流程
 
 1. 安装依赖，按仓库及分支恢复最近一份加密状态。
-2. `full` 模式先运行快速元数据查询，立即处理正式版通知，再运行限时解码和更新日志。第二阶段临时复用 24 小时内的成功 FUS 查询，减少同一轮重复请求；版本变化仍会重新查询。`metadata` 模式只运行一次元数据查询。
+2. `full` 模式先运行快速元数据查询，将正式版变更加入合并队列，再运行限时解码和更新日志。第二阶段临时复用 24 小时内的成功 FUS 查询，减少同一轮重复请求；版本变化仍会重新查询。`metadata` 模式只运行一次元数据查询。
 3. `local` 保存 SQLite；`cloud` 保存 MySQL；`both` 先写 SQLite 再写云端。云失败时，待补传队列随加密状态一起保留。
 4. 使用 SQLite backup API 生成独立快照，将数据库、Telegram 队列、云同步队列压缩后加密，上传独立 artifact。不会打包整个工作目录、`.env`、设备标识、FUS 会话或数据库连接密码。
 5. 只提交七个公开 JSON、Markdown、日志文件。部分 FOTA/云同步失败仍先保存可用结果，再将任务标记为失败，方便发现问题。
@@ -83,10 +85,12 @@ GitHub 的 `local` 指本轮 runner 的 SQLite。跨次持久化由加密 artifa
 
 仅监控正式版、解码测试版并保存进度：创建 **Secret `FW_STATE_KEY`** 即可，其余默认使用本地 SQLite 和加密 artifact。填写位置：仓库 Settings → Secrets and variables → Actions → Secrets。状态密钥生成命令见上文。
 
-需要个人 Telegram 通知时，再创建 **Secrets `TG_BOT_TOKEN`、`TG_USER_ID`**；`TG_CHAT_ID` 仅为可选测试版群通知。创建 Secret 后默认自动启用通知；可设 Variable `FW_NOTIFICATIONS=false` 关闭。
+需要个人 Telegram 通知时，再创建 **Secrets `TG_BOT_TOKEN`、`TG_USER_ID`**；`TG_CHAT_ID` 会在数据库缺失时迁移入库；群组通知当前暂停。创建 Secret 后默认自动启用通知；可设 Variable `FW_NOTIFICATIONS=false` 关闭。
 
 需要云数据库时，再创建 **Secrets `FW_MYSQL_HOST`、`FW_MYSQL_USER`、`FW_MYSQL_PASSWORD`、`FW_MYSQL_DATABASE`**，并在 **Variables** 设置 `FW_STORAGE=both` 或 `cloud`、正确的 `FW_MYSQL_PORT`。私有证书才需要 `FW_MYSQL_CA_PEM`。Secret 与 Variable 是两个标签页；普通执行参数放 Variables。
 
 `FW_PERSIST_STATE=true`、`FW_SCAN_MODE=full`、`FW_CPU_WORKERS=2`、`FW_MAX_SECONDS=30`、`FW_MAX_CANDIDATES=5000000` 均已有默认值，不必逐个创建。`GITHUB_TOKEN` 自动提供，FOTA/FUS 公共查询无需三星账户 Secret。
 
 断点随数据库加密备份，不增加 Secret。服务器测试哈希、正式版或搜索范围改变时自动重搜；不变时从未完成的位置继续，避免每轮重复扫描相同候选。已完成结果的缓存默认 24 小时，到期重新搜索；读取缓存不会续期。`metadata` 阶段保留原断点，`full` 阶段每完成一个设备即提交进度。详见 [断点续搜规则](CONFIGURATION.md#断点续搜与后续新增版本)。
+
+代码变更 push 触发的监控工作流只执行 `--sync-notification-config`，从数据库优先读取群组 ID，缺失时读取 Secret 入库，随后加密备份；不会扫描固件或发送 Telegram。定时/手动执行仍运行扫描。`FW_NOTIFY_GROUPS` 当前在 workflow 固定为 `false`，恢复的旧队列也不能发群。通知格式与版本比较规则见 [配置说明](CONFIGURATION.md)。

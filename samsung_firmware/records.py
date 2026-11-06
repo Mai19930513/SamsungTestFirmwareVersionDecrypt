@@ -1,7 +1,6 @@
-from .decode import version_key
+from .versions import parse_build, release_baseline, test_candidates, version_key
 from .files import now_text
 from .models import COUNTRIES
-from .network import valid_version
 from .fus import public_download
 
 
@@ -9,7 +8,7 @@ PUBLIC_FIELDS = {"版本号", "常规更新测试版", "大版本测试版", "�
                  "最新测试版上传时间", "最新版本号说明", "解密百分比", "解密数量", "地区", "机型",
                  "服务器固件数量", "当前已解密数量", "未解密哈希", "公共标记", "解密统计", "抓取状态",
                  "上次检查时间", "最新固件下载", "最新固件下载链接", "测试版下载状态", "当前服务器版本号",
-                 "最新服务器正式版", "正式版来源", "正式版首次发现时间"}
+                 "最新服务器正式版", "正式版来源", "正式版首次发现时间", "测试版安卓版本依据"}
 
 
 def public_record(record):
@@ -35,7 +34,6 @@ def update_record(model, region, name, old, fetched, decoded):
         record["正式版安卓版本"] = stable_data["android"]
     record.setdefault("最新正式版", "暂无正式版")
     record.setdefault("正式版安卓版本", "未知")
-    stable = record["最新正式版"]
     if decoded is not None:
         versions = dict(sorted(decoded["versions"].items(), key=lambda item: version_key(item[1])))
         record["版本号"] = versions
@@ -52,24 +50,35 @@ def update_record(model, region, name, old, fetched, decoded):
         record["当前服务器版本号"] = current
     else:
         versions = record.setdefault("版本号", {})
-        current = record.get("当前服务器版本号", versions)
-    candidates = list(current.values())
-    stable_major = stable.split("/")[0][-4] if valid_version(stable) else None
-    minor = [version for version in candidates if stable_major is None or version.split("/")[0][-4] == stable_major]
-    major = [version for version in candidates if version.split("/")[0][-4] == "Z" or (stable_major is not None and version.split("/")[0][-4] > stable_major)]
-    record["常规更新测试版"] = max(minor, key=version_key, default="暂无常规测试版")
-    record["大版本测试版"] = max(major, key=version_key, default="暂无大版本测试版")
-    record["测试版安卓版本"] = "未知"
-    record["最新版本号说明"] = "暂无"
-    latest = max(candidates, key=version_key, default="")
-    if latest:
-        ap = latest.split("/")[0]
-        if ap[-3].isalpha() and ap[-2] in "ABCDEFGHIJKL":
-            record["最新版本号说明"] = f"{2001 + ord(ap[-3]) - 65}年{ord(ap[-2]) - 64}月第{int(ap[-1], 36)}个测试版"
+    refresh_test_fields(record)
     new_hashes = set(versions) - set(old.get("版本号", {}))
     record["最新测试版上传时间"] = now_text() if new_hashes else old.get("最新测试版上传时间", "暂无")
-    if decoded is None:
-        for field in ("常规更新测试版", "大版本测试版", "最新版本号说明", "测试版安卓版本"):
-            if field in old:
-                record[field] = old[field]
     return record
+
+
+def refresh_test_fields(record):
+    """Recompute derived fields even for metadata-only scans or failed decoding."""
+    candidates = test_candidates(record)
+    baseline = parse_build(release_baseline(record))
+    minor = [value for value in candidates if parse_build(value).branch != "Z"
+             and baseline and parse_build(value).branch == baseline.branch]
+    major = [value for value in candidates if parse_build(value).branch == "Z"
+             or (baseline and parse_build(value).branch > baseline.branch)]
+    record["常规更新测试版"] = next(iter(minor), "暂无常规测试版")
+    record["大版本测试版"] = next(iter(major), "暂无大版本测试版")
+    record["测试版安卓版本"] = "暂无测试版"
+    record["测试版安卓版本依据"] = "没有高于正式版的已解密当前测试固件"
+    record["最新版本号说明"] = "暂无"
+    if not candidates:
+        return
+    latest = parse_build(candidates[0])
+    kind = "大版本" if candidates[0] in major else "常规更新"
+    record["最新版本号说明"] = f"{latest.year}年{latest.month}月第{latest.revision}个{kind}测试版"
+    stable = parse_build(record.get("最新正式版", ""))
+    android = str(record.get("正式版安卓版本", "未知"))
+    if not major and stable and latest.branch == stable.branch and latest.branch != "Z" and android.replace(".", "").isdigit():
+        record["测试版安卓版本"] = android
+        record["测试版安卓版本依据"] = "根据 FOTA 正式版同代分支推断，非测试服务器确认"
+    else:
+        record["测试版安卓版本"] = "待确认"
+        record["测试版安卓版本依据"] = "测试分支不能单独确定 Android 版本"

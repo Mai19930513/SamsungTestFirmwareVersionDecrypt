@@ -156,3 +156,25 @@ cython_debug/
 # 自定义排除文件
 run.sh
 cron.log
+.env.*
+!.env.example
+data/
+.cache/
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+.firmware.lock
+.*.tmp
+*.private.json
+*.state.enc
+tmp/
+.playwright-cli/
+
+# Local firmware downloads and private decryption material
+*.enc2
+*.enc4
+*.part
+*.download.json
+*.probe.json
+*.decrypt.json

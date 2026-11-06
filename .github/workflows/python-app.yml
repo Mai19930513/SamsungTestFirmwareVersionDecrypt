@@ -1,60 +1,216 @@
-name: 生成固件解密json文件
+name: Samsung firmware monitor
 
 on:
   workflow_dispatch:
+    inputs:
+      storage:
+        description: 保存位置（configured 使用仓库变量）
+        type: choice
+        default: configured
+        options: [configured, local, cloud, both]
+      scan_mode:
+        description: full 解码；metadata 仅查询版本和下载信息
+        type: choice
+        default: configured
+        options: [configured, full, metadata]
   schedule:
-    - cron: '0 7-20/2 * * *'
-      timezone: 'Asia/Shanghai'
+    - cron: '0 1-11/2,23 * * *'
   repository_dispatch:
     types: [telegram_trigger]
 
-# 添加权限声明，确保能把生成的 JSON 推送回仓库
 permissions:
   contents: write
+  actions: read
+
+concurrency:
+  group: firmware-update-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  decrypt:
+  firmware:
+    if: github.ref_type == 'branch'
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    env:
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: '1'
+      PYTHONUTF8: '1'
+      FW_OUTPUT_DIR: .
+      FW_DATA_DIR: data
+      FW_STORAGE: ${{ (inputs.storage != 'configured' && inputs.storage) || vars.FW_STORAGE || 'local' }}
+      FW_SCAN_MODE: ${{ (inputs.scan_mode != 'configured' && inputs.scan_mode) || vars.FW_SCAN_MODE || 'full' }}
+      FW_PERSIST_STATE: ${{ vars.FW_PERSIST_STATE || 'true' }}
+      FW_MODEL_SOURCE: ${{ vars.FW_MODEL_SOURCE || 'auto' }}
+      FW_MODELS_FILE: ${{ vars.FW_MODELS_FILE || 'models.txt' }}
+      FW_IO_WORKERS: ${{ vars.FW_IO_WORKERS || '8' }}
+      FW_CPU_WORKERS: ${{ vars.FW_CPU_WORKERS || '2' }}
+      FW_MAX_SECONDS: ${{ vars.FW_MAX_SECONDS || '30' }}
+      FW_MAX_CANDIDATES: ${{ vars.FW_MAX_CANDIDATES || '5000000' }}
+      FW_READ_TIMEOUT: ${{ vars.FW_READ_TIMEOUT || '60' }}
+      FW_DOWNLOAD_CACHE_HOURS: ${{ vars.FW_DOWNLOAD_CACHE_HOURS || '0' }}
+      FW_SEARCH_CACHE_HOURS: ${{ vars.FW_SEARCH_CACHE_HOURS || '24' }}
+      FW_MODEM_LIMIT: ${{ vars.FW_MODEM_LIMIT || '12' }}
+      FW_HISTORY_YEARS: ${{ vars.FW_HISTORY_YEARS || '4' }}
+      FW_YEAR_CODES: ${{ vars.FW_YEAR_CODES }}
+      FW_BOOTLOADER_CODES: ${{ vars.FW_BOOTLOADER_CODES }}
+      FW_UPDATE_CODES: ${{ vars.FW_UPDATE_CODES }}
+      FW_MONTH_CODES: ${{ vars.FW_MONTH_CODES || 'ABCDEFGHIJKL' }}
+      FW_SERIAL_CODES: ${{ vars.FW_SERIAL_CODES || '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' }}
+      FW_DOWNLOADS: ${{ vars.FW_DOWNLOADS || 'true' }}
+      FW_TIMELINE: ${{ vars.FW_TIMELINE || 'true' }}
+      FW_NOTIFICATIONS: ${{ vars.FW_NOTIFICATIONS || (secrets.TG_BOT_TOKEN != '' && secrets.TG_USER_ID != '' && 'true') || 'false' }}
+      FW_NOTIFY_INITIAL: ${{ vars.FW_NOTIFY_INITIAL || 'false' }}
+      FW_NOTIFY_DOWNLOAD_LINK: ${{ vars.FW_NOTIFY_DOWNLOAD_LINK || 'true' }}
 
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v4 # 升级到 v4
+      - name: 检出代码
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-    - name: 设置 Python 3.10
-      uses: actions/setup-python@v5 # 升级到 v5
-      with:
-        python-version: "3.10"
+      - name: 设置 Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
 
-    - name: 安装 python 依赖
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: 安装依赖
+        run: python -m pip install -r requirements.txt
 
-    - name: 运行解密脚本
-      env:
-        DATABASE: ${{ secrets.DATABASE }}
-        HOST: ${{ secrets.HOST }}
-        DBUSER: ${{ secrets.DBUSER }}
-        PASSWORD: ${{ secrets.PASSWORD }}
-        FCM_API_KEY: ${{ secrets.FCM_API_KEY }}
-        FCM_KEY: ${{ secrets.FCM_KEY }}
-        TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-        TG_USER_ID: ${{ secrets.TG_USER_ID }}
-        TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-      run: |
-        # 建议文件名如果带空格，使用引号包裹
-        python "三星测试版固件版本号解密.py"
+      - name: 校验运行选项
+        run: |
+          case "$FW_PERSIST_STATE" in true|false) ;; *) echo 'FW_PERSIST_STATE must be true or false'; exit 1 ;; esac
+          case "$FW_STORAGE" in local|cloud|both) ;; *) echo 'Invalid FW_STORAGE'; exit 1 ;; esac
+          case "$FW_SCAN_MODE" in full|metadata) ;; *) echo 'Invalid FW_SCAN_MODE'; exit 1 ;; esac
+          if [ "$FW_PERSIST_STATE" = false ]; then
+            echo '::warning::State persistence disabled; local database and pending notification/sync queues are temporary.'
+          fi
 
-    - name: 提交并推送更新
-      run: |
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        export TZ='Asia/Shanghai'
-        git add .
-        # 检查是否有文件变更，避免空提交报错
-        if ! git diff --cached --quiet; then
-          git commit -m "自动更新固件解密JSON [$(date '+%Y-%m-%d %H:%M:%S')]"
-          git push
-        else
-          echo "没有检测到文件更新，跳过推送。"
-        fi
+      - name: 恢复加密数据库、解码断点与通知队列
+        id: restore
+        if: env.FW_PERSIST_STATE == 'true'
+        env:
+          FW_STATE_KEY: ${{ secrets.FW_STATE_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -m samsung_firmware.actions_state restore
+
+      - name: 配置可选 MySQL 私有 CA
+        env:
+          FW_MYSQL_CA_PEM: ${{ secrets.FW_MYSQL_CA_PEM }}
+        run: |
+          if [ -n "$FW_MYSQL_CA_PEM" ]; then
+            umask 077
+            printf '%s\n' "$FW_MYSQL_CA_PEM" > "$RUNNER_TEMP/firmware-mysql-ca.pem"
+            printf 'FW_MYSQL_SSL_CA=%s\n' "$RUNNER_TEMP/firmware-mysql-ca.pem" >> "$GITHUB_ENV"
+          fi
+
+      - name: 查询正式版并解码测试版
+        id: firmware
+        env:
+          FW_MYSQL_HOST: ${{ secrets.FW_MYSQL_HOST || secrets.HOST }}
+          FW_MYSQL_USER: ${{ secrets.FW_MYSQL_USER || secrets.DBUSER }}
+          FW_MYSQL_PASSWORD: ${{ secrets.FW_MYSQL_PASSWORD || secrets.PASSWORD }}
+          FW_MYSQL_DATABASE: ${{ secrets.FW_MYSQL_DATABASE || secrets.DATABASE }}
+          FW_MYSQL_PORT: ${{ vars.FW_MYSQL_PORT || '3306' }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_USER_ID: ${{ secrets.TG_USER_ID }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: |
+          result=0
+          if [ "$FW_SCAN_MODE" = full ]; then
+            python '三星测试版固件版本号解密.py' --metadata-only --no-timeline || result=$?
+            if [ "$result" = 0 ] || [ "$result" = 2 ] || [ "$result" = 3 ]; then
+              second=0
+              FW_DOWNLOAD_CACHE_HOURS=24 python '三星测试版固件版本号解密.py' || second=$?
+              case "$second" in
+                0) ;;
+                2) if [ "$result" != 3 ]; then result=2; fi ;;
+                *) result=$second ;;
+              esac
+            fi
+          else
+            python '三星测试版固件版本号解密.py' --metadata-only || result=$?
+          fi
+          echo "result=$result" >> "$GITHUB_OUTPUT"
+          case "$result" in 0|2|3) ;; *) exit "$result" ;; esac
+
+      - name: 加密保存运行状态
+        id: pack
+        if: ${{ !cancelled() && steps.restore.outcome == 'success' && steps.firmware.outcome != 'skipped' }}
+        env:
+          FW_STATE_KEY: ${{ secrets.FW_STATE_KEY }}
+        run: python -m samsung_firmware.actions_state pack --archive "$RUNNER_TEMP/firmware.state.enc"
+
+      - name: 上传加密状态供下次恢复
+        id: upload
+        if: ${{ !cancelled() && steps.pack.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: ${{ steps.pack.outputs.artifact_name }}
+          path: ${{ runner.temp }}/firmware.state.enc
+          retention-days: ${{ vars.FW_STATE_RETENTION_DAYS || '30' }}
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: 提交公开固件信息
+        if: success() && steps.firmware.outcome == 'success'
+        run: |
+          git config --local user.name 'github-actions[bot]'
+          git config --local user.email 'github-actions[bot]@users.noreply.github.com'
+          outputs=(firmware.json firmware_mini.json 'MD5编码后的固件版本号.json' '更新时间线.json' '各机型最新版本.md' '测试版新增日志.txt' '测试版固件变动信息.txt')
+          for output in "${outputs[@]}"; do
+            if [ -f "$output" ]; then git add -- "$output"; fi
+          done
+          if ! git diff --cached --quiet; then
+            git commit -m "自动更新固件信息 [$(date '+%Y-%m-%d %H:%M:%S')]"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          else
+            echo '公开数据没有变动。'
+          fi
+
+      - name: 写入运行摘要
+        if: always()
+        env:
+          SCAN_RESULT: ${{ steps.firmware.outputs.result }}
+          STATE_RESTORE: ${{ steps.restore.outcome }}
+          STATE_PACK: ${{ steps.pack.outcome }}
+          STATE_UPLOAD: ${{ steps.upload.outcome }}
+        run: |
+          {
+            printf '### 固件监控\n\n'
+            printf -- '- 保存位置：`%s`\n' "$FW_STORAGE"
+            printf -- '- 扫描模式：`%s`\n' "$FW_SCAN_MODE"
+            printf -- '- 扫描退出码：`%s`（0 完成，2 FOTA 部分失败，3 云端补传待处理）\n' "${SCAN_RESULT:-未运行}"
+            printf -- '- 状态恢复 / 打包 / 上传：`%s` / `%s` / `%s`\n' "$STATE_RESTORE" "$STATE_PACK" "$STATE_UPLOAD"
+            printf -- '- 正式版通知仅发送个人 TG_USER_ID；下载地址需要 FUS 会话认证。\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 写入解码进度摘要
+        if: always() && steps.firmware.outcome != 'skipped'
+        run: |
+          python - <<'PYTHON'
+          import json
+          import os
+          from collections import Counter
+          from pathlib import Path
+
+          path = Path('firmware_mini.json')
+          if path.is_file():
+              data = json.loads(path.read_text(encoding='utf-8'))
+              stats = [record['解密统计'] for regions in data.values() if isinstance(regions, dict)
+                       for record in regions.values() if '解密统计' in record]
+              states = Counter(item.get('status', 'unknown') for item in stats)
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+                  summary.write('\n### 已保存的解码进度\n\n')
+                  summary.write(f'- 含统计的机型/地区：{len(stats)}；状态：{dict(states)}\n')
+                  summary.write(f'- 本轮候选：{sum(item.get("candidates", 0) for item in stats):,}\n')
+                  summary.write(f'- 各设备当前搜索计划累计候选：{sum(item.get("candidates_total", 0) for item in stats):,}\n')
+                  summary.write('- bounded 会在下次续搜；服务器哈希或搜索输入变化会从头搜索。\n')
+                  summary.write('- 扫描异常时，上述统计可能包含上次保存的记录。\n')
+          PYTHON
+
+      - name: 标记未完成的查询或同步
+        if: always() && steps.firmware.outputs.result != '' && steps.firmware.outputs.result != '0'
+        run: exit 1

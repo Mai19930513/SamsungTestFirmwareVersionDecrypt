@@ -447,6 +447,7 @@
                         <th>最新测试版</th>
                         <th id="sortUpdateTime" class="sortable">测试版上线时间</th>
                         <th>测试版本号说明</th>
+                        <th>固件下载信息</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -460,13 +461,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const timestamp = Date.now()
-            const DATA_URL = `https://cdn.jsdelivr.net/gh/Mai19930513/SamsungTestFirmwareVersionDecrypt/firmware_mini.json?v=${timestamp}`;
+            const DATA_URL = location.protocol === 'file:'
+                ? 'https://cdn.jsdelivr.net/gh/Mai19930513/SamsungTestFirmwareVersionDecrypt/firmware_mini.json'
+                : new URL('firmware_mini.json', location.href).href;
+            const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
             class FirmwareTable {
                 constructor() {
                     this.tableBody = document.querySelector('#firmwareTable tbody');
                     this.pageSize = 30; // 每次加载的数据量
                     this.currentIndex = 0; // 当前加载到的数据索引
+                    this.processedData = [];
                     this.isLoading = false; // 是否正在加载数据
                     this.filters = { model: '', region: '' }; // 筛选条件
                     this.sortOrder = 'desc'; // 默认排序顺序为降序
@@ -523,7 +527,8 @@
                 }
                 async loadData() {
                     try {
-                        const response = await fetch(DATA_URL)
+                        const response = await fetch(DATA_URL, { cache: 'no-cache' });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
                         const data = await response.json();
                         this.processData(data);
                         // 默认按设备型号降序排序
@@ -535,6 +540,9 @@
                         this.renderTable();
                     } catch (error) {
                         console.error('数据加载失败:', error);
+                        const message = document.getElementById('noResults');
+                        message.textContent = '固件数据加载失败，请稍后刷新重试。';
+                        message.style.display = 'block';
                     }
                 }
 
@@ -561,6 +569,8 @@
                                 regionName: details.地区,
                                 official: this.parseVersion(details.最新正式版),
                                 official_full: details.最新正式版,
+                                serverOfficial: details.最新服务器正式版,
+                                serverSource: details.正式版来源,
                                 major: this.parseVersion(details.大版本测试版),
                                 major_full: details.大版本测试版,
                                 minor: this.parseVersion(details.常规更新测试版),
@@ -570,6 +580,7 @@
                                 updateTime: details.最新测试版上传时间,
                                 stableOS: details.正式版安卓版本,
                                 devOS: details.测试版安卓版本,
+                                download: details.最新固件下载,
                             });
                         });
                     });
@@ -621,6 +632,7 @@
                     // 动态生成表格行
                     const fragment = document.createDocumentFragment();
                     nextData.forEach(item => {
+                        item = Object.fromEntries(Object.entries(item).map(([key, value]) => [key, typeof value === 'string' ? escapeHTML(value) : value]));
                         const row = document.createElement('tr');
                         row.classList.add('tr-fade-in'); // 添加动画类
                         row.innerHTML = `
@@ -633,6 +645,7 @@
                                 ${item.official ? `<a href="https://samfw.com/firmware/${item.model}/${item.regionCode}/${item.official}" target="_blank" class="version-badge official-badge">${item.official}</a>` : '-'}
                             </div>
                             <div class="android_os" style="margin-bottom:0.2em;">Android OS:${item.stableOS || '未知'}</div>
+                            ${item.serverOfficial && item.serverOfficial !== item.official_full ? `<div class="copyable" title="${item.serverOfficial}">服务器 (${item.serverSource || '未知'})：${item.serverOfficial.split('/')[0]}</div>` : ''}
                         </td>
                         <td style="min-width:180px; vertical-align:middle;text-align:left" title="${item.beta_full || '无版本号'}" class="copyable">
                             <div>
@@ -647,6 +660,26 @@
                         <td>${item.updateTime || '未知'}</td>
                         <td>${item.description}</td>
                     `;
+                        const downloadCell = document.createElement('td');
+                        const download = item.download || {};
+                        const labels = { available: '需 FUS 认证', stale: '旧地址，需重新验证', unavailable: '服务器未提供', error: '查询失败', disabled: '已关闭', not_checked: '尚未查询' };
+                        downloadCell.textContent = labels[download.status] || '尚未查询';
+                        if (download.url && ['available', 'stale'].includes(download.status)) {
+                            try {
+                                const url = new URL(download.url);
+                                if (url.protocol === 'https:' && url.hostname === 'cloud-neofussvr.samsungmobile.com' && !url.username && !url.password) {
+                                    const copy = document.createElement('button');
+                                    copy.type = 'button';
+                                    copy.className = 'copyable clear-btn';
+                                    copy.title = url.href;
+                                    copy.textContent = '复制下载地址';
+                                    downloadCell.append(document.createElement('br'), copy);
+                                }
+                            } catch (error) {
+                                downloadCell.textContent = '下载地址无效';
+                            }
+                        }
+                        row.appendChild(downloadCell);
                         fragment.appendChild(row);
                     });
                     // 判断是否已到最后，插入提示行
@@ -654,7 +687,7 @@
                         const tipRow = document.createElement('tr');
                         tipRow.setAttribute('data-tip', 'end'); // 标记提示行
                         tipRow.className = 'end-tip-row'; // 添加美观样式和动画
-                        tipRow.innerHTML = `<td colspan="8">加载完毕！共 ${filteredData.length} 条数据</td>`;
+                        tipRow.innerHTML = `<td colspan="9">加载完毕！共 ${filteredData.length} 条数据</td>`;
                         fragment.appendChild(tipRow);
                     }
                     this.tableBody.appendChild(fragment);

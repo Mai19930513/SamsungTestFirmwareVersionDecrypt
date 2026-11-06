@@ -1,9 +1,15 @@
 [![生成固件解密json文件](https://github.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/actions/workflows/python-app.yml/badge.svg)](https://github.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/actions/workflows/python-app.yml)
 # 主要功能
+当前版本支持并发 FOTA 查询、MD5/HMAC-SHA256 候选匹配、历史缓存复用、SQLite/MySQL 持久化，以及 FUS 最新正式版下载信息导出。完整配置、数据字段、隐私边界与使用命令见 [配置与运行说明](docs/CONFIGURATION.md)，联网调研依据见 [FOTA/FUS 实现资料](docs/FOTA_RESEARCH.md)。
+
+上传 GitHub 后的 Secrets、定时运行、数据库和通知队列跨次保存见 [GitHub Actions 部署说明](docs/GITHUB_ACTIONS.md)。正式版上线和回滚通知只发送个人；Actions 使用加密 artifact 保留 SQLite、通知重试和云端补传状态。
+
+
+固件下载、断点续传和 AES 解密已提供独立本地命令，使用方法见 [下载与解密](docs/DOWNLOAD.md)。可先运行 `python -m samsung_firmware.download probe --model SM-F9760 --region CHC`，只下载少量样本验证下载与解密；完整下载需显式使用 `download`。
 通过生成序列号穷举MD5编码后的结果与官网对比，达到解码版本号的功能。
 三星测试版固件官网:`https://fota-cloud-dn.ospserver.net/firmware/区域码/设备型号/version.test.xml`,示例网站：如[国行版S24 Ultra](https://fota-cloud-dn.ospserver.net/firmware/CHC/SM-S9280/version.test.xml)
 # 如何添加自己需要的设备
-`Fork`本项目或`git clone`代码到本地,修改`models.txt`，添加格式为`设备名称,设备型号,地区代码(多个地区用|分隔)`，将自己需要的设备型号添加进去；并将`三星测试版固件版本号解密.py`文件最下面的`getModelDictsFromDB`改为`getModelDicts`,重新运行脚本。
+修改 `models.txt`，每行格式为 `设备名称,设备型号,地区代码(多个地区用|分隔)`。默认合并该文件与历史 JSON 中的机型；只处理文件中的设备可在 `.env` 设置 `FW_MODEL_SOURCE=file`。使用已有 MySQL `models` 表时设置 `FW_MODEL_SOURCE=mysql`，无需修改 Python 源码。
 
 
 # 如何根据三星固件版本号获取相关信息？
@@ -48,7 +54,7 @@ CSC文件主要包含与你的网络运营商、位置、设备语言设置、�
 ## 什么是OXM Multi-CSC固件？
 OXM是一个超集，它内部包含许多子CSC。如果您的Samsung设备具有多个CSC固件，那么您可以轻松更改区域。
 OXM Multi-CSC包含以下CSC:
-> ACR AFG AFR ARO ATO AUT BGL BNG BRI BTC BTU CAC CAM CHO COO DBT DKR ECT EGY EON ETL EUR GLB ILO INS ITV KSA LAO LUX LYS MID MM1 MWD MYM NEE NPL ORX OXM PAK PHE PHN ROM SEB SEE SEK SER SIN SKZ SLK SMA STH THL THR TMC TPA TPH TTT TUN TUR WTL XEF XEH XEO XEU XFE XME XSG XSP XTC XXV ZTO 
+> ACR AFG AFR ARO ATO AUT BGL BNG BRI BTC BTU CAC CAM CHO COO DBT DKR ECT EGY EON ETL EUR GLB ILO INS ITV KSA LAO LUX LYS MID MM1 MWD MYM NEE NPL ORX OXM PAK PHE PHN ROM SEB SEE SEK SER SIN SKZ SLK SMA STH THL THR TMC TPA TPH TTT TUN TUR WTL XEF XEH XEO XEU XFE XME XSG XSP XTC XXV ZTO
 
 除了 OXM，还有一堆更多的多 CSC，包括:
 > ODD、ODM、OJK、OJP、OJV、OLB、OLC、OMC、OSW、OWO、OXA、OXE、OXF、OXI、OXX、OYA、OYM、OYN、OYV 和 OZS、VFG、VFR、YXY。

@@ -7,9 +7,9 @@ from copy import deepcopy
 import requests
 
 from .config import env_bool, env_int
-from .events import render_event
+from .events import fus_ahead_version, render_event, render_message
 from .files import atomic_json, load_json
-from .versions import same_release, test_candidates, version_key
+from .versions import newer_release, normalize_version, same_release, test_candidates
 
 
 def split_text(text, limit=3900):
@@ -30,6 +30,25 @@ def split_text(text, limit=3900):
     if current:
         chunks.append(current.rstrip())
     return chunks
+
+
+def split_message(text, entities=(), limit=3900):
+    """Keep Telegram text-link offsets correct after splitting, including emoji."""
+    messages = []
+    cursor = 0
+    for chunk in split_text(text, limit):
+        start = text.index(chunk, cursor)
+        offset = len(text[:start].encode("utf-16-le")) // 2
+        length = len(chunk.encode("utf-16-le")) // 2
+        links = []
+        for entity in entities:
+            left = max(offset, entity["offset"])
+            right = min(offset + length, entity["offset"] + entity["length"])
+            if left < right:
+                links.append({**entity, "offset": left - offset, "length": right - left})
+        messages.append({"text": chunk, "entities": links})
+        cursor = start + len(chunk)
+    return messages
 
 
 def recipient_config(group_id=None):
@@ -103,17 +122,40 @@ def enqueue(settings, events, group_id=None):
         else:
             pending["versions"] = sorted(set(pending.get("versions", [])) | set(event.get("versions", [])))
             if event.get("stable"):
-                first = pending.get("stable")
                 pending["stable"] = deepcopy(event["stable"])
-                if first:
-                    pending["stable"]["earlier"] = first["earlier"]
-                pending["stable"]["rollback"] = bool(pending["stable"]["earlier"] and version_key(pending["stable"]["current"]) < version_key(pending["stable"]["earlier"]))
-                if same_release(pending["stable"]["earlier"], pending["stable"]["current"]):
-                    pending["stable"] = None
         pending["members"].append(event["id"])
         pending["text"] = render_event(pending)
         seen.add(event["id"])
     atomic_json(queue_path(settings), queue, private=True)
+
+
+def revalidate_stable(event, record):
+    """Recheck queued/retried FUS alerts; defer if current evidence is unavailable."""
+    stable = event.get("stable")
+    if not stable:
+        return True
+    if record is None or record.get("抓取状态", {}).get("stable") != "ok":
+        return False
+    fota = normalize_version(record.get("最新正式版", ""))
+    if not fota:
+        return False
+    ahead = newer_release(stable["current"], fota)
+    if ahead and record.get("最新固件下载", {}).get("status") != "available":
+        return False
+    valid = ahead and same_release(stable["current"], fus_ahead_version(record))
+    partial = any(event["targets"].values())
+    if valid and (not partial or stable.get("rule") == "fus_ahead_fota"):
+        if not partial:
+            stable.update(earlier=fota, source="FUS", rule="fus_ahead_fota", rollback=False)
+        return True
+    if partial:
+        # Keep chunk offsets intact; never resume an obsolete stable announcement.
+        event["suppressed_at"] = time.time()
+    else:
+        event["stable"] = None
+        event.pop("started_at", None)
+        event["text"] = render_event(event)
+    return True
 
 
 def notify(settings, group_id=None, data=None):
@@ -141,12 +183,17 @@ def notify(settings, group_id=None, data=None):
                 event["suppressed_at"] = time.time()
                 atomic_json(path, queue, private=True)
                 continue
+            record = (data or {}).get(event["model"], {}).get(event["region"])
+            if not revalidate_stable(event, record):
+                continue
+            atomic_json(path, queue, private=True)
+            if completed(event):
+                continue
             pair = pair_key(event)
             if time.time() < event.get("retry_at", 0):
                 continue
             if not event.get("started_at"):
                 # A later scan can promote a queued test build to stable or remove it.
-                record = (data or {}).get(event["model"], {}).get(event["region"])
                 if record is not None:
                     active = set(test_candidates(record))
                     event["versions"] = [v for v in event.get("versions", []) if v in active]
@@ -171,11 +218,11 @@ def notify(settings, group_id=None, data=None):
                     if not content.get("versions"):
                         event["targets"].pop(key, None)
                         continue
-                chunks = split_text(render_event(content))
+                chunks = split_message(**render_message(content))
                 for index in range(event["targets"][key], len(chunks)):
                     try:
                         with session.post(f"https://api.telegram.org/bot{token}/sendMessage",
-                                          json={"chat_id": recipient, "text": chunks[index], "disable_web_page_preview": True},
+                                          json={"chat_id": recipient, **chunks[index], "disable_web_page_preview": True},
                                           timeout=settings.timeout, allow_redirects=False) as response:
                             payload = response.json()
                             if response.status_code != 200 or not payload.get("ok"):

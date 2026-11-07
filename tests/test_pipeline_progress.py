@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from samsung_firmware.config import Settings
 from samsung_firmware.decode import candidate_groups
-from samsung_firmware.files import atomic_write, load_json
+from samsung_firmware.files import atomic_json, atomic_write, load_json
 from samsung_firmware.pipeline import execute_run
 from samsung_firmware.storage import Store
 
@@ -29,6 +29,22 @@ class Client:
 
 
 class PipelineProgressTests(unittest.TestCase):
+    def test_notifications_use_only_currently_scanned_devices(self):
+        with TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            settings = replace(Settings.from_env(Path(directory)), downloads=False, timeline=False,
+                               notifications=True, cpu_workers=1)
+            atomic_write(settings.models_file, 'Galaxy S25 Ultra,SM-S9380,CHC|TGY\n')
+            atomic_json(settings.output_dir / 'firmware.json', {'SM-S9380': {'TGY': {
+                '最新正式版': STABLE, '抓取状态': {'stable': 'ok'}}}})
+            args = Namespace(model=['SM-S9380'], region=['CHC'], force=False,
+                             metadata_only=True, migrate_only=False)
+            with patch('samsung_firmware.pipeline.HttpClient', Client), patch('samsung_firmware.notify.notify') as send:
+                self.assertEqual(execute_run(settings, args), 0)
+            current = send.call_args.args[2]
+            self.assertEqual(set(current), {'SM-S9380'})
+            self.assertEqual(set(current['SM-S9380']), {'CHC'})
+            self.assertIn('TGY', load_json(settings.output_dir / 'firmware.json')['SM-S9380'])
+
     def test_metadata_force_and_precommit_failure_preserve_progress(self):
         with TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
             settings = replace(Settings.from_env(Path(directory)), downloads=False, timeline=False,

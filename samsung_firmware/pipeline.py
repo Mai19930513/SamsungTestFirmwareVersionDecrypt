@@ -166,8 +166,10 @@ def execute_run(settings, args):
         data["上次更新时间"] = now_text()
         hashes["上次更新时间"] = now_text()
         observations = {}
+        notification_data = {}
         for model, region in pairs:
             record = data[model][region]
+            notification_data.setdefault(model, {})[region] = record
             record["最新固件下载链接"] = record["最新固件下载"].get("url")
             if "test" in fetched[model, region]:
                 observations[model, region] = target_hashes(fetched[model, region]["test"], settings.hmac_key)[0]
@@ -182,7 +184,7 @@ def execute_run(settings, args):
         if settings.notifications:
             from .notify import notify
 
-            notify(settings, group_id, data)
+            notify(settings, group_id, notification_data)
         if settings.timeline:
             from .timeline import update_timeline
 

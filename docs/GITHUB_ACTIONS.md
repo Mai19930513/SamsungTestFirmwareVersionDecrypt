@@ -15,7 +15,7 @@
 | --- | --- |
 | `FW_STATE_KEY` | 默认必填，64 个十六进制字符，用于 AES-256-GCM 加密运行状态 |
 | `TG_BOT_TOKEN` | Telegram 机器人 Token |
-| `TG_USER_ID` | 个人数字 ID，正式版上线和回滚只发这里；需先向机器人发起对话 |
+| `TG_USER_ID` | 个人数字 ID，FUS 高于 FOTA 正式版的上线消息只发这里；需先向机器人发起对话 |
 | `TG_CHAT_ID` | 可选群组 ID；仅数据库缺失时读入并保存，群组发送当前暂停 |
 | `FW_MYSQL_HOST` | 云数据库主机，兼容旧 Secret `HOST` |
 | `FW_MYSQL_USER` | 云数据库用户，兼容 `DBUSER` |
@@ -64,7 +64,7 @@ python -c 'import secrets; print(secrets.token_hex(32))'
 ## 每次运行的流程
 
 1. 安装依赖，按仓库及分支恢复最近一份加密状态。
-2. `full` 模式先运行快速元数据查询，将正式版变更加入合并队列，再运行限时解码和更新日志。第二阶段临时复用 24 小时内的成功 FUS 查询，减少同一轮重复请求；版本变化仍会重新查询。`metadata` 模式只运行一次元数据查询。
+2. `full` 模式先运行快速元数据查询，将严格高于 FOTA 正式版的 FUS 上线消息加入合并队列，再运行限时解码和更新日志。第二阶段临时复用 24 小时内的成功 FUS 查询，减少同一轮重复请求；版本变化仍会重新查询。`metadata` 模式只运行一次元数据查询。
 3. `local` 保存 SQLite；`cloud` 保存 MySQL；`both` 先写 SQLite 再写云端。云失败时，待补传队列随加密状态一起保留。
 4. 使用 SQLite backup API 生成独立快照，将数据库、Telegram 队列、云同步队列压缩后加密，上传独立 artifact。不会打包整个工作目录、`.env`、设备标识、FUS 会话或数据库连接密码。
 5. 只提交七个公开 JSON、Markdown、日志文件。部分 FOTA/云同步失败仍先保存可用结果，再将任务标记为失败，方便发现问题。

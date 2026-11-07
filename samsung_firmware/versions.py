@@ -62,7 +62,7 @@ def same_release(left, right):
     return a[:2] == b[:2] and (a[2] == b[2] or not a[2] or not b[2])
 
 
-def newer_test(version, stable):
+def newer_release(version, stable):
     candidate, baseline = parse_build(version), parse_build(stable)
     if not candidate or not baseline or same_release(version, stable):
         return False
@@ -84,5 +84,10 @@ def release_baseline(record):
 def test_candidates(record):
     stable = release_baseline(record)
     current = record.get("当前服务器版本号", {})
-    return sorted({version for version in current.values() if newer_test(version, stable)},
+    return sorted({version for version in current.values() if newer_release(version, stable)},
                   key=lambda value: (version_key(value), value), reverse=True)
+
+
+def newer_test(version, stable):
+    """Backward-compatible name for the shared release ordering check."""
+    return newer_release(version, stable)

@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 from samsung_firmware.config import Settings
 from samsung_firmware.databases import Databases
 from samsung_firmware.files import atomic_json, load_json
-from samsung_firmware.notify import enqueue, notify, queue_path, recipient_key, split_text
+from samsung_firmware.notify import enqueue, notify, queue_path, recipient_key, split_message, split_text
 from samsung_firmware.storage import Store
-from test_versions_events import NEW_TEST, NEW_BETA, STABLE, events, record
+from test_versions_events import NEW_TEST, NEW_BETA, STABLE, events, fus_record, record
 
 
 class NotifyTests(unittest.TestCase):
@@ -53,8 +53,8 @@ class NotifyTests(unittest.TestCase):
         notify(self.settings, '-10012345')
         self.assertEqual(self.session.post.call_count, 1)
         text = self.session.post.call_args.kwargs['json']['text']
-        self.assertIn(NEW_TEST, text)
-        self.assertIn(NEW_BETA, text)
+        self.assertIn(NEW_TEST.split('/')[0], text)
+        self.assertIn(NEW_BETA.split('/')[0], text)
         later = NEW_BETA.replace('ZJ1', 'ZJ2')
         self.enqueue_versions(later)
         self.clock.return_value = 11000
@@ -87,12 +87,126 @@ class NotifyTests(unittest.TestCase):
 
     def test_group_digest_excludes_stable_section(self):
         with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true', 'FW_NOTIFY_BATCH_SECONDS': '0'}):
-            enqueue(self.settings, events(record(), record([NEW_BETA], stable=NEW_TEST)), '-10012345')
-            notify(self.settings, '-10012345')
+            item = fus_record([NEW_BETA])
+            enqueue(self.settings, events(record(), item), '-10012345')
+            notify(self.settings, '-10012345', data={'SM-F9260': {'CHC': item}})
         sent = {call.kwargs['json']['chat_id']: call.kwargs['json']['text'] for call in self.session.post.call_args_list}
-        self.assertIn('正式版服务器上线', sent['12345'])
-        self.assertNotIn('正式版服务器上线', sent['-10012345'])
-        self.assertIn(NEW_BETA, sent['-10012345'])
+        self.assertIn('FUS 新版本上线', sent['12345'])
+        self.assertNotIn('FUS 新版本上线', sent['-10012345'])
+        self.assertIn(NEW_BETA.split('/')[0], sent['-10012345'])
+        self.assertNotIn(NEW_BETA, sent['-10012345'])
+        self.assertTrue(sent['-10012345'].endswith(NEW_BETA.split('/')[0]))
+        self.assertNotIn('仅列出高于', sent['-10012345'])
+
+    def test_fota_catchup_removes_queued_fus_but_keeps_tests(self):
+        item = fus_record([NEW_BETA])
+        enqueue(self.settings, events(record(), item))
+        item['最新正式版'] = NEW_TEST
+        self.clock.return_value = 10400
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.session.post.assert_called_once()
+        text = self.session.post.call_args.kwargs['json']['text']
+        self.assertIn(NEW_BETA.split('/')[0], text)
+        self.assertNotIn('FUS 新版本上线', text)
+
+    def test_legacy_stable_backlog_and_failed_attempt_are_suppressed(self):
+        for started in (False, True):
+            with self.subTest(started=started):
+                item = fus_record()
+                event = events(record(), item)[0]
+                event['stable'].pop('rule')
+                event['id'] = str(started)
+                enqueue(self.settings, [event])
+                queue = load_json(queue_path(self.settings))
+                if started:
+                    queue[event['id']]['started_at'] = 10001
+                    atomic_json(queue_path(self.settings), queue)
+                item['最新正式版'] = NEW_TEST
+                self.clock.return_value += 400
+                notify(self.settings, data={'SM-F9260': {'CHC': item}})
+                self.session.post.assert_not_called()
+                self.assertTrue(load_json(queue_path(self.settings))[event['id']]['suppressed_at'])
+
+    def test_fus_alert_waits_for_valid_state_then_delivers(self):
+        item = fus_record()
+        enqueue(self.settings, events(record(), item))
+        self.clock.return_value = 10400
+        notify(self.settings)
+        self.session.post.assert_not_called()
+        item['抓取状态']['stable'] = 'http_503'
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.session.post.assert_not_called()
+        item['抓取状态']['stable'] = 'ok'
+        item['最新固件下载']['status'] = 'stale'
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.session.post.assert_not_called()
+        item['最新固件下载']['status'] = 'available'
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.session.post.assert_called_once()
+
+    def test_queued_fus_updates_fota_baseline_before_delivery(self):
+        item = fus_record(stable=STABLE.replace('ZH2', 'ZH1'))
+        enqueue(self.settings, events(record(), item))
+        item['最新正式版'] = STABLE
+        self.clock.return_value = 10400
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        text = self.session.post.call_args.kwargs['json']['text']
+        self.assertIn('FOTA 当前正式版：' + STABLE.split('/')[0], text)
+
+    def test_obsolete_fus_stops_partially_delivered_message(self):
+        item = fus_record()
+        event = events(record(), item)[0]
+        event['name'] = 'A' * 4000
+        enqueue(self.settings, [event])
+        self.clock.return_value = 10400
+        self.response.json.side_effect = [{'ok': True}, {'ok': False}]
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.assertEqual(self.session.post.call_count, 2)
+        item['最新正式版'] = NEW_TEST
+        self.clock.return_value = 10461
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.assertEqual(self.session.post.call_count, 2)
+        self.assertTrue(load_json(queue_path(self.settings))[event['id']]['suppressed_at'])
+
+    def test_merged_fus_updates_use_latest_fota_baseline(self):
+        first = fus_record()
+        enqueue(self.settings, events(record(), first))
+        self.clock.return_value = 10100
+        latest = fus_record(stable=NEW_TEST, fus=NEW_TEST.replace('ZI1', 'ZI2'))
+        enqueue(self.settings, events(first, latest))
+        queue = load_json(queue_path(self.settings))
+        self.assertEqual(len(queue), 1)
+        pending = next(iter(queue.values()))
+        self.assertEqual(pending['stable']['earlier'], NEW_TEST)
+        self.assertEqual(pending['stable']['current'], latest['最新固件下载']['version'])
+        self.clock.return_value = 10400
+        notify(self.settings, data={'SM-F9260': {'CHC': latest}})
+        self.session.post.assert_called_once()
+
+    def test_fus_seen_marker_survives_database_restart(self):
+        item = fus_record()
+        events(record(), item)
+        store = Store(self.settings)
+        try:
+            with store.transaction():
+                store.save_device('SM-F9260', 'CHC', item)
+        finally:
+            store.close()
+        reopened = Store(self.settings)
+        self.addCleanup(reopened.close)
+        previous = reopened.snapshots()['SM-F9260']['CHC']
+        self.assertEqual(previous['已记录FUS领先版本'], NEW_TEST)
+        self.assertEqual(events(previous, fus_record()), [])
+
+    def test_superseded_fus_alert_is_discarded(self):
+        item = fus_record()
+        event = events(record(), item)[0]
+        enqueue(self.settings, [event])
+        item['最新固件下载']['version'] = NEW_TEST.replace('ZI1', 'ZI2')
+        self.clock.return_value = 10400
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        self.session.post.assert_not_called()
+        self.assertTrue(load_json(queue_path(self.settings))[event['id']]['suppressed_at'])
 
     def test_failed_send_is_retried_without_mutating_started_message(self):
         self.enqueue_versions(NEW_TEST)
@@ -114,6 +228,36 @@ class NotifyTests(unittest.TestCase):
         self.assertGreater(len(chunks), 1)
         self.assertEqual('\n'.join(chunks), text)
         self.assertTrue(all(len(value.encode('utf-16-le')) // 2 <= 3900 for value in chunks))
+
+    def test_text_links_survive_long_messages_and_emoji(self):
+        item = fus_record()
+        event = events(record(), item)[0]
+        event['name'] = '设备 😀 <Ultra> & ' * 350
+        enqueue(self.settings, [event])
+        self.clock.return_value = 10400
+        notify(self.settings, data={'SM-F9260': {'CHC': item}})
+        labels = {}
+        for call in self.session.post.call_args_list:
+            payload = call.kwargs['json']
+            encoded = payload['text'].encode('utf-16-le')
+            self.assertLessEqual(len(encoded) // 2, 3900)
+            self.assertNotIn('https://', payload['text'])
+            for link in payload['entities']:
+                label = encoded[link['offset'] * 2:(link['offset'] + link['length']) * 2].decode('utf-16-le')
+                labels[label] = link['url']
+        self.assertGreater(self.session.post.call_count, 1)
+        self.assertEqual(labels, {'下载地址': item['最新固件下载']['url'],
+                                  '更新说明': 'https://doc.samsungmobile.com/SM-F9260/CHC/doc.html'})
+
+    def test_link_crossing_chunk_boundary_keeps_clickable_label(self):
+        chunks = split_message('😀下载地址', [{'type': 'text_link', 'offset': 2,
+                                             'length': 4, 'url': 'https://example.com'}], limit=4)
+        labels = []
+        for chunk in chunks:
+            encoded = chunk['text'].encode('utf-16-le')
+            for link in chunk['entities']:
+                labels.append(encoded[link['offset'] * 2:(link['offset'] + link['length']) * 2].decode('utf-16-le'))
+        self.assertEqual(''.join(labels), '下载地址')
 
     def test_group_id_saved_when_notifications_disabled_and_survives_restart(self):
         db = Databases(self.settings)

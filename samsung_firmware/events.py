@@ -4,41 +4,69 @@ from .config import env_bool
 from .files import now_text
 from .fus import public_download
 from .records import refresh_test_fields
-from .versions import normalize_version, same_release, test_candidates, version_key
+from .versions import newer_release, normalize_version, same_release, test_candidates, version_key
 
 
 def server_version(record, previous):
-    download = record.get("最新固件下载", {})
-    if download.get("status") == "available" and normalize_version(download.get("version", "")):
-        return normalize_version(download["version"]), "FUS"
+    fus = fus_ahead_version(record)
+    if fus:
+        return fus, "FUS"
     stable = normalize_version(record.get("最新正式版", ""))
     earlier = normalize_version(previous.get("最新服务器正式版", ""))
     if record.get("抓取状态", {}).get("stable") == "ok" and stable:
-        if earlier and previous.get("正式版来源") == "FUS" and version_key(stable) <= version_key(earlier):
+        # Keep a previously observed FUS build through a transient FUS failure while
+        # FOTA is still behind it; do not treat an equal/older FUS build as current.
+        if (earlier and previous.get("正式版来源") == "FUS"
+                and newer_release(earlier, stable)):
             return earlier, "FUS"
         return stable, "FOTA"
     return (earlier or normalize_version(previous.get("最新正式版", "")) or stable,
             previous.get("正式版来源", "FOTA"))
 
 
-def render_event(event):
+def fus_ahead_version(record):
+    """Only a successful FUS lookup strictly ahead of current FOTA is news."""
+    stable = normalize_version(record.get("最新正式版", ""))
+    download = record.get("最新固件下载", {})
+    current = normalize_version(download.get("version", ""))
+    if (record.get("抓取状态", {}).get("stable") == "ok"
+            and download.get("status") == "available" and newer_release(current, stable)):
+        return current
+    return ""
+
+
+def render_message(event):
     lines = ["三星固件更新", f"{event['name']} · {event['model']} · {event['region']}"]
+    entities = []
     stable = event.get("stable")
     if stable:
-        title = "正式版服务器回滚" if stable["rollback"] else "正式版服务器上线"
-        lines.extend(["", title, f"原版本：{stable['earlier'] or '首次发现'}", f"新版本：{stable['current']}",
-                      f"发现时间：{stable['discovered_at']} · 来源：{stable['source']}",
-                      "服务器已提供此版本；设备 OTA 到达时间取决于分批推送。"])
+        lines.extend(["", "FUS 新版本上线",
+                      f"FOTA 当前正式版：{stable['earlier'].split('/')[0]}",
+                      f"FUS 版本：{stable['current'].split('/')[0]}",
+                      f"脚本发现时间：{stable['discovered_at']} · 来源：{stable['source']}"])
+        links = []
         if stable.get("url"):
-            lines.extend(["下载地址（需要 FUS 会话认证）：", stable["url"]])
-        lines.append(f"更新说明：https://doc.samsungmobile.com/{event['model']}/{event['region']}/doc.html")
-    versions = event.get("versions", [])
+            links.append(("下载地址", stable["url"]))
+        links.append(("更新说明", f"https://doc.samsungmobile.com/{event['model']}/{event['region']}/doc.html"))
+        offset = len(("\n".join(lines) + "\n").encode("utf-16-le")) // 2
+        labels = []
+        for label, url in links:
+            if labels:
+                offset += len(" · ")
+            length = len(label.encode("utf-16-le")) // 2
+            entities.append({"type": "text_link", "offset": offset, "length": length, "url": url})
+            labels.append(label)
+            offset += length
+        lines.append(" · ".join(labels))
+    versions = {version.split("/")[0] for version in event.get("versions", [])}
     if versions:
         lines.extend(["", f"新增测试固件解密结果：{len(versions)} 个版本"])
-        for index, version in enumerate(sorted(set(versions), key=lambda v: (version_key(v), v), reverse=True), 1):
-            lines.append(f"{index}. {version}")
-        lines.append("仅列出高于正式版的当前测试固件；解密发现时间不代表上传时间。")
-    return "\n".join(lines)
+        lines.extend(sorted(versions, key=lambda v: (version_key(v), v), reverse=True))
+    return {"text": "\n".join(lines), "entities": entities}
+
+
+def render_event(event):
+    return render_message(event)["text"]
 
 
 def firmware_events(old_data, data, pairs):
@@ -57,10 +85,18 @@ def firmware_events(old_data, data, pairs):
             record["正式版首次发现时间"] = now_text()
         refresh_test_fields(record)
         stable = None
-        if changed and (earlier or initial):
-            stable = {"earlier": earlier, "current": current, "source": source,
-                      "rollback": bool(earlier and version_key(current) < version_key(earlier)),
-                      "discovered_at": record["正式版首次发现时间"]}
+        ahead = fus_ahead_version(record)
+        seen = normalize_version(previous.get("已记录FUS领先版本", ""))
+        if "已记录FUS领先版本" not in previous and previous.get("正式版来源") == "FUS":
+            old_fus = normalize_version(previous.get("最新服务器正式版", ""))
+            old_fota = normalize_version(previous.get("最新正式版", ""))
+            seen = old_fus if newer_release(old_fus, old_fota) else fus_ahead_version(previous)
+        # Persist even for a silent initial scan; fetch failures must not reset deduplication.
+        record["已记录FUS领先版本"] = ahead or seen
+        if ahead and not same_release(ahead, seen) and (previous or initial):
+            stable = {"earlier": normalize_version(record["最新正式版"]), "current": ahead,
+                      "source": "FUS", "rule": "fus_ahead_fota", "rollback": False,
+                      "discovered_at": now_text()}
             download = public_download(record.get("最新固件下载"))
             if (attach_download and download.get("status") == "available" and download.get("url")
                     and same_release(download.get("version", ""), current)):
@@ -71,7 +107,7 @@ def firmware_events(old_data, data, pairs):
             continue
         event = {"schema": 2, "kind": "firmware", "model": model, "region": region,
                  "name": record.get("机型", model), "stable": stable, "versions": versions}
-        keys = [model, region, earlier if stable else "", current if stable else "", *sorted(versions)]
+        keys = [model, region, "fus_ahead_fota" if stable else "", ahead if stable else "", *sorted(versions)]
         event["id"] = hashlib.sha256("\0".join(keys).encode()).hexdigest()
         event["text"] = render_event(event)
         events.append(event)

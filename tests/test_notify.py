@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 from samsung_firmware.config import Settings
 from samsung_firmware.databases import Databases
 from samsung_firmware.files import atomic_json, load_json
+from samsung_firmware.events import firmware_events, render_message
+from samsung_firmware.messages import digest_counts, digest_pages, render_digest_page
 from samsung_firmware.notify import enqueue, notify, queue_path, recipient_key, split_message, split_text
 from samsung_firmware.storage import Store
 from test_versions_events import NEW_TEST, NEW_BETA, STABLE, events, fus_record, record
@@ -94,8 +96,9 @@ class NotifyTests(unittest.TestCase):
         self.assertIn('FUS 新版本上线', sent['12345'])
         self.assertNotIn('FUS 新版本上线', sent['-10012345'])
         self.assertIn(NEW_BETA.split('/')[0], sent['-10012345'])
-        self.assertNotIn(NEW_BETA, sent['-10012345'])
-        self.assertTrue(sent['-10012345'].endswith(NEW_BETA.split('/')[0]))
+        self.assertIn(NEW_BETA, sent['-10012345'])
+        self.assertTrue(sent['-10012345'].endswith(NEW_BETA))
+        self.assertEqual(self.session.post.call_count, 2)
         self.assertNotIn('仅列出高于', sent['-10012345'])
 
     def test_fota_catchup_removes_queued_fus_but_keeps_tests(self):
@@ -305,7 +308,11 @@ class NotifyTests(unittest.TestCase):
         self.response.json.return_value = {"ok": True}
         self.clock.return_value = 10501
         notify(self.settings)
-        self.assertEqual(self.session.post.call_count, 3)
+        self.assertEqual(self.session.post.call_count, 2)
+        text = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertIn("共<2>台机型", text)
+        self.assertIn(NEW_TEST, text)
+        self.assertIn(NEW_BETA, text)
 
     def test_sync_config_mode_never_fetches_or_sends(self):
         from argparse import Namespace
@@ -345,3 +352,220 @@ class NotifyTests(unittest.TestCase):
         notify(self.settings)
         self.assertEqual(self.session.post.call_args_list[2].kwargs["json"]["text"], failed_text)
         self.assertEqual(sum(call.kwargs["json"]["text"] == first_text for call in self.session.post.call_args_list), 1)
+
+
+    def device_event(self, model, name, region="CHC", versions=(NEW_BETA,), fus=False):
+        code = model.removeprefix("SM-")
+        versions = [v.replace("F9260", code) for v in versions]
+        baseline = STABLE.replace("F9260", code)
+        before = record(stable=baseline)
+        after = (fus_record(versions, stable=baseline, fus=NEW_TEST.replace("F9260", code))
+                 if fus else record(versions, stable=baseline))
+        after["机型"] = name
+        event = firmware_events({model: {region: before}}, {model: {region: after}}, [(model, region)])[0]
+        return event, after
+
+    def test_restores_original_digest_for_multiple_models_and_deduplicates(self):
+        first, _ = self.device_event("SM-X800", "Tab S8+", "TGY")
+        second, _ = self.device_event("SM-X900", "Tab S8 Ultra", "TGY")
+        first["versions"] = ["X800XXSBEZK1/X800OXMBEZK1/"]
+        second["versions"] = ["X900XXSBEZK1/X900OXMBEZK1/"]
+        enqueue(self.settings, [second, first])
+        self.clock.return_value = 10400
+        notify(self.settings)
+        self.session.post.assert_called_once()
+        self.assertEqual(self.session.post.call_args.kwargs["json"]["text"],
+                         "三星新增内测固件—共<2>台机型(1/1)\n"
+                         "1. #X800 - Tab S8+(香港版)\nX800XXSBEZK1/X800OXMBEZK1/\n\n"
+                         "2. #X900 - Tab S8 Ultra(香港版)\nX900XXSBEZK1/X900OXMBEZK1/")
+        enqueue(self.settings, [first, second])
+        notify(self.settings)
+        self.session.post.assert_called_once()
+        self.assertEqual(len(load_json(queue_path(self.settings))), 1)
+
+    def test_digest_keeps_distinct_csc_cp_versions_for_same_ap(self):
+        event, _ = self.device_event("SM-F9260", "Z Fold3", "ZZZ")
+        other_cp = NEW_BETA.rsplit("/", 1)[0] + "/F9260ZCUHKZJ2"
+        event["versions"] = [NEW_BETA, other_cp, NEW_BETA]
+        enqueue(self.settings, [event])
+        self.clock.return_value = 10400
+        notify(self.settings)
+        text = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertIn("Z Fold3(ZZZ版)", text)
+        self.assertEqual(text.count(NEW_BETA), 1)
+        self.assertEqual(text.count(other_cp), 1)
+
+    def test_all_fus_and_test_updates_share_one_personal_message(self):
+        first, one = self.device_event("SM-F9260", "Z Fold3 😀", fus=True)
+        second, two = self.device_event("SM-F9360", "Z Fold4", fus=True)
+        data = {first["model"]: {"CHC": one}, second["model"]: {"CHC": two}}
+        with patch.dict(os.environ, {"FW_NOTIFY_GROUPS": "true", "FW_NOTIFY_BATCH_SECONDS": "0"}):
+            enqueue(self.settings, [second, first], "-10012345")
+            notify(self.settings, "-10012345", data)
+        sent = {call.kwargs["json"]["chat_id"]: call.kwargs["json"] for call in self.session.post.call_args_list}
+        self.assertEqual(len(self.session.post.call_args_list), 2)
+        personal = sent["12345"]
+        self.assertIn("三星新增内测固件—共<2>台机型(1/1)", personal["text"])
+        self.assertIn("三星 FUS 新版本上线—共<2>台机型(1/1)", personal["text"])
+        self.assertNotIn("FUS", sent["-10012345"]["text"])
+        self.assertEqual(sent["-10012345"]["entities"], [])
+        labels = []
+        encoded = personal["text"].encode("utf-16-le")
+        for link in personal["entities"]:
+            labels.append(encoded[2 * link["offset"]:2 * (link["offset"] + link["length"])].decode("utf-16-le"))
+        self.assertEqual(labels, ["下载地址", "更新说明"] * 2)
+        self.assertEqual([link["url"] for link in personal["entities"] if "doc.samsungmobile" in link["url"]],
+                         ["https://doc.samsungmobile.com/SM-F9260/CHC/doc.html",
+                          "https://doc.samsungmobile.com/SM-F9360/CHC/doc.html"])
+
+    def test_fus_only_updates_for_multiple_models_share_one_message(self):
+        first, one = self.device_event("SM-F9260", "Z Fold3", versions=(), fus=True)
+        second, two = self.device_event("SM-F9360", "Z Fold4", versions=(), fus=True)
+        enqueue(self.settings, [first, second])
+        self.clock.return_value = 10400
+        notify(self.settings, data={first["model"]: {"CHC": one}, second["model"]: {"CHC": two}})
+        self.session.post.assert_called_once()
+        text = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertTrue(text.startswith("三星 FUS 新版本上线—共<2>台机型(1/1)"))
+        self.assertNotIn("内测固件", text)
+        self.assertEqual(text.count("FOTA 当前正式版："), 2)
+        self.assertEqual(text.count("FUS 版本："), 2)
+
+    def test_expired_fus_on_retry_does_not_drop_other_devices_or_repeat_tests(self):
+        test, _ = self.device_event("SM-X800", "A" * 3800)
+        first, one = self.device_event("SM-F9260", "Z Fold3", versions=(), fus=True)
+        second, two = self.device_event("SM-F9360", "Z Fold4", versions=(), fus=True)
+        data = {first["model"]: {"CHC": one}, second["model"]: {"CHC": two}}
+        enqueue(self.settings, [test, first, second])
+        self.clock.return_value = 10400
+        self.response.json.side_effect = [{"ok": True}, {"ok": False}]
+        notify(self.settings, data=data)
+        self.assertEqual(self.session.post.call_count, 2)
+        first_page = self.session.post.call_args_list[0].kwargs["json"]["text"]
+        one["最新正式版"] = one["最新固件下载"]["version"]
+        self.response.json.side_effect = None
+        self.clock.return_value = 10461
+        notify(self.settings, data=data)
+        self.assertEqual(self.session.post.call_count, 3)
+        final = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertNotIn("#F9260", final)
+        self.assertIn("#F9360", final)
+        self.assertEqual(sum(call.kwargs["json"]["text"] == first_page for call in self.session.post.call_args_list), 1)
+        self.assertTrue(next(iter(load_json(queue_path(self.settings)).values()))["delivered_at"])
+
+    def test_retry_waits_for_fus_evidence_without_resending_test_page(self):
+        test, _ = self.device_event("SM-X800", "A" * 3800)
+        fus, state = self.device_event("SM-F9260", "Z Fold3", versions=(), fus=True)
+        data = {fus["model"]: {"CHC": state}}
+        enqueue(self.settings, [test, fus])
+        self.clock.return_value = 10400
+        self.response.json.side_effect = [{"ok": True}, {"ok": False}]
+        notify(self.settings, data=data)
+        self.response.json.side_effect = None
+        self.clock.return_value = 10461
+        notify(self.settings)
+        self.assertEqual(self.session.post.call_count, 2)
+        notify(self.settings, data=data)
+        self.assertEqual(self.session.post.call_count, 3)
+        self.assertNotIn("#X800", self.session.post.call_args.kwargs["json"]["text"])
+
+    def test_group_success_and_personal_retry_keep_separate_progress(self):
+        event, state = self.device_event("SM-F9260", "Z Fold3", fus=True)
+        data = {event["model"]: {"CHC": state}}
+        with patch.dict(os.environ, {"FW_NOTIFY_GROUPS": "true"}):
+            enqueue(self.settings, [event], "-10012345")
+            self.clock.return_value = 10400
+            self.response.json.side_effect = [{"ok": True}, {"ok": False}]
+            notify(self.settings, "-10012345", data)
+        state["最新正式版"] = state["最新固件下载"]["version"]
+        self.response.json.side_effect = None
+        self.clock.return_value = 10461
+        notify(self.settings, "-10012345", data)
+        self.assertEqual([call.kwargs["json"]["chat_id"] for call in self.session.post.call_args_list],
+                         ["-10012345", "12345", "12345"])
+        final = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertIn(NEW_BETA, final)
+        self.assertNotIn("FUS", final)
+
+    def test_multi_device_retry_freezes_pages_and_defers_later_same_device(self):
+        first, _ = self.device_event("SM-X800", "A" * 3800)
+        second, _ = self.device_event("SM-X900", "Tab S8 Ultra")
+        with patch.dict(os.environ, {"FW_NOTIFY_BATCH_SECONDS": "0"}):
+            enqueue(self.settings, [first, second])
+            self.response.json.side_effect = [{"ok": True}, {"ok": False}]
+            notify(self.settings)
+            failed = self.session.post.call_args.kwargs["json"]["text"]
+            later, _ = self.device_event("SM-X900", "Tab S8 Ultra", versions=(NEW_BETA.replace("ZJ1", "ZJ2"),))
+            enqueue(self.settings, [later])
+            self.response.json.side_effect = None
+            self.clock.return_value = 10061
+            notify(self.settings)
+            self.assertEqual(self.session.post.call_count, 3)
+            self.assertEqual(self.session.post.call_args.kwargs["json"]["text"], failed)
+            notify(self.settings)
+            self.assertEqual(self.session.post.call_count, 3)
+            self.clock.return_value = 11862
+            notify(self.settings)
+        self.assertEqual(self.session.post.call_count, 4)
+        self.assertIn(later["versions"][0], self.session.post.call_args.kwargs["json"]["text"])
+
+    def test_promoted_device_is_removed_from_digest_count(self):
+        first, state = self.device_event("SM-X800", "Tab S8+")
+        second, _ = self.device_event("SM-X900", "Tab S8 Ultra")
+        enqueue(self.settings, [first, second])
+        state["最新正式版"] = first["versions"][0]
+        self.clock.return_value = 10400
+        notify(self.settings, data={first["model"]: {"CHC": state}})
+        text = self.session.post.call_args.kwargs["json"]["text"]
+        self.assertIn("共<1>台机型", text)
+        self.assertNotIn("#X800", text)
+        self.assertIn("1. #X900", text)
+
+    def test_digest_pagination_keeps_device_blocks_and_multidigit_page_numbers(self):
+        entries = []
+        for index in range(40):
+            event, _ = self.device_event(f"SM-X{index:03}", f"Tab {index} 😀")
+            event["targets"] = {"personal": 0}
+            entries.append(event)
+        pages = digest_pages(entries, "personal", limit=300)
+        counts = digest_counts([block for page in pages for block in page])
+        self.assertGreaterEqual(len(pages), 10)
+        rendered = [render_digest_page(page, counts, index, len(pages)) for index, page in enumerate(pages, 1)]
+        for index, message in enumerate(rendered, 1):
+            self.assertLessEqual(len(message["text"].encode("utf-16-le")) // 2, 300)
+            self.assertTrue(message["text"].startswith(f"三星新增内测固件—共<40>台机型({index}/{len(pages)})"))
+        for index, event in enumerate(entries, 1):
+            block = f"{index}. #{event['model'][3:]} - {event['name']}(国行版)\n{event['versions'][0]}"
+            self.assertEqual(sum(block in message["text"] for message in rendered), 1)
+
+    def test_mixed_digest_pagination_preserves_links_after_section_headers(self):
+        entries = []
+        for index in range(15):
+            event, _ = self.device_event(f"SM-F{index:03}", f"Fold 😀 {index}", fus=True)
+            event["targets"] = {"personal": 0}
+            entries.append(event)
+        pages = digest_pages(entries, "personal", limit=400)
+        counts = digest_counts([block for page in pages for block in page])
+        labels = []
+        for index, page in enumerate(pages, 1):
+            message = render_digest_page(page, counts, index, len(pages))
+            encoded = message["text"].encode("utf-16-le")
+            self.assertLessEqual(len(encoded) // 2, 400)
+            for link in message["entities"]:
+                label = encoded[2 * link["offset"]:2 * (link["offset"] + link["length"])].decode("utf-16-le")
+                labels.append(label)
+        self.assertEqual(labels, ["下载地址", "更新说明"] * len(entries))
+
+    def test_started_legacy_message_keeps_original_chunk_offsets(self):
+        event = self.enqueue_versions(NEW_TEST)[0]
+        queue = load_json(queue_path(self.settings))
+        pending = queue[event["id"]]
+        pending["name"] = "A" * 4000
+        pending["started_at"] = 10000
+        pending["targets"][recipient_key("offline-test", "12345")] = 1
+        chunks = split_message(**render_message(pending))
+        atomic_json(queue_path(self.settings), queue)
+        self.clock.return_value = 10400
+        notify(self.settings)
+        self.assertEqual([call.kwargs["json"]["text"] for call in self.session.post.call_args_list],
+                         [chunk["text"] for chunk in chunks[1:]])

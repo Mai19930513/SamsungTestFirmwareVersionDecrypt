@@ -35,13 +35,15 @@ def fus_ahead_version(record):
     return ""
 
 
-def render_message(event):
-    lines = ["三星固件更新", f"{event['name']} · {event['model']} · {event['region']}"]
+def render_message(event, *, header=None):
+    lines = ([header] if header is not None else
+             ["三星固件更新", f"{event['name']} · {event['model']} · {event['region']}"])
     entities = []
     stable = event.get("stable")
     if stable:
-        lines.extend(["", "FUS 新版本上线",
-                      f"FOTA 当前正式版：{stable['earlier'].split('/')[0]}",
+        if header is None:
+            lines.extend(["", "FUS 新版本上线"])
+        lines.extend([f"FOTA 当前正式版：{stable['earlier'].split('/')[0]}",
                       f"FUS 版本：{stable['current'].split('/')[0]}",
                       f"脚本发现时间：{stable['discovered_at']} · 来源：{stable['source']}"])
         links = []

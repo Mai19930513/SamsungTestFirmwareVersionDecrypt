@@ -9,46 +9,8 @@ import requests
 from .config import env_bool, env_int
 from .events import fus_ahead_version, render_event, render_message
 from .files import atomic_json, load_json
+from .messages import digest_counts, digest_pages, render_digest_page, split_message, split_text
 from .versions import newer_release, normalize_version, same_release, test_candidates
-
-
-def split_text(text, limit=3900):
-    """Prefer whole lines/versions; Telegram limits UTF-16 units."""
-    chunks, current, units = [], "", 0
-    for line in text.splitlines(keepends=True):
-        width = len(line.encode("utf-16-le")) // 2
-        if units and units + width > limit:
-            chunks.append(current.rstrip())
-            current, units = "", 0
-        for character in line:
-            size = 2 if ord(character) > 65535 else 1
-            if units + size > limit:
-                chunks.append(current.rstrip())
-                current, units = "", 0
-            current += character
-            units += size
-    if current:
-        chunks.append(current.rstrip())
-    return chunks
-
-
-def split_message(text, entities=(), limit=3900):
-    """Keep Telegram text-link offsets correct after splitting, including emoji."""
-    messages = []
-    cursor = 0
-    for chunk in split_text(text, limit):
-        start = text.index(chunk, cursor)
-        offset = len(text[:start].encode("utf-16-le")) // 2
-        length = len(chunk.encode("utf-16-le")) // 2
-        links = []
-        for entity in entities:
-            left = max(offset, entity["offset"])
-            right = min(offset + length, entity["offset"] + entity["length"])
-            if left < right:
-                links.append({**entity, "offset": left - offset, "length": right - left})
-        messages.append({"text": chunk, "entities": links})
-        cursor = start + len(chunk)
-    return messages
 
 
 def recipient_config(group_id=None):
@@ -75,7 +37,7 @@ def load_queue(settings):
     for key, event in queue.items():
         # Legacy per-hash messages may describe historical builds or CP fill-ins.
         # Never flush this obsolete backlog after upgrading.
-        if event.get("schema") != 2:
+        if event.get("schema") not in (2, 3):
             if not event.get("delivered_at"):
                 event.setdefault("suppressed_at", now)
             completed_at = event.get("delivered_at") or event.get("suppressed_at", now)
@@ -90,6 +52,10 @@ def load_queue(settings):
 
 def pair_key(event):
     return event.get("model"), event.get("region")
+
+
+def event_pairs(event):
+    return {pair_key(item) for item in event.get("entries", [event])}
 
 
 def completed(event):
@@ -110,8 +76,10 @@ def enqueue(settings, events, group_id=None):
                    if recipient != group_id or event.get("versions")}
         if not targets:
             continue
-        siblings = [item for item in queue.values() if item.get("schema") == 2 and pair_key(item) == pair_key(event)]
-        pending = next((item for item in siblings if not completed(item) and not item.get("started_at")
+        siblings = [item for item in queue.values()
+                    if item.get("schema") in (2, 3) and pair_key(event) in event_pairs(item)]
+        pending = next((item for item in siblings if item.get("schema") == 2
+                        and not completed(item) and not item.get("started_at")
                         and set(item["targets"]) == set(targets)), None)
         if pending is None:
             pending = deepcopy(event)
@@ -158,6 +126,87 @@ def revalidate_stable(event, record):
     return True
 
 
+def prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown):
+    """Freeze all due updates together, with separate content per recipient."""
+    now = time.time()
+    busy = {pair for item in queue.values() if item.get("schema") in (2, 3)
+            and not completed(item) and item.get("started_at") for pair in event_pairs(item)}
+    selected = []
+    for event in queue.values():
+        if event.get("schema") != 2 or completed(event) or event.get("started_at"):
+            continue
+        allowed = {recipient_key(token, recipient) for recipient in recipients
+                   if recipient != group_id or event.get("versions")}
+        event["targets"] = {key: count for key, count in event["targets"].items() if key in allowed}
+        if not event["targets"]:
+            event["suppressed_at"] = now
+            continue
+        record = (data or {}).get(event["model"], {}).get(event["region"])
+        if not revalidate_stable(event, record) or completed(event):
+            continue
+        if record is not None:
+            active = set(test_candidates(record))
+            event["versions"] = [v for v in event.get("versions", []) if v in active]
+        if not event.get("versions") and not event.get("stable"):
+            event["suppressed_at"] = now
+            continue
+        pair = pair_key(event)
+        due = max(event["ready_at"], event.get("retry_at", 0), last_sent.get(pair, 0) + cooldown)
+        if pair in busy or now < due:
+            continue
+        selected.append(event)
+        busy.add(pair)
+    if not selected:
+        return
+    targets = {key: 0 for event in selected for key in event["targets"]}
+    group_target = recipient_key(token, group_id) if group_id else None
+    entries = [{field: deepcopy(event[field])
+                for field in ("id", "model", "region", "name", "versions", "stable", "targets")}
+               for event in selected]
+    digest = {"schema": 3, "kind": "firmware_digest", "id": selected[0]["id"],
+              "created_at": min(event["created_at"] for event in selected), "started_at": now,
+              "members": [member for event in selected for member in event["members"]],
+              "entries": entries, "targets": targets, "group_target": group_target,
+              "pages": {key: digest_pages(entries, key, group_target) for key in targets}}
+    # Keep the first queue position and all member IDs for deduplication/cooldown.
+    queue[digest["id"]] = digest
+    for event in selected[1:]:
+        del queue[event["id"]]
+
+
+def revalidate_digest(event, data):
+    """Remove obsolete FUS fragments without dropping other updates on that page."""
+    waiting, changed = set(), False
+    for entry in event["entries"]:
+        if not entry.get("stable"):
+            continue
+        record = (data or {}).get(entry["model"], {}).get(entry["region"])
+        probe = {**entry, "stable": deepcopy(entry["stable"]),
+                 "targets": {key: count for key, count in event["targets"].items()
+                             if key in entry["targets"] and key != event["group_target"]}}
+        if not revalidate_stable(probe, record):
+            waiting.add(entry["id"])
+            continue
+        stable = None if probe.get("suppressed_at") else probe["stable"]
+        if stable != entry["stable"]:
+            entry["stable"] = stable
+            changed = True
+    if changed:
+        valid = {entry["id"] for entry in event["entries"] if entry.get("stable")}
+        for key, count in event["targets"].items():
+            if not count:
+                event["pages"][key] = digest_pages(event["entries"], key, event["group_target"])
+            else:
+                # Retain the page positions already acknowledged by Telegram.
+                # Only remove obsolete FUS blocks from the remaining pages.
+                for index in range(count, len(event["pages"][key])):
+                    event["pages"][key][index] = [block for block in event["pages"][key][index]
+                                                if block["kind"] != "stable" or block["entry"] in valid]
+        if not any(entry.get("stable") or entry.get("versions") for entry in event["entries"]):
+            event["suppressed_at"] = time.time()
+    return waiting
+
+
 def notify(settings, group_id=None, data=None):
     queue = load_queue(settings)
     token, recipients = recipient_config(group_id)
@@ -169,79 +218,80 @@ def notify(settings, group_id=None, data=None):
     cooldown = env_int("FW_NOTIFY_COOLDOWN_SECONDS", 1800, 0, 86400)
     last_sent = {}
     for item in queue.values():
-        if item.get("schema") == 2 and item.get("delivered_at"):
-            pair = pair_key(item)
-            last_sent[pair] = max(last_sent.get(pair, 0), item["delivered_at"])
+        if item.get("schema") in (2, 3) and item.get("delivered_at"):
+            for pair in event_pairs(item):
+                last_sent[pair] = max(last_sent.get(pair, 0), item["delivered_at"])
+    prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown)
+    atomic_json(path, queue, private=True)
     with requests.Session() as session:
         for event in queue.values():
-            if event.get("schema") != 2 or completed(event):
+            if event.get("schema") not in (2, 3) or completed(event):
                 continue
+            digest = event.get("schema") == 3
             allowed = {recipient_key(token, recipient) for recipient in recipients
-                       if recipient != group_id or event.get("versions")}
+                       if recipient != group_id or digest or event.get("versions")}
             event["targets"] = {key: count for key, count in event["targets"].items() if key in allowed}
             if not event["targets"]:
                 event["suppressed_at"] = time.time()
                 atomic_json(path, queue, private=True)
                 continue
-            record = (data or {}).get(event["model"], {}).get(event["region"])
-            if not revalidate_stable(event, record):
-                continue
-            atomic_json(path, queue, private=True)
-            if completed(event):
-                continue
-            pair = pair_key(event)
-            if time.time() < event.get("retry_at", 0):
-                continue
-            if not event.get("started_at"):
-                # A later scan can promote a queued test build to stable or remove it.
-                if record is not None:
-                    active = set(test_candidates(record))
-                    event["versions"] = [v for v in event.get("versions", []) if v in active]
-                if not event.get("versions") and not event.get("stable"):
+            if digest:
+                waiting = revalidate_digest(event, data)
+            else:
+                # Finish already-started schema-2 messages using their original
+                # layout so saved chunk offsets still refer to the same content.
+                record = (data or {}).get(event["model"], {}).get(event["region"])
+                if not revalidate_stable(event, record):
+                    continue
+                if not event.get("stable") and not event.get("versions"):
                     event["suppressed_at"] = time.time()
-                    atomic_json(path, queue, private=True)
-                    continue
-                due = max(event["ready_at"], last_sent.get(pair, 0) + cooldown)
-                if time.time() < due:
-                    continue
-                event["started_at"] = time.time()
-                event["text"] = render_event(event)
-                atomic_json(path, queue, private=True)
+            atomic_json(path, queue, private=True)
+            if completed(event) or not event.get("started_at") or time.time() < event.get("retry_at", 0):
+                continue
+            finished = True
             for recipient in sorted(recipients):
                 key = recipient_key(token, recipient)
                 if key not in event["targets"]:
                     continue
-                content = event
-                if recipient == group_id:
-                    # Stable events remain personal, even in a combined digest.
-                    content = {**event, "stable": None}
-                    if not content.get("versions"):
-                        event["targets"].pop(key, None)
-                        continue
-                chunks = split_message(**render_message(content))
+                if digest:
+                    pages = event["pages"][key]
+                    counts = digest_counts([block for page in pages for block in page])
+                    chunks = [render_digest_page(page, counts, index, len(pages))
+                              for index, page in enumerate(pages, 1)]
+                else:
+                    content = {**event, "stable": None} if recipient == group_id else event
+                    chunks = split_message(**render_message(content))
                 for index in range(event["targets"][key], len(chunks)):
-                    try:
-                        with session.post(f"https://api.telegram.org/bot{token}/sendMessage",
-                                          json={"chat_id": recipient, **chunks[index], "disable_web_page_preview": True},
-                                          timeout=settings.timeout, allow_redirects=False) as response:
-                            payload = response.json()
-                            if response.status_code != 200 or not payload.get("ok"):
-                                retry_after = payload.get("parameters", {}).get("retry_after", 60)
-                                delay = retry_after if type(retry_after) is int and retry_after > 0 else 60
-                                event["retry_at"] = time.time() + delay
-                                if response.status_code == 429:
-                                    for item in queue.values():
-                                        if item.get("schema") == 2 and not completed(item):
-                                            item["retry_at"] = event["retry_at"]
-                                atomic_json(path, queue, private=True)
-                                print("Telegram 发送失败，通知保留在本地队列，下次重试。")
-                                return
-                    except (requests.RequestException, ValueError):
-                        print("Telegram 网络错误，通知保留在本地队列，下次重试。")
-                        return
+                    if digest and any(block["kind"] == "stable" and block["entry"] in waiting
+                                      for block in pages[index]):
+                        finished = False
+                        break
+                    if chunks[index]["text"]:
+                        try:
+                            with session.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                                              json={"chat_id": recipient, **chunks[index], "disable_web_page_preview": True},
+                                              timeout=settings.timeout, allow_redirects=False) as response:
+                                payload = response.json()
+                                if response.status_code != 200 or not payload.get("ok"):
+                                    retry_after = payload.get("parameters", {}).get("retry_after", 60)
+                                    delay = retry_after if type(retry_after) is int and retry_after > 0 else 60
+                                    event["retry_at"] = time.time() + delay
+                                    if response.status_code == 429:
+                                        for item in queue.values():
+                                            if item.get("schema") in (2, 3) and not completed(item):
+                                                item["retry_at"] = event["retry_at"]
+                                    atomic_json(path, queue, private=True)
+                                    print("Telegram 发送失败，通知保留在本地队列，下次重试。")
+                                    return
+                        except (requests.RequestException, ValueError):
+                            print("Telegram 网络错误，通知保留在本地队列，下次重试。")
+                            return
                     event["targets"][key] = index + 1
                     atomic_json(path, queue, private=True)
-                    time.sleep(1.1)
-            event["delivered_at"] = time.time()
-            last_sent[pair] = event["delivered_at"]
-            atomic_json(path, queue, private=True)
+                    if chunks[index]["text"]:
+                        time.sleep(1.1)
+            if finished:
+                event["delivered_at"] = time.time()
+                for pair in event_pairs(event):
+                    last_sent[pair] = event["delivered_at"]
+                atomic_json(path, queue, private=True)

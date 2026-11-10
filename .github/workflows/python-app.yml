@@ -68,8 +68,8 @@ jobs:
       FW_SERIAL_CODES: ${{ vars.FW_SERIAL_CODES || '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' }}
       FW_DOWNLOADS: ${{ vars.FW_DOWNLOADS || 'true' }}
       FW_TIMELINE: ${{ vars.FW_TIMELINE || 'true' }}
-      FW_NOTIFICATIONS: ${{ vars.FW_NOTIFICATIONS || (secrets.TG_BOT_TOKEN != '' && secrets.TG_USER_ID != '' && 'true') || 'false' }}
-      FW_NOTIFY_GROUPS: 'false'
+      FW_NOTIFICATIONS: ${{ vars.FW_NOTIFICATIONS || (secrets.TG_BOT_TOKEN != '' && (secrets.TG_USER_ID != '' || secrets.TG_CHAT_ID != '') && 'true') || 'false' }}
+      FW_NOTIFY_GROUPS: ${{ vars.FW_NOTIFY_GROUPS || 'true' }}
       FW_NOTIFY_BATCH_SECONDS: ${{ vars.FW_NOTIFY_BATCH_SECONDS || '300' }}
       FW_NOTIFY_COOLDOWN_SECONDS: ${{ vars.FW_NOTIFY_COOLDOWN_SECONDS || '1800' }}
       FW_NOTIFY_INITIAL: ${{ vars.FW_NOTIFY_INITIAL || 'false' }}
@@ -196,7 +196,7 @@ jobs:
             printf -- '- 扫描模式：`%s`\n' "$FW_SCAN_MODE"
             printf -- '- 扫描退出码：`%s`（0 完成，2 FOTA 部分失败，3 云端补传待处理）\n' "${SCAN_RESULT:-未运行}"
             printf -- '- 状态恢复 / 打包 / 上传：`%s` / `%s` / `%s`\n' "$STATE_RESTORE" "$STATE_PACK" "$STATE_UPLOAD"
-            printf -- '- 群组通知已暂停；个人通知按机型/地区合并，下载地址需要 FUS 会话认证。\n'
+            printf -- '- 通知总开关：`%s`；群组开关：`%s`（个人与群组均支持内测及 FUS 上线汇总）；下载地址需要 FUS 会话认证。\n' "$FW_NOTIFICATIONS" "$FW_NOTIFY_GROUPS"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 写入解码进度摘要

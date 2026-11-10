@@ -52,7 +52,7 @@ def device_label(event, index):
     return f"{index}. #{event['model'].removeprefix('SM-')} - {event['name']}({country}版)"
 
 
-def digest_blocks(entries, target, group_target):
+def digest_blocks(entries, target, group_target, *, group_stable=True):
     selected = sorted((entry for entry in entries if target in entry["targets"]),
                       key=lambda entry: (entry["model"], entry["region"]))
     blocks = []
@@ -67,7 +67,7 @@ def digest_blocks(entries, target, group_target):
                 index += 1
                 message = {"text": "\n".join([device_label(entry, index), *versions]), "entities": []}
             else:
-                if target == group_target or not entry.get("stable"):
+                if not entry.get("stable") or (target == group_target and not group_stable):
                     continue
                 index += 1
                 message = render_message({**entry, "versions": []}, header=device_label(entry, index))
@@ -94,9 +94,9 @@ def render_digest_page(blocks, counts, page, total):
     return {"text": text, "entities": entities}
 
 
-def digest_pages(entries, target, group_target=None, limit=3900):
+def digest_pages(entries, target, group_target=None, limit=3900, *, group_stable=True):
     """Prefer whole device blocks; freeze fragments so retries cannot repeat pages."""
-    blocks = digest_blocks(entries, target, group_target)
+    blocks = digest_blocks(entries, target, group_target, group_stable=group_stable)
     counts = digest_counts(blocks)
     digits = 1
     while True:

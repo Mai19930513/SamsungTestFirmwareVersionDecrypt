@@ -20,7 +20,7 @@ class NotifyTests(unittest.TestCase):
         temp = TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         env = patch.dict(os.environ, {'TG_BOT_TOKEN': 'offline-test', 'TG_USER_ID': '12345',
-                                     'TG_CHAT_ID': '-10012345'}, clear=True)
+                                     'TG_CHAT_ID': '-10012345', 'FW_NOTIFY_GROUPS': 'false'}, clear=True)
         env.start()
         self.addCleanup(env.stop)
         self.settings = Settings.from_env(Path(temp.name))
@@ -87,19 +87,162 @@ class NotifyTests(unittest.TestCase):
         notify(self.settings, data={'SM-F9260': {'CHC': record([NEW_TEST], stable=NEW_TEST)}})
         self.session.post.assert_not_called()
 
-    def test_group_digest_excludes_stable_section(self):
+    def test_group_digest_includes_stable_section(self):
         with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true', 'FW_NOTIFY_BATCH_SECONDS': '0'}):
             item = fus_record([NEW_BETA])
             enqueue(self.settings, events(record(), item), '-10012345')
             notify(self.settings, '-10012345', data={'SM-F9260': {'CHC': item}})
         sent = {call.kwargs['json']['chat_id']: call.kwargs['json']['text'] for call in self.session.post.call_args_list}
         self.assertIn('FUS 新版本上线', sent['12345'])
-        self.assertNotIn('FUS 新版本上线', sent['-10012345'])
+        self.assertEqual(sent['-10012345'], sent['12345'])
         self.assertIn(NEW_BETA.split('/')[0], sent['-10012345'])
         self.assertIn(NEW_BETA, sent['-10012345'])
-        self.assertTrue(sent['-10012345'].endswith(NEW_BETA))
         self.assertEqual(self.session.post.call_count, 2)
         self.assertNotIn('仅列出高于', sent['-10012345'])
+
+    def test_fus_only_notifications_reach_both_recipients_by_default(self):
+        item = fus_record()
+        updates = events(record(), item)
+        data = {'SM-F9260': {'CHC': item}}
+        with patch.dict(os.environ):
+            os.environ.pop('FW_NOTIFY_GROUPS')
+            enqueue(self.settings, updates, '-10012345')
+            notify(self.settings, '-10012345', data)
+            self.session.post.assert_not_called()
+            self.clock.return_value = 10400
+            notify(self.settings, '-10012345')
+            self.session.post.assert_not_called()
+            notify(self.settings, '-10012345', data)
+            enqueue(self.settings, updates, '-10012345')
+            notify(self.settings, '-10012345', data)
+        sent = {call.kwargs['json']['chat_id']: call.kwargs['json'] for call in self.session.post.call_args_list}
+        self.assertEqual(self.session.post.call_count, 2)
+        self.assertEqual(set(sent), {'12345', '-10012345'})
+        self.assertIn('FUS 新版本上线', sent['-10012345']['text'])
+        self.assertNotIn('内测固件', sent['-10012345']['text'])
+        self.assertEqual(sent['-10012345']['text'], sent['12345']['text'])
+        self.assertEqual(sent['-10012345']['entities'], sent['12345']['entities'])
+
+    def test_group_only_fus_notifications_retry_without_personal_id(self):
+        item = fus_record()
+        data = {'SM-F9260': {'CHC': item}}
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true', 'TG_USER_ID': ''}):
+            enqueue(self.settings, events(record(), item), '-10012345')
+            self.clock.return_value = 10400
+            self.response.json.return_value = {'ok': False}
+            notify(self.settings, '-10012345', data)
+            self.session.post.assert_called_once()
+            first = self.session.post.call_args.kwargs['json']
+            self.assertEqual(first['chat_id'], '-10012345')
+            self.assertIn('FUS 新版本上线', first['text'])
+            self.clock.return_value = 10459
+            notify(self.settings, '-10012345', data)
+            self.session.post.assert_called_once()
+            self.response.json.return_value = {'ok': True}
+            self.clock.return_value = 10461
+            notify(self.settings, '-10012345', data)
+            notify(self.settings, '-10012345', data)
+        self.assertEqual(self.session.post.call_count, 2)
+        self.assertEqual(self.session.post.call_args.kwargs['json'], first)
+
+    def test_disabling_groups_blocks_pending_fus_digest(self):
+        item = fus_record()
+        data = {'SM-F9260': {'CHC': item}}
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true'}):
+            enqueue(self.settings, events(record(), item), '-10012345')
+            self.clock.return_value = 10400
+            self.response.json.return_value = {'ok': False}
+            notify(self.settings, '-10012345', data)
+        self.session.post.assert_called_once()
+        self.assertEqual(self.session.post.call_args.kwargs['json']['chat_id'], '-10012345')
+        self.response.json.return_value = {'ok': True}
+        self.clock.return_value = 10461
+        notify(self.settings, '-10012345', data)
+        notify(self.settings, '-10012345', data)
+        self.assertEqual([call.kwargs['json']['chat_id'] for call in self.session.post.call_args_list],
+                         ['-10012345', '12345'])
+
+    def test_enabling_groups_does_not_backfill_existing_personal_queue(self):
+        item = fus_record()
+        updates = events(record(), item)
+        data = {'SM-F9260': {'CHC': item}}
+        enqueue(self.settings, updates, '-10012345')
+        self.clock.return_value = 10400
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true'}):
+            notify(self.settings, '-10012345', data)
+            enqueue(self.settings, updates, '-10012345')
+            notify(self.settings, '-10012345', data)
+        self.session.post.assert_called_once()
+        self.assertEqual(self.session.post.call_args.kwargs['json']['chat_id'], '12345')
+
+    def test_group_partial_fus_retry_preserves_pages_and_waits_for_evidence(self):
+        item = fus_record(stable=STABLE.replace('ZH2', 'ZH1'))
+        event = events(record(), item)[0]
+        event['name'] = 'A' * 4000
+        data = {'SM-F9260': {'CHC': item}}
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true', 'TG_USER_ID': ''}):
+            enqueue(self.settings, [event], '-10012345')
+            self.clock.return_value = 10400
+            self.response.json.side_effect = [{'ok': True}, {'ok': False}]
+            notify(self.settings, '-10012345', data)
+            self.assertEqual(self.session.post.call_count, 2)
+            first, failed = [call.kwargs['json'] for call in self.session.post.call_args_list]
+            self.response.json.side_effect = None
+            self.clock.return_value = 10461
+            notify(self.settings, '-10012345')
+            self.assertEqual(self.session.post.call_count, 2)
+            item['最新正式版'] = STABLE
+            notify(self.settings, '-10012345', data)
+            notify(self.settings, '-10012345', data)
+        self.assertEqual(self.session.post.call_args_list[2].kwargs['json'], failed)
+        self.assertEqual(sum(call.kwargs['json'] == first for call in self.session.post.call_args_list), 1)
+        pending = load_json(queue_path(self.settings))[event['id']]
+        self.assertTrue(pending['delivered_at'])
+        self.assertEqual(pending['entries'][0]['stable']['earlier'], STABLE.replace('ZH2', 'ZH1'))
+
+    def test_old_digest_keeps_test_only_group_layout_on_revalidation(self):
+        item = fus_record([NEW_BETA], stable=STABLE.replace('ZH2', 'ZH1'))
+        event = events(record(), item)[0]
+        data = {'SM-F9260': {'CHC': item}}
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true'}):
+            enqueue(self.settings, [event], '-10012345')
+            self.clock.return_value = 10400
+            self.response.json.return_value = {'ok': False}
+            notify(self.settings, '-10012345', data)
+            queue = load_json(queue_path(self.settings))
+            pending = queue[event['id']]
+            pending.pop('group_stable', None)
+            group = pending['group_target']
+            pending['pages'][group] = digest_pages(pending['entries'], group, group, group_stable=False)
+            atomic_json(queue_path(self.settings), queue)
+            self.session.post.reset_mock()
+            self.response.json.return_value = {'ok': True}
+            item['最新正式版'] = STABLE
+            self.clock.return_value = 10461
+            notify(self.settings, '-10012345', data)
+        sent = {call.kwargs['json']['chat_id']: call.kwargs['json']['text'] for call in self.session.post.call_args_list}
+        self.assertEqual(self.session.post.call_count, 2)
+        self.assertIn(NEW_BETA, sent['-10012345'])
+        self.assertNotIn('FUS', sent['-10012345'])
+        self.assertIn('FOTA 当前正式版：' + STABLE.split('/')[0], sent['12345'])
+
+    def test_started_legacy_group_message_keeps_test_only_chunk_offsets(self):
+        item = fus_record([NEW_BETA])
+        event = events(record(), item)[0]
+        with patch.dict(os.environ, {'FW_NOTIFY_GROUPS': 'true', 'TG_USER_ID': ''}):
+            enqueue(self.settings, [event], '-10012345')
+            queue = load_json(queue_path(self.settings))
+            pending = queue[event['id']]
+            pending['name'] = 'A' * 4000
+            pending['started_at'] = 10000
+            pending['targets'][recipient_key('offline-test', '-10012345')] = 1
+            chunks = split_message(**render_message({**pending, 'stable': None}))
+            atomic_json(queue_path(self.settings), queue)
+            self.clock.return_value = 10400
+            notify(self.settings, '-10012345', {'SM-F9260': {'CHC': item}})
+        self.assertEqual([call.kwargs['json']['text'] for call in self.session.post.call_args_list],
+                         [chunk['text'] for chunk in chunks[1:]])
+        self.assertTrue(all('FUS' not in call.kwargs['json']['text'] for call in self.session.post.call_args_list))
 
     def test_fota_catchup_removes_queued_fus_but_keeps_tests(self):
         item = fus_record([NEW_BETA])
@@ -395,7 +538,7 @@ class NotifyTests(unittest.TestCase):
         self.assertEqual(text.count(NEW_BETA), 1)
         self.assertEqual(text.count(other_cp), 1)
 
-    def test_all_fus_and_test_updates_share_one_personal_message(self):
+    def test_all_fus_and_test_updates_share_one_message_per_recipient(self):
         first, one = self.device_event("SM-F9260", "Z Fold3 😀", fus=True)
         second, two = self.device_event("SM-F9360", "Z Fold4", fus=True)
         data = {first["model"]: {"CHC": one}, second["model"]: {"CHC": two}}
@@ -407,8 +550,8 @@ class NotifyTests(unittest.TestCase):
         personal = sent["12345"]
         self.assertIn("三星新增内测固件—共<2>台机型(1/1)", personal["text"])
         self.assertIn("三星 FUS 新版本上线—共<2>台机型(1/1)", personal["text"])
-        self.assertNotIn("FUS", sent["-10012345"]["text"])
-        self.assertEqual(sent["-10012345"]["entities"], [])
+        self.assertEqual(sent["-10012345"]["text"], personal["text"])
+        self.assertEqual(sent["-10012345"]["entities"], personal["entities"])
         labels = []
         encoded = personal["text"].encode("utf-16-le")
         for link in personal["entities"]:
@@ -477,10 +620,12 @@ class NotifyTests(unittest.TestCase):
             self.clock.return_value = 10400
             self.response.json.side_effect = [{"ok": True}, {"ok": False}]
             notify(self.settings, "-10012345", data)
-        state["最新正式版"] = state["最新固件下载"]["version"]
-        self.response.json.side_effect = None
-        self.clock.return_value = 10461
-        notify(self.settings, "-10012345", data)
+            self.assertIn("FUS 新版本上线", self.session.post.call_args_list[0].kwargs["json"]["text"])
+            state["最新正式版"] = state["最新固件下载"]["version"]
+            self.response.json.side_effect = None
+            self.clock.return_value = 10461
+            notify(self.settings, "-10012345", data)
+            notify(self.settings, "-10012345", data)
         self.assertEqual([call.kwargs["json"]["chat_id"] for call in self.session.post.call_args_list],
                          ["-10012345", "12345", "12345"])
         final = self.session.post.call_args.kwargs["json"]["text"]

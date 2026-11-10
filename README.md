@@ -2,7 +2,7 @@
 # 主要功能
 当前版本支持并发 FOTA 查询、MD5/HMAC-SHA256 候选匹配、历史缓存复用、SQLite/MySQL 持久化，以及 FUS 最新正式版下载信息导出。完整配置、数据字段、隐私边界与使用命令见 [配置与运行说明](docs/CONFIGURATION.md)，联网调研依据见 [FOTA/FUS 实现资料](docs/FOTA_RESEARCH.md)。
 
-上传 GitHub 后的 Secrets、定时运行、数据库和通知队列跨次保存见 [GitHub Actions 部署说明](docs/GITHUB_ACTIONS.md)。FUS 版本严格高于当前 FOTA 正式版时才发送上线通知，且只发送个人；Actions 使用加密 artifact 保留 SQLite、通知重试和云端补传状态。
+上传 GitHub 后的 Secrets、定时运行、数据库和通知队列跨次保存见 [GitHub Actions 部署说明](docs/GITHUB_ACTIONS.md)。FUS 版本严格高于当前 FOTA 正式版时才发送上线通知，发送至已配置的个人与群组（`FW_NOTIFY_GROUPS=false` 可单独关闭群组）；Actions 使用加密 artifact 保留 SQLite、通知重试和云端补传状态。
 
 
 固件下载、断点续传和 AES 解密已提供独立本地命令，使用方法见 [下载与解密](docs/DOWNLOAD.md)。可先运行 `python -m samsung_firmware.download probe --model SM-F9760 --region CHC`，只下载少量样本验证下载与解密；完整下载需显式使用 `download`。

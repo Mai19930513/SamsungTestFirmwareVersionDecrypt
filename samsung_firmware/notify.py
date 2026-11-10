@@ -17,7 +17,7 @@ def recipient_config(group_id=None):
     token = os.getenv("TG_BOT_TOKEN", "").strip()
     personal = os.getenv("TG_USER_ID", "").strip()
     recipients = {personal} if re.fullmatch(r"[1-9][0-9]*", personal) else set()
-    if env_bool("FW_NOTIFY_GROUPS", False) and group_id:
+    if env_bool("FW_NOTIFY_GROUPS", True) and group_id:
         recipients.add(group_id)
     return token, recipients
 
@@ -72,8 +72,7 @@ def enqueue(settings, events, group_id=None):
     for event in events:
         if event["id"] in seen or not token:
             continue
-        targets = {recipient_key(token, recipient): 0 for recipient in recipients
-                   if recipient != group_id or event.get("versions")}
+        targets = {recipient_key(token, recipient): 0 for recipient in recipients}
         if not targets:
             continue
         siblings = [item for item in queue.values()
@@ -127,7 +126,7 @@ def revalidate_stable(event, record):
 
 
 def prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown):
-    """Freeze all due updates together, with separate content per recipient."""
+    """Freeze all due updates together, keeping per-recipient delivery progress."""
     now = time.time()
     busy = {pair for item in queue.values() if item.get("schema") in (2, 3)
             and not completed(item) and item.get("started_at") for pair in event_pairs(item)}
@@ -135,8 +134,7 @@ def prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown
     for event in queue.values():
         if event.get("schema") != 2 or completed(event) or event.get("started_at"):
             continue
-        allowed = {recipient_key(token, recipient) for recipient in recipients
-                   if recipient != group_id or event.get("versions")}
+        allowed = {recipient_key(token, recipient) for recipient in recipients}
         event["targets"] = {key: count for key, count in event["targets"].items() if key in allowed}
         if not event["targets"]:
             event["suppressed_at"] = now
@@ -166,7 +164,7 @@ def prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown
     digest = {"schema": 3, "kind": "firmware_digest", "id": selected[0]["id"],
               "created_at": min(event["created_at"] for event in selected), "started_at": now,
               "members": [member for event in selected for member in event["members"]],
-              "entries": entries, "targets": targets, "group_target": group_target,
+              "entries": entries, "targets": targets, "group_target": group_target, "group_stable": True,
               "pages": {key: digest_pages(entries, key, group_target) for key in targets}}
     # Keep the first queue position and all member IDs for deduplication/cooldown.
     queue[digest["id"]] = digest
@@ -177,13 +175,15 @@ def prepare_digest(queue, token, recipients, group_id, data, last_sent, cooldown
 def revalidate_digest(event, data):
     """Remove obsolete FUS fragments without dropping other updates on that page."""
     waiting, changed = set(), False
+    # Digests frozen before group FUS support must retain their test-only layout.
+    group_stable = event.get("group_stable", False)
     for entry in event["entries"]:
         if not entry.get("stable"):
             continue
         record = (data or {}).get(entry["model"], {}).get(entry["region"])
         probe = {**entry, "stable": deepcopy(entry["stable"]),
                  "targets": {key: count for key, count in event["targets"].items()
-                             if key in entry["targets"] and key != event["group_target"]}}
+                             if key in entry["targets"] and (group_stable or key != event["group_target"])}}
         if not revalidate_stable(probe, record):
             waiting.add(entry["id"])
             continue
@@ -195,7 +195,8 @@ def revalidate_digest(event, data):
         valid = {entry["id"] for entry in event["entries"] if entry.get("stable")}
         for key, count in event["targets"].items():
             if not count:
-                event["pages"][key] = digest_pages(event["entries"], key, event["group_target"])
+                event["pages"][key] = digest_pages(event["entries"], key, event["group_target"],
+                                                  group_stable=group_stable)
             else:
                 # Retain the page positions already acknowledged by Telegram.
                 # Only remove obsolete FUS blocks from the remaining pages.
@@ -228,8 +229,7 @@ def notify(settings, group_id=None, data=None):
             if event.get("schema") not in (2, 3) or completed(event):
                 continue
             digest = event.get("schema") == 3
-            allowed = {recipient_key(token, recipient) for recipient in recipients
-                       if recipient != group_id or digest or event.get("versions")}
+            allowed = {recipient_key(token, recipient) for recipient in recipients}
             event["targets"] = {key: count for key, count in event["targets"].items() if key in allowed}
             if not event["targets"]:
                 event["suppressed_at"] = time.time()
@@ -259,6 +259,8 @@ def notify(settings, group_id=None, data=None):
                     chunks = [render_digest_page(page, counts, index, len(pages))
                               for index, page in enumerate(pages, 1)]
                 else:
+                    # Only pre-upgrade, already-started schema-2 messages reach
+                    # here; adding FUS would invalidate their saved chunk offsets.
                     content = {**event, "stable": None} if recipient == group_id else event
                     chunks = split_message(**render_message(content))
                 for index in range(event["targets"][key], len(chunks)):

@@ -7,6 +7,8 @@ from contextlib import contextmanager
 
 from .files import now_text
 from .mysql_errors import CloudDatabaseError, mysql_error_summary
+from .postgres import postgres_connection
+from .database_errors import database_error_summary
 
 
 def mysql_connection():
@@ -46,9 +48,15 @@ def mysql_connection():
 
 class Store:
     def __init__(self, settings):
+        if settings.db_backend not in {"sqlite", "mysql", "postgres"}:
+            raise ValueError("Unsupported database backend")
+        self.backend = settings.db_backend
         self.mysql = settings.db_backend == "mysql"
+        self.remote = settings.db_backend in {"mysql", "postgres"}
         if self.mysql:
             self.connection = mysql_connection()
+        elif self.backend == "postgres":
+            self.connection = postgres_connection()
         else:
             settings.data_dir.mkdir(parents=True, exist_ok=True)
             database = settings.data_dir / "firmware.sqlite3"
@@ -58,13 +66,14 @@ class Store:
             self.connection.execute("PRAGMA journal_mode=WAL")
             self.connection.execute("PRAGMA busy_timeout=30000")
         text_type = "LONGTEXT" if self.mysql else "TEXT"
+        real_type = "DOUBLE PRECISION" if self.backend == "postgres" else "DOUBLE"
         definitions = {
             "firmware_settings": "name VARCHAR(64) PRIMARY KEY, value TEXT NOT NULL",
             "firmware_devices": f"model VARCHAR(32), region VARCHAR(3), snapshot {text_type} NOT NULL, updated_at VARCHAR(32), PRIMARY KEY(model, region)",
             "firmware_versions": "model VARCHAR(32), region VARCHAR(3), hash VARCHAR(64), algorithm VARCHAR(16), version VARCHAR(140), ap VARCHAR(32), csc VARCHAR(32), cp VARCHAR(32), build_year INTEGER, build_month INTEGER, build_number INTEGER, bootloader VARCHAR(1), first_seen VARCHAR(32), last_seen VARCHAR(32), active INTEGER, PRIMARY KEY(model, region, hash)",
             "firmware_hashes": "model VARCHAR(32), region VARCHAR(3), hash VARCHAR(64), algorithm VARCHAR(16), first_seen VARCHAR(32), last_seen VARCHAR(32), active INTEGER, PRIMARY KEY(model, region, hash)",
-            "firmware_search_progress": f"model VARCHAR(32), region VARCHAR(3), result {text_type} NOT NULL, updated_at DOUBLE, PRIMARY KEY(model, region)",
-            "firmware_search_cache": f"signature VARCHAR(64) PRIMARY KEY, result {text_type} NOT NULL, completed_at DOUBLE",
+            "firmware_search_progress": f"model VARCHAR(32), region VARCHAR(3), result {text_type} NOT NULL, updated_at {real_type}, PRIMARY KEY(model, region)",
+            "firmware_search_cache": f"signature VARCHAR(64) PRIMARY KEY, result {text_type} NOT NULL, completed_at {real_type}",
         }
         try:
             for table, definition in definitions.items():
@@ -73,14 +82,14 @@ class Store:
             self.connection.commit()
         except Exception as error:
             self.connection.close()
-            if self.mysql:
-                raise CloudDatabaseError("云数据库初始化数据表失败：" + mysql_error_summary(error)) from None
+            if self.remote:
+                raise CloudDatabaseError("云数据库初始化数据表失败：" + database_error_summary(error, self.backend)) from None
             raise
 
     def execute(self, statement, parameters=()):
         cursor = self.connection.cursor()
         try:
-            cursor.execute(statement.replace("?", "%s") if self.mysql else statement, parameters)
+            cursor.execute(statement.replace("?", "%s") if self.remote else statement, parameters)
             return [dict(row) for row in cursor.fetchall()] if cursor.description else []
         finally:
             cursor.close()
@@ -95,7 +104,10 @@ class Store:
             statement += " ON DUPLICATE KEY UPDATE " + ",".join(f"{column}=VALUES({column})" for column in updates)
             statement = statement.replace("?", "%s")
         else:
-            statement += f" ON CONFLICT ({','.join(keys)}) DO UPDATE SET " + ",".join(f"{column}=excluded.{column}" for column in updates)
+            statement += f" ON CONFLICT ({','.join(keys)})"
+            statement += (" DO UPDATE SET " + ",".join(f"{column}=excluded.{column}" for column in updates)) if updates else " DO NOTHING"
+            if self.remote:
+                statement = statement.replace("?", "%s")
         cursor = self.connection.cursor()
         try:
             cursor.executemany(statement, rows)

@@ -51,6 +51,7 @@ jobs:
       FW_SCAN_MODE: ${{ (inputs.scan_mode != 'configured' && inputs.scan_mode) || vars.FW_SCAN_MODE || 'full' }}
       FW_PERSIST_STATE: ${{ vars.FW_PERSIST_STATE || 'true' }}
       FW_MODEL_SOURCE: ${{ vars.FW_MODEL_SOURCE || 'auto' }}
+      FW_DB_BACKEND: ${{ vars.FW_DB_BACKEND || 'sqlite' }}
       FW_MODELS_FILE: ${{ vars.FW_MODELS_FILE || 'models.txt' }}
       FW_IO_WORKERS: ${{ vars.FW_IO_WORKERS || '8' }}
       FW_CPU_WORKERS: ${{ vars.FW_CPU_WORKERS || '2' }}
@@ -93,6 +94,7 @@ jobs:
         run: |
           case "$FW_PERSIST_STATE" in true|false) ;; *) echo 'FW_PERSIST_STATE must be true or false'; exit 1 ;; esac
           case "$FW_STORAGE" in local|cloud|both) ;; *) echo 'Invalid FW_STORAGE'; exit 1 ;; esac
+          case "$FW_DB_BACKEND" in sqlite|mysql|postgres) ;; *) echo 'Invalid FW_DB_BACKEND'; exit 1 ;; esac
           case "$FW_SCAN_MODE" in full|metadata) ;; *) echo 'Invalid FW_SCAN_MODE'; exit 1 ;; esac
           if [ "$FW_PERSIST_STATE" = false ]; then
             echo '::warning::State persistence disabled; local database and pending notification/sync queues are temporary.'
@@ -116,6 +118,16 @@ jobs:
             printf 'FW_MYSQL_SSL_CA=%s\n' "$RUNNER_TEMP/firmware-mysql-ca.pem" >> "$GITHUB_ENV"
           fi
 
+      - name: 配置可选 PostgreSQL 私有 CA
+        env:
+          FW_PG_CA_PEM: ${{ secrets.FW_PG_CA_PEM }}
+        run: |
+          if [ -n "$FW_PG_CA_PEM" ]; then
+            umask 077
+            printf '%s\n' "$FW_PG_CA_PEM" > "$RUNNER_TEMP/firmware-postgres-ca.pem"
+            printf 'FW_PG_SSL_CA=%s\n' "$RUNNER_TEMP/firmware-postgres-ca.pem" >> "$GITHUB_ENV"
+          fi
+
       - name: 查询正式版并解码测试版
         id: firmware
         env:
@@ -124,6 +136,12 @@ jobs:
           FW_MYSQL_PASSWORD: ${{ secrets.FW_MYSQL_PASSWORD || secrets.PASSWORD }}
           FW_MYSQL_DATABASE: ${{ secrets.FW_MYSQL_DATABASE || secrets.DATABASE }}
           FW_MYSQL_PORT: ${{ vars.FW_MYSQL_PORT || '3306' }}
+          FW_PG_HOST: ${{ secrets.FW_PG_HOST }}
+          FW_PG_USER: ${{ secrets.FW_PG_USER }}
+          FW_PG_PASSWORD: ${{ secrets.FW_PG_PASSWORD }}
+          FW_PG_DATABASE: ${{ vars.FW_PG_DATABASE || 'Sam_FW' }}
+          FW_PG_PORT: ${{ vars.FW_PG_PORT || '5432' }}
+          FW_PG_SSLMODE: verify-full
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_USER_ID: ${{ secrets.TG_USER_ID }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}

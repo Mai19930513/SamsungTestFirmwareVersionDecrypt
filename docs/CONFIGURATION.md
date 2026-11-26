@@ -18,7 +18,7 @@ Linux 激活命令为 `source .venv/bin/activate`。已有 `.env` 不需要覆�
 | 位置 / 配置 | 默认值 | 用途 |
 | --- | --- | --- |
 | `models.txt` | 现有文件 | 每行 `名称,型号,CSC1\|CSC2`，支持空行和 `#` 注释 |
-| `FW_MODEL_SOURCE` | `auto` | 合并 models.txt 与历史 JSON；`file` 仅处理文件中的设备；`mysql` 读取旧 models 表 |
+| `FW_MODEL_SOURCE` | `auto` | 合并 models.txt 与历史 JSON；`file` 仅处理文件中的设备；`mysql` / `postgres` 从对应数据库读取 models 表 |
 | `FW_IO_WORKERS` | `8` | FOTA/文档网络并发，最大 32；FUS 并发最多 4 |
 | `FW_CPU_WORKERS` | CPU 数与 4 的较小值 | 搜索进程数，工作进程不写文件或数据库，主进程收到每个设备结果后立即提交断点 |
 | `FW_CONNECT_TIMEOUT` / `FW_READ_TIMEOUT` | `5` / `20` 秒 | 连接和读超时 |
@@ -77,7 +77,7 @@ python 三星测试版固件版本号解密.py --storage cloud
 python 三星测试版固件版本号解密.py --storage both
 ```
 
-`local` 使用本地 SQLite，`cloud` 使用云 MySQL，`both` 同时写入。长期默认在 `.env` 设置 `FW_STORAGE=local/cloud/both`。优先级为 `--storage` > `FW_STORAGE` > 旧 `FW_DB_BACKEND`，未配置时默认 local。机型来源 `FW_MODEL_SOURCE` 是独立选项，与数据保存位置无关。GitHub Actions 手动运行也提供 storage 下拉菜单，定时任务读取仓库变量 `FW_STORAGE`。
+`local` 使用本地 SQLite，`cloud` 使用云 MySQL/PostgreSQL，`both` 同时写入。`FW_DB_BACKEND=postgres` 选择 PostgreSQL，`mysql` 选择 MySQL；未指定驱动的旧 cloud/both 配置继续使用 MySQL。保存位置优先级为 `--storage` > `FW_STORAGE` > 驱动推导值（postgres/mysql 默认 cloud，sqlite 默认 local）。机型来源 `FW_MODEL_SOURCE` 是独立选项，与数据保存位置无关。GitHub Actions 手动运行也提供 storage 下拉菜单，定时任务读取仓库变量 `FW_STORAGE`。
 
 双库模式先提交本地，再提交云端；两台数据库没有分布式事务。云端中断返回退出码 `3`，本地数据和 `data/cloud-pending-*.private.json` 待同步队列保留，下次选择 cloud/both 自动补传。云端单独模式连接失败时退出，不伪装成功；写入失败则保留私有待同步队列。队列按云端主机/端口/库名的哈希隔离，里面不含连接密码。切换保存位置后会同步所有现有历史记录，不只同步当前筛选的机型。
 
@@ -95,6 +95,8 @@ python 三星测试版固件版本号解密.py --storage both
 首次导入的观察时间表示导入时间，不等于三星上传时间；`最新测试版上传时间` 也是本程序观察到新版本的时间。离线导入时 `active` 可为 NULL，只有成功抓取测试列表才更新存在状态。失败不会把所有历史版本标为移除。达到预算的搜索标记为 `bounded`，每个设备完成后立即将断点独立提交到 SQLite。后续设备失败或导出失败，不会撤销已提交的搜索进度。正在计算但还没返回的设备可能重做本轮预算。
 
 MySQL 使用 `FW_DB_BACKEND=mysql`，配置 `FW_MYSQL_HOST`、`FW_MYSQL_PORT`、`FW_MYSQL_USER`、`FW_MYSQL_PASSWORD`、`FW_MYSQL_DATABASE`，支持旧 `HOST/DBUSER/PASSWORD/DATABASE` 回退。旧端口固定为 21777，新默认 3306，旧部署需显式设置 `FW_MYSQL_PORT=21777`。账号需要创建上述表和增删改查权限，不修改旧 `models` 表。TLS 验证主机名和系统 CA，私有 CA 使用 `FW_MYSQL_SSL_CA`，不能静默关闭验证。
+
+PostgreSQL 使用 `FW_DB_BACKEND=postgres`，从迁移后的机型表读取时另设 `FW_MODEL_SOURCE=postgres`。连接变量为 `FW_PG_HOST`、`FW_PG_PORT`（默认 5432，Aiven 使用实际端口）、`FW_PG_USER`、`FW_PG_PASSWORD`、`FW_PG_DATABASE`（默认 `Sam_FW`，区分大小写）、`FW_PG_SSL_CA`。默认 `FW_PG_SSLMODE=verify-full`；仅本机回环测试允许 `disable`。不会回退到旧 MySQL 或环境中的通用 PG* 凭据，schema 固定为 `public`。应用会创建六张 firmware_* 表，但只读取 models，不自动创建或覆盖它。迁移顺序和 Actions 配置见 [PostgreSQL 迁移](POSTGRESQL.md)。
 
 ## 下载 JSON 字段
 

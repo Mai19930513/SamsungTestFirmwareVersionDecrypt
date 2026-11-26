@@ -7,7 +7,7 @@ from dataclasses import replace
 
 from .files import atomic_json, load_json, now_text
 from .storage import Store
-from .mysql_errors import CloudDatabaseError, mysql_error_summary
+from .database_errors import CloudDatabaseError, database_error_summary
 
 
 class Databases:
@@ -16,21 +16,26 @@ class Databases:
         self.local = None
         self.cloud = None
         self.cloud_error = False
+        # Legacy FW_STORAGE=cloud/both with the default sqlite backend uses MySQL.
+        self.cloud_backend = 'postgres' if settings.db_backend == 'postgres' else 'mysql'
         identity = [os.getenv("FW_MYSQL_HOST") or os.getenv("HOST", ""),
                     os.getenv("FW_MYSQL_PORT", "3306"),
                     os.getenv("FW_MYSQL_DATABASE") or os.getenv("DATABASE", "")]
+        if self.cloud_backend == 'postgres':
+            identity = ['postgres', os.getenv('FW_PG_HOST', '').strip(),
+                        os.getenv('FW_PG_PORT', '5432'), os.getenv('FW_PG_DATABASE', 'Sam_FW').strip(), 'public']
         fingerprint = hashlib.sha256("\0".join(identity).encode()).hexdigest()[:16]
         self.pending_path = settings.data_dir / f"cloud-pending-{fingerprint}.private.json"
         if settings.storage_target in {"local", "both"}:
             self.local = Store(replace(settings, db_backend="sqlite"))
         if settings.storage_target in {"cloud", "both"}:
             try:
-                self.cloud = Store(replace(settings, db_backend="mysql"))
+                self.cloud = Store(replace(settings, db_backend=self.cloud_backend))
             except Exception as error:
                 self.cloud_error = True
                 if not self.local:
-                    raise CloudDatabaseError(mysql_error_summary(error)) from None
-                print("云数据库暂不可用，将保存本地数据和待同步队列。" + mysql_error_summary(error), flush=True)
+                    raise CloudDatabaseError(database_error_summary(error, self.cloud_backend)) from None
+                print("云数据库暂不可用，将保存本地数据和待同步队列。" + database_error_summary(error, self.cloud_backend), flush=True)
 
         # Cloud-only runs also retain local checkpoints for encrypted Actions state.
         self.progress = self.local or Store(replace(settings, db_backend="sqlite"))
@@ -93,10 +98,10 @@ class Databases:
             except Exception as error:
                 if store is self.cloud and self.local:
                     self.cloud_error = True
-                    print("云数据库读取失败，继续使用本地数据。" + mysql_error_summary(error), flush=True)
+                    print("云数据库读取失败，继续使用本地数据。" + database_error_summary(error, self.cloud_backend), flush=True)
                     continue
                 if store is self.cloud:
-                    raise CloudDatabaseError("云数据库读取失败：" + mysql_error_summary(error)) from None
+                    raise CloudDatabaseError("云数据库读取失败：" + database_error_summary(error, self.cloud_backend)) from None
                 raise
             for model, regions in snapshots.items():
                 for region, record in regions.items():
@@ -148,9 +153,9 @@ class Databases:
                     self.cloud_error = False
                 except Exception as error:
                     self.cloud_error = True
-                    print("云数据库写入失败，待同步数据已安全保留，下次选择 cloud/both 时重试。" + mysql_error_summary(error), flush=True)
+                    print("云数据库写入失败，待同步数据已安全保留，下次选择 cloud/both 时重试。" + database_error_summary(error, self.cloud_backend), flush=True)
                     if not self.local:
-                        raise CloudDatabaseError("云数据库写入失败；待同步队列已保存在本地。" + mysql_error_summary(error)) from None
+                        raise CloudDatabaseError("云数据库写入失败；待同步队列已保存在本地。" + database_error_summary(error, self.cloud_backend)) from None
 
     def close(self):
         for store in {self.local, self.cloud, self.progress}:

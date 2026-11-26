@@ -1,5 +1,7 @@
 from .network import validate_device
-from .storage import mysql_connection
+from .storage import mysql_connection, postgres_connection
+from .database_errors import CloudDatabaseError, database_error_summary
+from .postgres import models_select
 
 
 COUNTRIES = {"CHC": "国行", "CHN": "国行", "TGY": "香港", "KOO": "韩国",
@@ -8,13 +10,15 @@ COUNTRIES = {"CHC": "国行", "CHN": "国行", "TGY": "香港", "KOO": "韩国",
 
 def load_models(settings, old_data):
     models = {}
-    if settings.model_source == "mysql":
-        connection = mysql_connection()
+    if settings.model_source in {"mysql", "postgres"}:
+        connection = postgres_connection() if settings.model_source == "postgres" else mysql_connection()
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT name, code, cc FROM models")
+                cursor.execute(models_select(cursor) if settings.model_source == 'postgres' else "SELECT name, code, cc FROM models")
                 for row in cursor.fetchall():
                     models[row["code"]] = {"name": row["name"], "CC": row["cc"].split("|")}
+        except Exception as error:
+            raise CloudDatabaseError('机型表读取失败：' + database_error_summary(error, settings.model_source)) from None
         finally:
             connection.close()
     else:

@@ -22,7 +22,7 @@ def main(argv=None):
     parser.add_argument("--output-dir", help="JSON 和日志输出目录")
     parser.add_argument("--no-downloads", action="store_true", help="关闭 FUS 下载信息查询")
     parser.add_argument("--no-timeline", action="store_true", help="关闭更新日志查询")
-    parser.add_argument("--storage", choices=("local", "cloud", "both"), help="保存到本地 SQLite、云 MySQL 或同时保存")
+    parser.add_argument("--storage", choices=("local", "cloud", "both"), help="保存到本地 SQLite、云 MySQL/PostgreSQL 或同时保存")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parent.parent
     load_dotenv(root / ".env")

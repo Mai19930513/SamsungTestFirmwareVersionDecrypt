@@ -22,6 +22,8 @@
 | `FW_MYSQL_PASSWORD` | 云数据库密码，兼容 `PASSWORD` |
 | `FW_MYSQL_DATABASE` | 云数据库名称，兼容 `DATABASE` |
 | `FW_MYSQL_CA_PEM` | 可选私有 CA 的 PEM 内容，只写入 runner 临时目录 |
+| `FW_PG_HOST` / `FW_PG_USER` / `FW_PG_PASSWORD` | PostgreSQL 连接参数；选择 postgres 时使用 |
+| `FW_PG_CA_PEM` | PostgreSQL 私有 CA 完整 PEM 内容，只写入 runner 临时目录 |
 
 在自己的终端生成状态密钥，再将结果复制到 `FW_STATE_KEY` Secret：
 
@@ -38,6 +40,8 @@ python -c 'import secrets; print(secrets.token_hex(32))'
 | Variable | 默认值 | 用途 |
 | --- | --- | --- |
 | `FW_STORAGE` | `local` | `local`、`cloud`、`both` |
+| `FW_DB_BACKEND` | `sqlite` | `postgres` 选择 PostgreSQL 云端；旧 cloud/both 配置保持 MySQL |
+| `FW_PG_DATABASE` / `FW_PG_PORT` | `Sam_FW` / `5432` | PostgreSQL 库名（大小写敏感）与实际服务端口 |
 | `FW_SCAN_MODE` | `full` | `full` 完整解码；`metadata` 仅查询版本、复用已知映射和获取下载信息 |
 | `FW_PERSIST_STATE` | `true` | 是否跨次保存加密状态；关闭后本地数据库和待发送/补传队列随 runner 丢失 |
 | `FW_STATE_RETENTION_DAYS` | `30` | 加密 artifact 保留天数，公共仓库可设 1–90，受仓库策略限制 |
@@ -89,6 +93,8 @@ GitHub 的 `local` 指本轮 runner 的 SQLite。跨次持久化由加密 artifa
 需要 Telegram 通知时，创建 **Secret `TG_BOT_TOKEN`**，并按需创建 **`TG_USER_ID`（个人）和/或 `TG_CHAT_ID`（群组）**。个人与群组均接收内测及 FUS 上线消息；仅群组通知无需个人 ID。`TG_CHAT_ID` 会在数据库缺失时迁移入库，已有数据库配置优先。机器人必须在群内并具有发送权限。配置 Token 和任一种接收人 Secret 后自动启用通知；如果群组仅保存在数据库、未保留任何接收人 Secret，需显式设置 Variable `FW_NOTIFICATIONS=true`。`FW_NOTIFY_GROUPS=false` 可单独关闭群组，`FW_NOTIFICATIONS=false` 可关闭全部通知。
 
 需要云数据库时，再创建 **Secrets `FW_MYSQL_HOST`、`FW_MYSQL_USER`、`FW_MYSQL_PASSWORD`、`FW_MYSQL_DATABASE`**，并在 **Variables** 设置 `FW_STORAGE=both` 或 `cloud`、正确的 `FW_MYSQL_PORT`。私有证书才需要 `FW_MYSQL_CA_PEM`。Secret 与 Variable 是两个标签页；普通执行参数放 Variables。
+
+迁移到 PostgreSQL 后，使用 **Secrets `FW_PG_HOST`、`FW_PG_USER`、`FW_PG_PASSWORD`、`FW_PG_CA_PEM`**；Variables 设置 `FW_DB_BACKEND=postgres`、`FW_MODEL_SOURCE=postgres`、`FW_STORAGE=cloud` 或 `both`、`FW_PG_DATABASE=Sam_FW`、实际 `FW_PG_PORT`。工作流固定 PostgreSQL `verify-full` TLS。先完成 `defaultdb.models → Sam_FW.public.models` 迁移和复核，再启用定时任务，详见 [PostgreSQL 迁移](POSTGRESQL.md)。
 
 `FW_PERSIST_STATE=true`、`FW_SCAN_MODE=full`、`FW_CPU_WORKERS=2`、`FW_MAX_SECONDS=30`、`FW_MAX_CANDIDATES=5000000` 均已有默认值，不必逐个创建。`GITHUB_TOKEN` 自动提供，FOTA/FUS 公共查询无需三星账户 Secret。
 

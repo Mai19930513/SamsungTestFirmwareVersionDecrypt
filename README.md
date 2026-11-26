@@ -1,6 +1,6 @@
 [![生成固件解密json文件](https://github.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/actions/workflows/python-app.yml/badge.svg)](https://github.com/Mai19930513/SamsungTestFirmwareVersionDecrypt/actions/workflows/python-app.yml)
 # 主要功能
-当前版本支持并发 FOTA 查询、MD5/HMAC-SHA256 候选匹配、历史缓存复用、SQLite/MySQL 持久化，以及 FUS 最新正式版下载信息导出。完整配置、数据字段、隐私边界与使用命令见 [配置与运行说明](docs/CONFIGURATION.md)，联网调研依据见 [FOTA/FUS 实现资料](docs/FOTA_RESEARCH.md)。
+当前版本支持并发 FOTA 查询、MD5/HMAC-SHA256 候选匹配、历史缓存复用、SQLite/MySQL/PostgreSQL 持久化，以及 FUS 最新正式版下载信息导出。完整配置、数据字段、隐私边界与使用命令见 [配置与运行说明](docs/CONFIGURATION.md)，联网调研依据见 [FOTA/FUS 实现资料](docs/FOTA_RESEARCH.md)。
 
 上传 GitHub 后的 Secrets、定时运行、数据库和通知队列跨次保存见 [GitHub Actions 部署说明](docs/GITHUB_ACTIONS.md)。FUS 版本严格高于当前 FOTA 正式版时才发送上线通知，发送至已配置的个人与群组（`FW_NOTIFY_GROUPS=false` 可单独关闭群组）；Actions 使用加密 artifact 保留 SQLite、通知重试和云端补传状态。
 
@@ -9,7 +9,7 @@
 通过生成序列号穷举MD5编码后的结果与官网对比，达到解码版本号的功能。
 三星测试版固件官网:`https://fota-cloud-dn.ospserver.net/firmware/区域码/设备型号/version.test.xml`,示例网站：如[国行版S24 Ultra](https://fota-cloud-dn.ospserver.net/firmware/CHC/SM-S9280/version.test.xml)
 # 如何添加自己需要的设备
-修改 `models.txt`，每行格式为 `设备名称,设备型号,地区代码(多个地区用|分隔)`。默认合并该文件与历史 JSON 中的机型；只处理文件中的设备可在 `.env` 设置 `FW_MODEL_SOURCE=file`。使用已有 MySQL `models` 表时设置 `FW_MODEL_SOURCE=mysql`，无需修改 Python 源码。
+修改 `models.txt`，每行格式为 `设备名称,设备型号,地区代码(多个地区用|分隔)`。默认合并该文件与历史 JSON 中的机型；只处理文件中的设备可在 `.env` 设置 `FW_MODEL_SOURCE=file`。使用已有 MySQL `models` 表时设置 `FW_MODEL_SOURCE=mysql`，无需修改 Python 源码。 PostgreSQL 使用 `FW_MODEL_SOURCE=postgres`；`defaultdb.models → Sam_FW.public.models` 的迁移与运行配置见 [PostgreSQL 迁移说明](docs/POSTGRESQL.md)。
 
 
 # 如何根据三星固件版本号获取相关信息？

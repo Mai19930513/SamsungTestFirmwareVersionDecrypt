@@ -68,11 +68,11 @@ class Settings:
         alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         model_source = os.getenv("FW_MODEL_SOURCE", "auto")
         db_backend = os.getenv("FW_DB_BACKEND", "sqlite")
-        storage_target = os.getenv("FW_STORAGE", "cloud" if db_backend == "mysql" else "local")
-        if model_source not in {"auto", "file", "mysql"}:
-            raise ValueError("FW_MODEL_SOURCE must be auto, file or mysql")
-        if db_backend not in {"sqlite", "mysql"}:
-            raise ValueError("FW_DB_BACKEND must be sqlite or mysql")
+        storage_target = os.getenv("FW_STORAGE", "cloud" if db_backend in {"mysql", "postgres"} else "local")
+        if model_source not in {"auto", "file", "mysql", "postgres"}:
+            raise ValueError("FW_MODEL_SOURCE must be auto, file, mysql or postgres")
+        if db_backend not in {"sqlite", "mysql", "postgres"}:
+            raise ValueError("FW_DB_BACKEND must be sqlite, mysql or postgres")
         if storage_target not in {"local", "cloud", "both"}:
             raise ValueError("FW_STORAGE must be local, cloud or both")
         return cls(

@@ -24,13 +24,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.499667,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.2446961,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7110_5_20260824075011_tg23z9izkj_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -39,10 +39,10 @@
             "解密统计": {
                 "status": "bounded",
                 "candidates": 5000000,
-                "seconds": 5.3435,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 935708,
+                "seconds": 4.9695,
+                "resumed": true,
+                "candidates_total": 10000000,
+                "candidates_per_second": 1006128,
                 "target_count": 559,
                 "matched_count": 139
             },
@@ -79,25 +79,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.4864507,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.240687,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7210_15_20261102091330_yr4vgipaco_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.7848,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1044980,
+                "status": "exhausted",
+                "candidates": 4817648,
+                "seconds": 4.8539,
+                "resumed": true,
+                "candidates_total": 9817648,
+                "candidates_per_second": 992525,
                 "target_count": 389,
                 "matched_count": 345
             },
@@ -135,14 +135,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.4756744,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.2470028,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7310_15_20261017050751_e6avatics8_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -193,14 +193,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.3155327,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.268516,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7410_4_20261017083820_5k7gmf4lrw_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -209,12 +209,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2665985,
-                "seconds": 2.5487,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2665985,
-                "candidates_per_second": 1046031,
+                "candidates_per_second": 0,
                 "target_count": 112,
                 "matched_count": 105
             },
@@ -251,14 +251,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.8138313,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.8743427,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7610_2_20261013085701_n5fxhjd9fi_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -309,14 +309,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.0210521,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.7285788,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7660_2_20261014154441_7sul0f2du4_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -346,7 +346,7 @@
         "CHC": {
             "机型": "Z Flip8",
             "地区": "国行",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -389,8 +389,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:11",
-                "checked_epoch": 1795754471.9933143,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.977797,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F7760_1_20261116173651_i74qjb3gwq_fac.zip.enc4",
@@ -425,13 +425,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.0013437,
+                "checked_at": "2026-11-27 22:33:35",
+                "checked_epoch": 1795790015.7095227,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9260_15_20260824102751_i0ejbi79qt_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -440,10 +440,10 @@
             "解密统计": {
                 "status": "bounded",
                 "candidates": 5000000,
-                "seconds": 4.7292,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1057272,
+                "seconds": 5.0529,
+                "resumed": true,
+                "candidates_total": 10000000,
+                "candidates_per_second": 989531,
                 "target_count": 381,
                 "matched_count": 320
             },
@@ -480,25 +480,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.3494377,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.165941,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9360_5_20261030160331_v36q5qjzay_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.8166,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1038084,
+                "status": "exhausted",
+                "candidates": 4817648,
+                "seconds": 5.5142,
+                "resumed": true,
+                "candidates_total": 9817648,
+                "candidates_per_second": 873675,
                 "target_count": 224,
                 "matched_count": 214
             },
@@ -536,14 +536,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.4947398,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.3327224,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9460_14_20261017042040_8ly46jfz0y_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -594,14 +594,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.5924563,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.355254,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9560_4_20261017082410_r3914r9woh_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -610,12 +610,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2665953,
-                "seconds": 2.542,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2665953,
-                "candidates_per_second": 1048745,
+                "candidates_per_second": 0,
                 "target_count": 104,
                 "matched_count": 97
             },
@@ -652,14 +652,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.534021,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.5651722,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9660_2_20261017094411_5n5jyyl7hf_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -689,7 +689,7 @@
         "CHC": {
             "机型": "Z Fold8 Ultra",
             "地区": "国行",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -732,8 +732,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.8745036,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.6096935,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-F9760_1_20261116150700_ri8gdsku2k_fac.zip.enc4",
@@ -768,25 +768,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.997977,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.8911622,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9810_5_20260514083311_tsu3reagv2_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 10407168,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0603,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 988078,
                 "target_count": 256,
                 "matched_count": 194
             },
@@ -821,25 +821,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:12",
-                "checked_epoch": 1795754472.9949203,
+                "checked_at": "2026-11-27 22:33:36",
+                "checked_epoch": 1795790016.8022738,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9810_5_20260514085651_66q5wb5d2h_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 10407328,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.1715,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 966839,
                 "target_count": 264,
                 "matched_count": 244
             },
@@ -876,25 +876,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.331383,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.0464268,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9860_14_20260514084242_95bg91vgwt_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 10407168,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0173,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 996557,
                 "target_count": 453,
                 "matched_count": 150
             },
@@ -929,25 +929,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.1482294,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.0406477,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9860_14_20260514085132_ukc5nzyhp3_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 10407328,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0722,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 985759,
                 "target_count": 471,
                 "matched_count": 198
             },
@@ -984,13 +984,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.6149027,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.3212438,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9880_5_20260514084041_0wqghg776a_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1037,13 +1037,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.5273588,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.2916236,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9880_5_20260514085711_qokav6mck0_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1092,25 +1092,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.6580088,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.4816158,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9910_5_20260515224011_rru7zqqu5j_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380928,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0571,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 988711,
                 "target_count": 261,
                 "matched_count": 215
             },
@@ -1145,25 +1145,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.8076332,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.4753652,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9910_5_20260303091740_kgvw9hnvdo_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380960,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0995,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 980482,
                 "target_count": 234,
                 "matched_count": 192
             },
@@ -1200,25 +1200,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.1462739,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.8362966,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9960_5_20260303091640_7crm2x8r6t_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380960,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0634,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 987475,
                 "target_count": 238,
                 "matched_count": 195
             },
@@ -1253,25 +1253,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:13",
-                "checked_epoch": 1795754473.9830053,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.8508599,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9960_5_20260515221451_ngmckxaa0x_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380928,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.2216,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 957553,
                 "target_count": 265,
                 "matched_count": 218
             },
@@ -1308,25 +1308,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.2727644,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.9399376,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9980_5_20260303091540_01hiffd2kn_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380960,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.1873,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 963887,
                 "target_count": 241,
                 "matched_count": 172
             },
@@ -1361,25 +1361,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.1366794,
+                "checked_at": "2026-11-27 22:33:37",
+                "checked_epoch": 1795790017.896643,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-G9980_5_20260515220451_4wzltw3zhj_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 13380928,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0756,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 985096,
                 "target_count": 266,
                 "matched_count": 219
             },
@@ -1472,25 +1472,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.5956535,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.4283261,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-N9810_5_20260515175741_vpjrb3mv9g_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 11894064,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0852,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 983242,
                 "target_count": 205,
                 "matched_count": 176
             },
@@ -1525,25 +1525,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.461307,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.2638824,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-N9810_5_20260515180201_9og4yokeof_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 11150728,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0464,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 990797,
                 "target_count": 194,
                 "matched_count": 188
             },
@@ -1580,25 +1580,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.609098,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.4151397,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-N9860_5_20260515180221_gn1tl89omv_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 11150728,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0447,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 991139,
                 "target_count": 199,
                 "matched_count": 193
             },
@@ -1633,25 +1633,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.7471755,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.3955917,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-N9860_5_20260515182211_n2iormrvhk_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 11894064,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0443,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 991220,
                 "target_count": 212,
                 "matched_count": 182
             },
@@ -1688,14 +1688,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:14",
-                "checked_epoch": 1795754474.9638424,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.6892798,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S731U_3_20261116180001_lznvtj9o65_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1746,13 +1746,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.1282134,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.818749,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9010_5_20260819193030_y2g9rz3mx9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1799,13 +1799,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.1407888,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.9098768,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9010_5_20260819091141_ho5l0wuoiw_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1854,13 +1854,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.2637715,
+                "checked_at": "2026-11-27 22:33:38",
+                "checked_epoch": 1795790018.8479898,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S901B_5_20260818184310_el6p8a8fvh_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -1869,10 +1869,10 @@
             "解密统计": {
                 "status": "bounded",
                 "candidates": 5000000,
-                "seconds": 4.7818,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1045630,
+                "seconds": 5.0625,
+                "resumed": true,
+                "candidates_total": 10000000,
+                "candidates_per_second": 987647,
                 "target_count": 438,
                 "matched_count": 305
             },
@@ -1909,25 +1909,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.4528935,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.1125054,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S901N_5_20260819114001_lkwwkbm4bg_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.7026,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1063246,
+                "status": "exhausted",
+                "candidates": 2354864,
+                "seconds": 2.3594,
+                "resumed": true,
+                "candidates_total": 7354864,
+                "candidates_per_second": 998057,
                 "target_count": 310,
                 "matched_count": 289
             },
@@ -1964,13 +1964,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.6628785,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.27307,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9060_5_20260819091040_vev7kaimf3_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2017,13 +2017,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.595332,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.224555,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9060_5_20260819191510_is6ahdetm9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2072,13 +2072,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.752903,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.593126,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S906B_5_20260818183611_7wld6k3jac_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2087,10 +2087,10 @@
             "解密统计": {
                 "status": "bounded",
                 "candidates": 5000000,
-                "seconds": 4.7542,
+                "seconds": 4.9795,
                 "resumed": true,
-                "candidates_total": 10000000,
-                "candidates_per_second": 1051702,
+                "candidates_total": 15000000,
+                "candidates_per_second": 1004123,
                 "target_count": 456,
                 "matched_count": 322
             },
@@ -2127,25 +2127,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:15",
-                "checked_epoch": 1795754475.8991117,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.5450456,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S906N_5_20260819114040_va0pv8xmdn_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.7378,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1055338,
+                "status": "exhausted",
+                "candidates": 2354864,
+                "seconds": 2.3648,
+                "resumed": true,
+                "candidates_total": 7354864,
+                "candidates_per_second": 995811,
                 "target_count": 311,
                 "matched_count": 267
             },
@@ -2182,13 +2182,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.1712568,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.7070172,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9080_5_20260819090940_slocq43oai_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2235,13 +2235,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.0844166,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.65111,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9080_5_20260819190701_4qgctxkadf_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2290,13 +2290,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.2560527,
+                "checked_at": "2026-11-27 22:33:39",
+                "checked_epoch": 1795790019.9699688,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S908B_5_20260818182852_65t3b57yrd_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2305,10 +2305,10 @@
             "解密统计": {
                 "status": "bounded",
                 "candidates": 5000000,
-                "seconds": 4.7624,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1049898,
+                "seconds": 5.0271,
+                "resumed": true,
+                "candidates_total": 10000000,
+                "candidates_per_second": 994619,
                 "target_count": 438,
                 "matched_count": 305
             },
@@ -2345,25 +2345,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.4533741,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.020419,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S908N_5_20260819114120_qnutsiclz2_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.7536,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1051825,
+                "status": "exhausted",
+                "candidates": 2354864,
+                "seconds": 2.3699,
+                "resumed": true,
+                "candidates_total": 7354864,
+                "candidates_per_second": 993640,
                 "target_count": 312,
                 "matched_count": 290
             },
@@ -2400,14 +2400,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.6669886,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.1358411,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9110_5_20260929111341_dl8s8u3dp9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2456,14 +2456,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.664704,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.0731795,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9110_5_20261017054141_u6z0fvr7xz_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2514,14 +2514,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.7605507,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.410646,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S911B_5_20260928230031_bjjqs8mtoo_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:26",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2572,14 +2572,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:16",
-                "checked_epoch": 1795754476.9501526,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.4426835,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S911N_6_20261117234020_t7acgtzj6f_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2630,14 +2630,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.285048,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.552073,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9160_5_20260929111401_b7mk4pkrat_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2686,14 +2686,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.2767358,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.5254643,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9160_5_20261017054131_b7pkzmgufw_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2744,14 +2744,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.2829444,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.837276,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S916B_5_20260928230612_i5ccb2l976_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2802,14 +2802,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.411532,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.8628623,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S916N_6_20261117235631_4hlanmme3v_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2860,14 +2860,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.7464502,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.9571118,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9180_5_20260929112201_zmrr4wcaqr_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2916,14 +2916,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.7268171,
+                "checked_at": "2026-11-27 22:33:40",
+                "checked_epoch": 1795790020.9573658,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9180_5_20261017054911_iybr14kp9k_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -2974,14 +2974,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.835322,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.2681167,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S918B_5_20260928230251_vawo0mgtlx_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3032,14 +3032,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:17",
-                "checked_epoch": 1795754477.9051838,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.2705595,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S918N_6_20261117233940_c1nr5cf2k9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3090,14 +3090,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.2241073,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.3718343,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9210_5_20261110015801_9lx0grbttz_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3106,12 +3106,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152688,
-                "seconds": 3.9864,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152688,
-                "candidates_per_second": 1041721,
+                "candidates_per_second": 0,
                 "target_count": 167,
                 "matched_count": 160
             },
@@ -3146,14 +3146,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.1834342,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.3884058,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9210_4_20261107185710_w2vexnjnhg_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3162,12 +3162,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 3554608,
-                "seconds": 3.3859,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 3554608,
-                "candidates_per_second": 1049834,
+                "candidates_per_second": 0,
                 "target_count": 189,
                 "matched_count": 181
             },
@@ -3204,14 +3204,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.3606768,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.6943069,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S921B_5_20261110171141_5217gvjbt9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3262,14 +3262,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.393473,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.6966689,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S921N_5_20261110140500_ezlk20pr8n_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3278,12 +3278,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 901280,
-                "seconds": 0.8773,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": true,
                 "candidates_total": 10901280,
-                "candidates_per_second": 1027299,
+                "candidates_per_second": 0,
                 "target_count": 242,
                 "matched_count": 211
             },
@@ -3320,14 +3320,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.6429148,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.7884774,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S921U_5_20261120045121_0i7vgr5rxg_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3336,12 +3336,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152624,
-                "seconds": 4.0062,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152624,
-                "candidates_per_second": 1036558,
+                "candidates_per_second": 0,
                 "target_count": 262,
                 "matched_count": 257
             },
@@ -3378,14 +3378,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.8122518,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.1445165,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9260_5_20261110014540_kzyxxcg20u_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3394,12 +3394,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152688,
-                "seconds": 3.9888,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152688,
-                "candidates_per_second": 1041097,
+                "candidates_per_second": 0,
                 "target_count": 166,
                 "matched_count": 159
             },
@@ -3434,14 +3434,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.7740805,
+                "checked_at": "2026-11-27 22:33:41",
+                "checked_epoch": 1795790021.9853785,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9260_4_20261107190341_hrvha5tfuc_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3450,12 +3450,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 3554608,
-                "seconds": 3.4145,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 3554608,
-                "candidates_per_second": 1041042,
+                "candidates_per_second": 0,
                 "target_count": 190,
                 "matched_count": 181
             },
@@ -3492,14 +3492,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:18",
-                "checked_epoch": 1795754478.8712916,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.1423142,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S926B_5_20261110172830_0iuqr7dcbn_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3550,14 +3550,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.1123464,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.2180626,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S926N_5_20261110142201_26t1j3a5xm_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3566,12 +3566,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 901280,
-                "seconds": 0.8675,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": true,
                 "candidates_total": 10901280,
-                "candidates_per_second": 1038981,
+                "candidates_per_second": 0,
                 "target_count": 241,
                 "matched_count": 211
             },
@@ -3608,14 +3608,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.2854095,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.4633613,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S926U_5_20261117180751_x6lg8i02l2_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3624,12 +3624,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152624,
-                "seconds": 3.9709,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152624,
-                "candidates_per_second": 1045759,
+                "candidates_per_second": 0,
                 "target_count": 268,
                 "matched_count": 264
             },
@@ -3666,14 +3666,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.340678,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.6466458,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9280_5_20261110015441_0x2cvm4c37_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3682,12 +3682,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152688,
-                "seconds": 3.9633,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152688,
-                "candidates_per_second": 1047784,
+                "candidates_per_second": 0,
                 "target_count": 170,
                 "matched_count": 161
             },
@@ -3722,14 +3722,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.3007946,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.5952022,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9280_4_20261107190140_g5cvbjewk9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3738,12 +3738,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 3554608,
-                "seconds": 3.3703,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 3554608,
-                "candidates_per_second": 1054675,
+                "candidates_per_second": 0,
                 "target_count": 195,
                 "matched_count": 188
             },
@@ -3780,14 +3780,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.5650165,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.810243,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S928B_5_20261110175551_8r42e3fkfq_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3796,12 +3796,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152688,
-                "seconds": 3.97,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152688,
-                "candidates_per_second": 1046018,
+                "candidates_per_second": 0,
                 "target_count": 290,
                 "matched_count": 272
             },
@@ -3838,14 +3838,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.7596514,
+                "checked_at": "2026-11-27 22:33:42",
+                "checked_epoch": 1795790022.9338808,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S928N_5_20261110133041_6ybnak208p_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3854,12 +3854,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152816,
-                "seconds": 3.986,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152816,
-                "candidates_per_second": 1041862,
+                "candidates_per_second": 0,
                 "target_count": 233,
                 "matched_count": 216
             },
@@ -3896,14 +3896,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.7957203,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.0421946,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S928U_5_20261117164220_wfxvtenxe9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -3912,12 +3912,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152656,
-                "seconds": 3.956,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152656,
-                "candidates_per_second": 1049715,
+                "candidates_per_second": 0,
                 "target_count": 263,
                 "matched_count": 258
             },
@@ -3954,14 +3954,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.0299227,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.2293882,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9310_4_20261111051201_nwoyqbcpq4_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4010,14 +4010,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:19",
-                "checked_epoch": 1795754479.8012693,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.2266529,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9310_3_20261012203840_lp6pkcym2q_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4068,14 +4068,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.220642,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.3667538,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S931B_4_20261110111401_g4d52tlahu_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4084,12 +4084,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2109584,
-                "seconds": 2.0309,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": true,
                 "candidates_total": 7109584,
-                "candidates_per_second": 1038721,
+                "candidates_per_second": 0,
                 "target_count": 212,
                 "matched_count": 202
             },
@@ -4105,7 +4105,7 @@
         "KOO": {
             "机型": "S25",
             "地区": "韩国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4118,12 +4118,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
+                "status": "exhausted",
+                "candidates": 244404,
+                "seconds": 0.3506,
                 "resumed": false,
                 "candidates_total": 244404,
-                "candidates_per_second": 0,
+                "candidates_per_second": 697201,
                 "target_count": 203,
                 "matched_count": 0
             },
@@ -4148,8 +4148,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.2992682,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.486799,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S931N_4_20261110031500_dqxn2n45p7_fac.zip.enc4",
@@ -4184,14 +4184,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.4969397,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.643184,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9360_4_20261111045041_pk2o4v881l_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4240,14 +4240,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.2640748,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.657968,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9360_3_20261012205110_drxgxg123t_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4298,14 +4298,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.9085488,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.7763329,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S936B_4_20261106231220_ukb09v84qn_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4314,12 +4314,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2109584,
-                "seconds": 2.0206,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": true,
                 "candidates_total": 7109584,
-                "candidates_per_second": 1044063,
+                "candidates_per_second": 0,
                 "target_count": 207,
                 "matched_count": 199
             },
@@ -4335,7 +4335,7 @@
         "KOO": {
             "机型": "S25+",
             "地区": "韩国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4348,12 +4348,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
+                "status": "exhausted",
+                "candidates": 244404,
+                "seconds": 0.3475,
                 "resumed": false,
                 "candidates_total": 244404,
-                "candidates_per_second": 0,
+                "candidates_per_second": 703348,
                 "target_count": 202,
                 "matched_count": 0
             },
@@ -4378,8 +4378,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.7409995,
+                "checked_at": "2026-11-27 22:33:43",
+                "checked_epoch": 1795790023.9118977,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S936N_4_20261106163752_3c797smlqb_fac.zip.enc4",
@@ -4414,14 +4414,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:20",
-                "checked_epoch": 1795754480.7803113,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.099294,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9370_3_20261012205310_0e9bz2i61w_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4470,14 +4470,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:21",
-                "checked_epoch": 1795754481.0474925,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.133492,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9370_4_20261111045501_pnis14u9wu_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4528,14 +4528,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.3414285,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.3280535,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9380_4_20261111045431_beebg92eka_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4584,13 +4584,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:21",
-                "checked_epoch": 1795754481.2359474,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.1917646,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9380_3_20261013120710_rw9xwy5gj3_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4642,14 +4642,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:21",
-                "checked_epoch": 1795754481.8285122,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.5232687,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S938B_4_20261107043500_hpkf1ud0kv_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4658,12 +4658,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2109584,
-                "seconds": 2.001,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": true,
                 "candidates_total": 7109584,
-                "candidates_per_second": 1054261,
+                "candidates_per_second": 0,
                 "target_count": 204,
                 "matched_count": 196
             },
@@ -4679,7 +4679,7 @@
         "KOO": {
             "机型": "S25 Ultra",
             "地区": "韩国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4692,12 +4692,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
+                "status": "exhausted",
+                "candidates": 244404,
+                "seconds": 0.345,
                 "resumed": false,
                 "candidates_total": 244404,
-                "candidates_per_second": 0,
+                "candidates_per_second": 708390,
                 "target_count": 205,
                 "matched_count": 0
             },
@@ -4722,8 +4722,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.0010922,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.6310797,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S938N_4_20261106180541_9l3g9laonp_fac.zip.enc4",
@@ -4758,14 +4758,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.6990674,
+                "checked_at": "2026-11-27 22:33:44",
+                "checked_epoch": 1795790024.6111863,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S938U_4_20261116180701_zpnoo7104r_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4774,12 +4774,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 7109648,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 4.9546,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 1009156,
                 "target_count": 203,
                 "matched_count": 194
             },
@@ -4816,14 +4816,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.7687247,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.0380416,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S938U1_4_20261021171001_lpy9iuj5nl_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4832,12 +4832,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
-                "resumed": true,
-                "candidates_total": 6665288,
-                "candidates_per_second": 0,
+                "status": "bounded",
+                "candidates": 5000000,
+                "seconds": 5.0054,
+                "resumed": false,
+                "candidates_total": 5000000,
+                "candidates_per_second": 998924,
                 "target_count": 162,
                 "matched_count": 161
             },
@@ -4874,14 +4874,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.9847424,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.0307233,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9420_1_20261015142111_gxq2t2jcp6_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4890,12 +4890,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 1540256,
-                "seconds": 1.4476,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 1540256,
-                "candidates_per_second": 1063996,
+                "candidates_per_second": 0,
                 "target_count": 79,
                 "matched_count": 78
             },
@@ -4932,14 +4932,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:22",
-                "checked_epoch": 1795754482.805333,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.0332086,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S942B_2_20261104071901_fkcb391ml9_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -4948,12 +4948,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358512,
-                "seconds": 2.2147,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358512,
-                "candidates_per_second": 1064913,
+                "candidates_per_second": 0,
                 "target_count": 122,
                 "matched_count": 102
             },
@@ -4990,14 +4990,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.1511385,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.0670762,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S942N_2_20261104075140_2sn9yd2i6s_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5006,12 +5006,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358544,
-                "seconds": 2.2103,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358544,
-                "candidates_per_second": 1067050,
+                "candidates_per_second": 0,
                 "target_count": 77,
                 "matched_count": 74
             },
@@ -5027,7 +5027,7 @@
         "ATT": {
             "机型": "S26",
             "地区": "美国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5070,8 +5070,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.5695157,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.514247,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S942U_2_20261107041840_7tafditj5h_fac.zip.enc4",
@@ -5106,14 +5106,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.2534676,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.4466836,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9470_1_20261009015900_ynk7fobfh3_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5122,12 +5122,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 1540256,
-                "seconds": 1.4508,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 1540256,
-                "candidates_per_second": 1061627,
+                "candidates_per_second": 0,
                 "target_count": 78,
                 "matched_count": 77
             },
@@ -5164,14 +5164,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.4491355,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.5671911,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S947B_2_20261104002841_95vuvggync_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5180,12 +5180,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358512,
-                "seconds": 2.2473,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358512,
-                "candidates_per_second": 1049473,
+                "candidates_per_second": 0,
                 "target_count": 96,
                 "matched_count": 91
             },
@@ -5222,14 +5222,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.7360072,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.4959676,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S947N_2_20261104075451_4ohlnfzlij_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5238,12 +5238,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358544,
-                "seconds": 2.2187,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358544,
-                "candidates_per_second": 1063006,
+                "candidates_per_second": 0,
                 "target_count": 86,
                 "matched_count": 73
             },
@@ -5259,7 +5259,7 @@
         "ATT": {
             "机型": "S26+",
             "地区": "美国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5272,12 +5272,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
+                "status": "exhausted",
+                "candidates": 244436,
+                "seconds": 0.3379,
                 "resumed": false,
                 "candidates_total": 244436,
-                "candidates_per_second": 0,
+                "candidates_per_second": 723384,
                 "target_count": 97,
                 "matched_count": 0
             },
@@ -5302,8 +5302,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.7133267,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.8988976,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S947U_2_20261107084351_a7ls0fd4f1_fac.zip.enc4",
@@ -5338,14 +5338,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:23",
-                "checked_epoch": 1795754483.907649,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.9242213,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S9480_1_20261009020310_kqdz9qqsvi_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5354,12 +5354,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 1540288,
-                "seconds": 1.4598,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 1540288,
-                "candidates_per_second": 1055103,
+                "candidates_per_second": 0,
                 "target_count": 82,
                 "matched_count": 81
             },
@@ -5396,14 +5396,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.0327783,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.9291275,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S948B_2_20261103232421_1h7u5gjslq_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5412,12 +5412,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358608,
-                "seconds": 2.2296,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358608,
-                "candidates_per_second": 1057840,
+                "candidates_per_second": 0,
                 "target_count": 95,
                 "matched_count": 93
             },
@@ -5454,14 +5454,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.1888528,
+                "checked_at": "2026-11-27 22:33:45",
+                "checked_epoch": 1795790025.9860451,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-S948N_2_20261104083651_e6poyuhd81_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "没有高于正式版的已解密当前测试固件",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5470,12 +5470,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2358544,
-                "seconds": 2.2393,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2358544,
-                "candidates_per_second": 1053273,
+                "candidates_per_second": 0,
                 "target_count": 99,
                 "matched_count": 91
             },
@@ -5491,7 +5491,7 @@
         "ATT": {
             "机型": "S26 Ultra",
             "地区": "美国",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5504,12 +5504,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "cached",
-                "candidates": 0,
-                "seconds": 0,
+                "status": "exhausted",
+                "candidates": 244436,
+                "seconds": 0.3432,
                 "resumed": false,
                 "candidates_total": 244436,
-                "candidates_per_second": 0,
+                "candidates_per_second": 712150,
                 "target_count": 107,
                 "matched_count": 0
             },
@@ -5534,8 +5534,8 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.2210102,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.3177955,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/911/SM-S948U_2_20261107152000_newxoxo5mi_fac.zip.enc4",
@@ -5570,25 +5570,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.3648055,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.395182,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-T735C_4_20250514093930_pxgfkbj7p5_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4443360,
-                "seconds": 4.2705,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4443360,
-                "candidates_per_second": 1040478,
+                "candidates_per_second": 0,
                 "target_count": 66,
                 "matched_count": 61
             },
@@ -5625,25 +5625,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.530432,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.3672192,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-T870_4_20240813094301_xkq0unlf69_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 210000,
-                "seconds": 0.5859,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 210000,
-                "candidates_per_second": 358393,
+                "candidates_per_second": 0,
                 "target_count": 52,
                 "matched_count": 43
             },
@@ -5678,25 +5678,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.643132,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.4015775,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-T870_4_20240807153141_x5b3vrvf3t_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 210000,
-                "seconds": 0.5732,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 210000,
-                "candidates_per_second": 366333,
+                "candidates_per_second": 0,
                 "target_count": 77,
                 "matched_count": 35
             },
@@ -5733,25 +5733,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.8407393,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.8563294,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-T970_4_20240806145731_a2eo4i7gex_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 226800,
-                "seconds": 0.6149,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 226800,
-                "candidates_per_second": 368847,
+                "candidates_per_second": 0,
                 "target_count": 195,
                 "matched_count": 162
             },
@@ -5786,13 +5786,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.6960003,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.7312295,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-T970_4_20240819152140_5m4y1rhlxn_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5841,25 +5841,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:24",
-                "checked_epoch": 1795754484.999381,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.8087592,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-W9023_5_20261030163621_oy3dzw1dei_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "bounded",
-                "candidates": 5000000,
-                "seconds": 4.8448,
-                "resumed": false,
-                "candidates_total": 5000000,
-                "candidates_per_second": 1032042,
+                "status": "exhausted",
+                "candidates": 4817616,
+                "seconds": 4.6714,
+                "resumed": true,
+                "candidates_total": 9817616,
+                "candidates_per_second": 1031303,
                 "target_count": 105,
                 "matched_count": 97
             },
@@ -5897,14 +5897,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.1388867,
+                "checked_at": "2026-11-27 22:33:46",
+                "checked_epoch": 1795790026.8251173,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-W9024_5_20261017035510_los4e1n38c_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5955,14 +5955,14 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.3025162,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.15132,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-W9025_4_20261017082420_dkpno7hmpb_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
             "测试版安卓版本依据": "根据 FOTA 正式版同代分支推断，非测试服务器确认",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -5971,12 +5971,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 2665984,
-                "seconds": 2.5039,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 2665984,
-                "candidates_per_second": 1064714,
+                "candidates_per_second": 0,
                 "target_count": 85,
                 "matched_count": 83
             },
@@ -6013,13 +6013,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.2893713,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.2677934,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X700_5_20261022101241_uio64x5dpb_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6069,13 +6069,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.4903042,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.2413235,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X710_5_20260901232821_oom2jd1kao_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6124,13 +6124,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.5909634,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.2866743,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X710_5_20260909121900_33s6rjsh8z_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6139,12 +6139,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 235200,
-                "seconds": 0.4143,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 235200,
-                "candidates_per_second": 567730,
+                "candidates_per_second": 0,
                 "target_count": 148,
                 "matched_count": 135
             },
@@ -6181,25 +6181,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.7414727,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.6810884,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X800_5_20261019134251_mgfe2y1541_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.6766,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 564872,
+                "candidates_per_second": 0,
                 "target_count": 127,
                 "matched_count": 117
             },
@@ -6235,25 +6235,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.7553189,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.6652708,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X800_5_20261014231240_5kt0jgwk2i_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.6828,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 559771,
+                "candidates_per_second": 0,
                 "target_count": 125,
                 "matched_count": 88
             },
@@ -6291,13 +6291,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:25",
-                "checked_epoch": 1795754485.9636962,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.7791882,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X810_5_20260831161230_7c2njjhjq0_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6346,13 +6346,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.052311,
+                "checked_at": "2026-11-27 22:33:47",
+                "checked_epoch": 1795790027.705879,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X810_5_20260909034421_0a53o7n1bd_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6361,12 +6361,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 235200,
-                "seconds": 0.4139,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 235200,
-                "candidates_per_second": 568255,
+                "candidates_per_second": 0,
                 "target_count": 128,
                 "matched_count": 117
             },
@@ -6403,13 +6403,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.24937,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.1053193,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X820_4_20260901225011_2s1q1buqw5_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6458,13 +6458,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.2429333,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.1027634,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X820_4_20261027002441_4z6v8a2pcj_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6473,12 +6473,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.6805,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 561646,
+                "candidates_per_second": 0,
                 "target_count": 101,
                 "matched_count": 98
             },
@@ -6516,25 +6516,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.4346848,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.1417162,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X900_5_20261021112111_pr1doak1bp_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.68,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 562021,
+                "candidates_per_second": 0,
                 "target_count": 148,
                 "matched_count": 139
             },
@@ -6570,25 +6570,25 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.5304222,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.2399337,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X900_5_20261019175601_iqttl9xgbw_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
             },
             "公共标记": [],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.6767,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 564790,
+                "candidates_per_second": 0,
                 "target_count": 109,
                 "matched_count": 88
             },
@@ -6626,13 +6626,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.7249236,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.6033597,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X906C_5_20261021111901_4t9dm4er0s_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6682,13 +6682,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.7411168,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.5933042,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X910_5_20260831160241_4m4mtqmk2p_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6737,13 +6737,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:26",
-                "checked_epoch": 1795754486.8904037,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.6061206,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X910_5_20260909122000_1xszmxtf7j_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6752,12 +6752,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 235200,
-                "seconds": 0.4246,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 235200,
-                "candidates_per_second": 553990,
+                "candidates_per_second": 0,
                 "target_count": 144,
                 "matched_count": 131
             },
@@ -6794,13 +6794,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:27",
-                "checked_epoch": 1795754487.04845,
+                "checked_at": "2026-11-27 22:33:48",
+                "checked_epoch": 1795790028.8421497,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X916C_5_20260831160211_8mnwqkhu01_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6809,12 +6809,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 4152784,
-                "seconds": 3.9048,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 4152784,
-                "candidates_per_second": 1063506,
+                "candidates_per_second": 0,
                 "target_count": 82,
                 "matched_count": 80
             },
@@ -6851,13 +6851,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:27",
-                "checked_epoch": 1795754487.2032962,
+                "checked_at": "2026-11-27 22:33:49",
+                "checked_epoch": 1795790029.0070658,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X920_4_20260831181000_cncn9da6xt_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6906,13 +6906,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:27",
-                "checked_epoch": 1795754487.2043493,
+                "checked_at": "2026-11-27 22:33:49",
+                "checked_epoch": 1795790029.2514932,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X920_4_20261027002641_wxgkyp8hf2_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6921,12 +6921,12 @@
                 "d77ea9576c3dce257b4b6ed7d5c9f1f6a495022e592d5b5b35a7450dfa052a13"
             ],
             "解密统计": {
-                "status": "exhausted",
-                "candidates": 382200,
-                "seconds": 0.6658,
+                "status": "cached",
+                "candidates": 0,
+                "seconds": 0,
                 "resumed": false,
                 "candidates_total": 382200,
-                "candidates_per_second": 574019,
+                "candidates_per_second": 0,
                 "target_count": 99,
                 "matched_count": 98
             },
@@ -6964,13 +6964,13 @@
                 "encrypted": true,
                 "requires_auth": true,
                 "direct_download": false,
-                "checked_at": "2026-11-27 12:41:27",
-                "checked_epoch": 1795754487.4011605,
+                "checked_at": "2026-11-27 22:33:49",
+                "checked_epoch": 1795790029.2557428,
                 "error": null
             },
             "最新固件下载链接": "https://cloud-neofussvr.samsungmobile.com/NF_SmartDownloadBinaryForMass.do?file=/neofus/910/SM-X926C_4_20260831180001_7zrab0tjsa_fac.zip.enc4",
             "测试版下载状态": "not_provided_by_public_fota",
-            "上次检查时间": "2026-11-27 12:46:27",
+            "上次检查时间": "2026-11-27 22:38:17",
             "抓取状态": {
                 "stable": "ok",
                 "test": "ok"
@@ -6996,5 +6996,5 @@
             "已记录FUS领先版本": ""
         }
     },
-    "上次更新时间": "2026-11-27 12:46:27"
+    "上次更新时间": "2026-11-27 22:38:17"
 }
